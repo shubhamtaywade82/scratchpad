@@ -150,16 +150,16 @@ class Accounting(unittest.TestCase):
         ohlc = flat(8, 100.0)
         s = bars(ohlc)
         sig = [0] * len(s); sig[1:5] = [1] * 4; sig[5] = 0
-        risk = Risk(sizing='risk', risk_pct=0.01, sl_mult=2.0, max_gross=10.0)
+        risk = Risk(sizing='risk', risk_pct=0.01, sl_mult=2.0, lev=10.0)
         r = simulate(s, sig, risk, 1, len(s), A=[1.0] * len(s), fee=0, slip=0)
         # stop distance = 2 * ATR(1) = 2 -> qty = 0.01 * 1 / 2 = 0.005
         self.assertAlmostEqual(r.trades[0]['qty'], 0.005)
 
-    def test_risk_sizing_capped_by_max_gross(self):
+    def test_risk_sizing_capped_by_leverage(self):
         ohlc = flat(8, 100.0)
         s = bars(ohlc)
         sig = [0] * len(s); sig[1:5] = [1] * 4; sig[5] = 0
-        risk = Risk(sizing='risk', risk_pct=0.01, sl_mult=0.01, max_gross=1.0)  # tiny stop -> huge uncapped qty
+        risk = Risk(sizing='risk', risk_pct=0.01, sl_mult=0.01, lev=1.0)  # tiny stop -> huge uncapped qty
         r = simulate(s, sig, risk, 1, len(s), A=[1.0] * len(s), fee=0, slip=0)
         self.assertAlmostEqual(r.trades[0]['qty'], 1.0 / 100.0)  # notional capped at 1x equity
 
@@ -225,10 +225,114 @@ class Signals(unittest.TestCase):
         with self.assertRaises(ValueError):
             to_series('1h', rows)
 
-    def test_risk_rejects_risk_sizing_without_stop(self):
+    def test_risk_sizing_without_stop_distance_skips_entry(self):
         s = bars(flat(10))
+        r = simulate(s, [1] * 10, Risk(sizing='risk'), 1, 10, A=[1.0] * 10)
+        self.assertEqual(r.trades, [])
+        self.assertEqual(r.skipped, 1)          # one attempt per signal episode, no retry
+
+
+class Leverage(unittest.TestCase):
+    """Isolated-margin liquidation, liquidation-buffer entry rule, structural stops, ruin."""
+
+    def test_intrabar_liquidation_at_liquidation_price(self):
+        # lev 10: liquidation distance = 1/10 - 0.005 = 9.5%. Long at 100 -> liq 90.5. Bar 4 low 90 breaches it.
+        ohlc = flat(3) + [(100, 100.5, 99.5, 100), (100, 100.2, 90.0, 95)] + flat(5)
+        s = bars(ohlc)
+        sig = [0] * len(s); sig[2:] = [1] * (len(s) - 2)
+        r = simulate(s, sig, Risk(lev=10.0), 1, len(s), A=[1.0] * len(s), fee=0, slip=0)
+        t = r.trades[0]
+        self.assertEqual(t['reason'], 'liq')
+        self.assertAlmostEqual(t['px'], 100 * (1 - (1 / 10 - 0.005)))
+
+    def test_gap_through_liquidation_fills_at_open(self):
+        ohlc = flat(3) + [(100, 100.5, 99.5, 100), (85, 86, 84, 85)] + flat(5)   # open 85 is below liq 90.5
+        s = bars(ohlc)
+        sig = [0] * len(s); sig[2:] = [1] * (len(s) - 2)
+        r = simulate(s, sig, Risk(lev=10.0), 1, len(s), A=[1.0] * len(s), fee=0, slip=0)
+        self.assertEqual(r.trades[0]['reason'], 'liq')
+        self.assertAlmostEqual(r.trades[0]['px'], 85.0)
+
+    def test_entry_skipped_when_stop_beyond_liquidation_buffer(self):
+        # lev 15: liq 6.17%, buffer 0.8 -> max stop 4.93%. 3 x ATR(=3) on price 100 is a 9% stop: skip, one attempt.
+        s = bars(flat(10))
+        sig = [0] * len(s); sig[2:] = [1] * (len(s) - 2)
+        r = simulate(s, sig, Risk(sizing='risk', lev=15.0, sl_mult=3.0), 1, len(s), A=[3.0] * len(s), fee=0, slip=0)
+        self.assertEqual(r.trades, [])
+        self.assertEqual(r.skipped, 1)
+
+    def test_entry_allowed_when_stop_inside_buffer(self):
+        s = bars(flat(10))
+        sig = [0] * len(s); sig[2:] = [1] * (len(s) - 2)
+        r = simulate(s, sig, Risk(sizing='risk', lev=15.0, sl_mult=1.0), 1, len(s), A=[3.0] * len(s), fee=0, slip=0)
+        self.assertGreater(len(r.trades), 0)   # 3% stop < 4.93%
+
+    def test_fixed_notional_equals_leverage_times_equity(self):
+        s = bars(flat(6))
+        sig = [0] * len(s); sig[1:4] = [1, 1, 1]
+        r = simulate(s, sig, Risk(lev=5.0), 1, len(s), A=[1.0] * len(s), fee=0, slip=0)
+        self.assertAlmostEqual(r.trades[0]['eff_lev'], 5.0)
+
+    def test_structural_stop_sets_size_and_is_used(self):
+        s = bars(flat(8))
+        sig = [0] * len(s); sig[1:5] = [1, 1, 1, 1]; sig[5] = 0
+        sp = [None] * len(s); sp[1] = 98.0           # structural stop for the entry at the open of bar 2
+        r = simulate(s, sig, Risk(sizing='risk', risk_pct=0.01, lev=10.0), 1, len(s),
+                     A=[1.0] * len(s), stop_px=sp, fee=0, slip=0)
+        t = r.trades[0]
+        self.assertAlmostEqual(t['qty'], 0.01 / 2.0)   # d = |100 - 98| = 2 -> qty = 1% / 2
+
+    def test_structural_stop_on_wrong_side_is_skipped(self):
+        s = bars(flat(8))
+        sig = [0] * len(s); sig[1:5] = [1, 1, 1, 1]
+        sp = [None] * len(s); sp[1] = 103.0           # long with stop above entry
+        r = simulate(s, sig, Risk(sizing='risk', lev=10.0), 1, len(s), A=[1.0] * len(s), stop_px=sp, fee=0, slip=0)
+        self.assertEqual(r.trades, [])
+        self.assertEqual(r.skipped, 1)
+
+    def test_ruin_floors_equity_at_zero_and_stops_trading(self):
+        # lev 1 short at 100 -> liq at 199.5. Gap up to 400 loses 3x the account: equity floors at 0.
+        ohlc = flat(3) + [(100, 100, 100, 100), (400, 401, 399, 400)] + flat(8, 400)
+        s = bars(ohlc)
+        sig = [0] * len(s); sig[1:] = [-1] * (len(s) - 1)
+        r = simulate(s, sig, Risk(lev=1.0), 1, len(s), A=[1.0] * len(s), fee=0, slip=0)
+        self.assertTrue(r.ruined)
+        self.assertEqual(r.eq[-1], 0.0)
+        self.assertEqual(len(r.trades), 1)           # no re-entry on a ruined account
+
+    def test_returns_from_levels_handles_zero_equity(self):
+        from research.engine import returns_from_levels
+        self.assertEqual(returns_from_levels([0.5, 0.0, 0.0]), [-0.5, -1.0, 0.0])
+
+    def test_validate_rejects_leverage_without_liquidation_distance(self):
         with self.assertRaises(ValueError):
-            simulate(s, [1] * 10, Risk(sizing='risk'), 1, 10, A=[1.0] * 10)
+            Risk(lev=300.0).validate()                 # 1/300 < mmr 0.5%
+
+
+class Ideas(unittest.TestCase):
+    def test_sweep_fade_sets_structural_stop_beyond_wick(self):
+        from research.ideas import sweep_fade
+        # 16 warm-up bars range 99..101 (prior 3-bar high 101); bar 15 wicks to 103 and closes at 100.5: bearish sweep
+        ohlc = [(100, 101, 99, 100)] * 15 + [(100, 103, 99.5, 100.5)] + [(100, 100.5, 99.5, 100)] * 4
+        s = bars(ohlc)
+        sig, sp = sweep_fade(s, 3, 2, buf=0.0)
+        self.assertEqual(sig[15], -1)
+        self.assertAlmostEqual(sp[15], 103.0)
+        self.assertEqual(sig[16], -1)
+        self.assertEqual(sig[17], 0)                # held for T=2 bars
+
+    def test_taker_imbalance_requires_taker_volume(self):
+        from research.ideas import taker_imbalance
+        s = bars(flat(5))
+        with self.assertRaises(ValueError):
+            taker_imbalance(s, 2)
+
+    def test_hmm_filter_probabilities_sum_to_one(self):
+        from research.ideas import hmm_filter
+        x = [0.1, -0.2, 0.3, -0.1, 0.05, 2.0, 1.8, 2.2]
+        probs = hmm_filter(x, [0.5, 0.5], [[0.9, 0.1], [0.1, 0.9]], [0.0, 1.5], [0.5, 0.5])
+        for p in probs:
+            self.assertAlmostEqual(sum(p), 1.0, 9)
 
 
 if __name__ == '__main__':

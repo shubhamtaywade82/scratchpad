@@ -5,7 +5,7 @@ Usage:  python3 -m research.sensitivity
 import statistics as st
 import math
 
-from research.engine import Risk, atr, donchian_sig, ema_gate, load_funding, load_klines, metrics, simulate
+from research.engine import Risk, atr, donchian_sig, ema_gate, load_funding, load_klines, metrics, returns_from_levels, simulate
 from research.search import BPY, WINDOWS
 
 SL = [2.0, 3.0, 4.0, 5.0]
@@ -23,7 +23,7 @@ def surface(tf, n_chan, fund_t, fund_r):
     for sl in SL:
         row = f"sl{sl:<10}"
         for tr in TR:
-            risk = Risk(sizing='risk', risk_pct=0.01, sl_mult=sl, trail_mult=tr, max_gross=1.5)
+            risk = Risk(sizing='risk', risk_pct=0.01, sl_mult=sl, trail_mult=tr, lev=1.5)
             full = metrics(simulate(base, sig, risk, 1, N, A=A, fund_t=fund_t, fund_r=fund_r), tf)
             # walk-forward OOS, fixed config
             E, start, eq = 1.0, train, []
@@ -40,7 +40,7 @@ def long_short_and_bh(tf, n_chan, fund_t, fund_r):
     base = load_klines(tf)
     N = len(base)
     sig = donchian_sig(base, n_chan, gate=ema_gate(base, 200))
-    risk = Risk(sizing='risk', risk_pct=0.01, sl_mult=4.0, trail_mult=4.0, max_gross=1.5)
+    risk = Risk(sizing='risk', risk_pct=0.01, sl_mult=4.0, trail_mult=4.0, lev=1.5)
     m = metrics(simulate(base, sig, risk, 1, N, A=atr(base, 14), fund_t=fund_t, fund_r=fund_r), tf)
     r = [math.log(base.c[i] / base.c[i - 1]) for i in range(1, N)]
     bh = st.fmean(r) / st.pstdev(r) * math.sqrt(BPY[tf])
@@ -65,7 +65,7 @@ def candidate_folds(tf, n_chan, sl, tr, fund_t, fund_r):
     N = len(base)
     sig = donchian_sig(base, n_chan, gate=ema_gate(base, 200))
     A = atr(base, 14)
-    risk = Risk(sizing='risk', risk_pct=0.01, sl_mult=sl, trail_mult=tr, max_gross=1.5)
+    risk = Risk(sizing='risk', risk_pct=0.01, sl_mult=sl, trail_mult=tr, lev=1.5)
     train, test = WINDOWS[tf]
     E, start, all_eq = 1.0, train, [1.0]
     folds = []
@@ -75,7 +75,7 @@ def candidate_folds(tf, n_chan, sl, tr, fund_t, fund_r):
         all_eq.extend(E * v for v in r.eq)
         E *= r.eq[-1]
         start += test
-    rets = [all_eq[i] / all_eq[i - 1] - 1 for i in range(1, len(all_eq))]
+    rets = returns_from_levels(all_eq[1:])
     lo, md, hi = block_bootstrap_sharpe(rets, BPY[tf], L=10 if tf == '1d' else 20)
     full = metrics(simulate(base, sig, risk, 1, N, A=A, fund_t=fund_t, fund_r=fund_r), tf)
     print(f"{tf} DON{n_chan}+EMA200 sl{sl}/tr{tr} risk1%: full Sh {full['sharpe']:+.2f} MDD {full['mdd'] * 100:.1f}% "

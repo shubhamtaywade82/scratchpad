@@ -13,18 +13,18 @@
 [gross, zero cost, IS best] n 37  exp/tr +1.697%  total +70.4%  Sh +1.46
 
 ==================== 1d: 1500 bars (1500 d), 200 configs ====================
-[WF OOS] 6 folds x 182 bars  tot  +104.2%  CAGR  +27.0%  Sh +0.69  MDD  -82.4%  Calmar +0.33  n  51  WR 31.4%  PF 2.65  exp +9.47%/tr  expo   87%  L 25(+20.97%) S 26(-1.60%)
-         block-bootstrap OOS Sharpe 5/50/95: -0.28 / +0.67 / +1.66
-         fold   365-547   train_Sh +1.67  oos +415.3% Sh +3.83 n  4  TSMOM120/slNone
+[WF OOS] 6 folds x 182 bars  tot    -2.2%  CAGR   -0.8%  Sh +0.38  MDD  -83.2%  Calmar -0.01  n  51  WR 33.3%  PF 1.37  exp +4.25%/tr  expo   87%  L 25(+11.79%) S 26(-3.00%)
+         block-bootstrap OOS Sharpe 5/50/95: -0.65 / +0.34 / +1.36
+         fold   365-547   train_Sh +1.07  oos +146.7% Sh +2.28 n  4  ST20x3.0/slNone
          fold   547-729   train_Sh +3.34  oos  -61.5% Sh -1.56 n 10  TSMOM120/slNone
          fold   729-911   train_Sh +2.33  oos  +36.3% Sh +1.17 n 15  TSMOM20/slNone
          fold   911-1093  train_Sh +1.33  oos  -25.8% Sh -0.43 n 16  TSMOM20/slNone
          fold  1093-1275  train_Sh +0.25  oos   -2.4% Sh +0.27 n  2  DON120/half/none/slNone/trNone
          fold  1275-1457  train_Sh +1.31  oos   +4.3% Sh +0.42 n  4  DON40/half/none/slNone/tr3.0
-[IS best, full sample, OPTIMISTIC] TSMOM120/slNone: tot  +174.1%  CAGR  +27.8%  Sh +0.91  MDD  -98.2%  Calmar +0.28  n  38  WR 39.5%  PF 1.41  exp +12.95%/tr  expo   92%  L 19(+28.16%) S 19(-2.26%)
+[IS best, full sample, OPTIMISTIC] DON80/mid/none/sl3.0/trNone: tot  +252.1%  CAGR  +35.9%  Sh +0.82  MDD  -60.0%  Calmar +0.60  n  11  WR 36.4%  PF 2.60  exp +36.80%/tr  expo   43%  L 7(+56.01%) S 4(+3.19%)
 [v4 baseline full] tot  +103.9%  CAGR  +18.9%  Sh +0.58  MDD  -63.6%  Calmar +0.30  n  21  WR 33.3%  PF 1.76  exp +10.29%/tr  expo   41%  L 13(+16.95%) S 8(-0.55%)
 [v4 baseline OOS ] tot   +20.3%  CAGR  +11.9%  Sh +0.48  MDD  -35.5%  Calmar +0.34  n   9  WR 44.4%  PF 2.01  exp +2.74%/tr  expo   49%  L 4(+1.08%) S 5(+4.07%)
-[gross, zero cost, IS best] n 38  exp/tr +13.125%  total +253.3%  Sh +0.95
+[gross, zero cost, IS best] n 11  exp/tr +36.996%  total +320.6%  Sh +0.91
 
 ==================== 1h: 2600 bars (108 d), 210 configs ====================
 [WF OOS] 5 folds x 360 bars  tot   +13.7%  CAGR  +86.5%  Sh +1.84  MDD  -15.8%  Calmar +5.46  n  24  WR 37.5%  PF 1.62  exp +0.69%/tr  expo   35%  L 18(+1.48%) S 6(-1.68%)

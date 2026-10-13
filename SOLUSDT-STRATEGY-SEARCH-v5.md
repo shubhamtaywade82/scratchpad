@@ -2,6 +2,13 @@
 
 Instrument: Binance USD-M perpetual SOLUSDT. Costs: taker 5 bps/side, adverse slippage 3 bps/side, real funding applied at every 8h event held through. Signals decided on bar close, executed at next bar open.
 
+> **Correction (see v6, `SOLUSDT-OUTOFBOX-v6.md`).** The v5 engine did not liquidate isolated positions, so a 1x short could
+> ride through a +100% move with negative equity and recover later. That made the 1d walk-forward result invalid. The
+> corrected 1d walk-forward row is −2.2% total, Sharpe +0.38, MDD −83.2%, bootstrap 5/50/95 −0.65 / +0.34 / +1.36. The
+> +104% figure and its −82% drawdown should be disregarded. The 4h, 1h and 15m results, the 4h candidate, and the
+> fixed-design and sensitivity results are unchanged (regression-checked). Also fixed: skipped entries were retried every
+> bar, which is now one attempt per signal episode.
+
 ## 1. Direct decision
 
 - **Swing (4h): adopt as the candidate to paper-trade, not to deploy.** Donchian(40) breakout, symmetric long/short, EMA200 trend gate, 3×ATR(14) initial stop, 3×ATR chandelier trail, 1% equity risk per trade, gross cap 1.5×, no same-direction re-entry after a stop-out until the signal resets.
@@ -40,11 +47,11 @@ Train window picks one config by train Sharpe; the next test window is traded wi
 | TF | Bars | Folds × test | OOS total | OOS Sh | MDD | Boot 5/50/95 |
 |---|---|---|---|---|---|---|
 | 4h | 2700 | 5 × 60 d | −13.9% | −0.38 | −35.0% | −2.72 / −0.40 / +1.80 |
-| 1d | 1500 | 6 × 6 m | +104.2% | +0.69 | −82.4% | −0.28 / +0.67 / +1.66 |
+| 1d | 1500 | 6 × 6 m | −2.2% (corrected) | +0.38 | −83.2% | −0.65 / +0.34 / +1.36 |
 | 1h | 2600 | 5 × 15 d | +13.7% | +1.84 | −15.8% | −1.48 / +1.68 / +5.33 |
 | 15m | 7000 | 7 × 7.5 d | +2.6% | +0.59 | −24.7% | −3.86 / +0.62 / +4.71 |
 
-Selected configs change fold to fold (for example TSMOM120, TSMOM20, DON120, ST10x3, DON24). The chosen family changes almost every fold, so no single selected rule is being validated. The 1d result runs at 1× notional with no stop, so its −82% drawdown makes it unusable as it stands.
+Selected configs change fold to fold (for example TSMOM120, TSMOM20, DON120, ST10x3, DON24). The chosen family changes almost every fold, so no single selected rule is being validated. The 1d row is the corrected value; the 1x no-stop runs carry a −83% drawdown and are not usable as they stand.
 
 ### 4b. Fixed designs, risk-sized (`research/ensemble.py`), no selection
 

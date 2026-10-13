@@ -12,7 +12,7 @@ import math
 import statistics as st
 import sys
 
-from research.engine import (Result, Risk, atr, donchian_sig, ema_gate, htf_gate, load_funding,
+from research.engine import (Result, Risk, atr, donchian_sig, ema_gate, htf_gate, load_funding, returns_from_levels,
                              load_klines, metrics, simulate)
 from research.search import BPY, WINDOWS, block_bootstrap_sharpe
 
@@ -41,11 +41,11 @@ def designs(tf, base, fund_loader):
     ens = vote(sigs)
     out = []
     for rp in (0.01, 0.02):
-        r = Risk(sizing='risk', risk_pct=rp, sl_mult=3.0, trail_mult=3.0, max_gross=1.5)
+        r = Risk(sizing='risk', risk_pct=rp, sl_mult=3.0, trail_mult=3.0, lev=1.5)
         out.append((f"VOTE{VOTE_LENGTHS[tf]} {gname} stop3 trail3 risk{int(rp * 100)}%", ens, r))
     single = donchian_sig(base, VOTE_LENGTHS[tf][len(VOTE_LENGTHS[tf]) // 2], gate=gate)
     out.append((f"single DON{VOTE_LENGTHS[tf][len(VOTE_LENGTHS[tf]) // 2]} {gname} stop3 trail3 risk1%", single,
-                Risk(sizing='risk', risk_pct=0.01, sl_mult=3.0, trail_mult=3.0, max_gross=1.5)))
+                Risk(sizing='risk', risk_pct=0.01, sl_mult=3.0, trail_mult=3.0, lev=1.5)))
     return out
 
 
@@ -84,7 +84,7 @@ def run(tf, fund_t, fund_r):
         oos = metrics(simulate(base, sig, risk, cut, n, A=A, fund_t=fund_t, fund_r=fund_r), tf)
         res, folds = walk_eval(tf, base, sig, risk, fund_t, fund_r)
         wf = metrics(res, tf)
-        rets = [res.eq[0] - 1.0] + [res.eq[i] / res.eq[i - 1] - 1 for i in range(1, len(res.eq))]
+        rets = returns_from_levels(res.eq)
         lo, md, hi = block_bootstrap_sharpe(rets, BPY[tf], L=10 if tf == '1d' else 20)
         pos_folds = sum(1 for f in folds if f > 0)
         print(f"\n{name}")

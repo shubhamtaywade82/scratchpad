@@ -19,7 +19,7 @@ import sys
 from dataclasses import dataclass
 from typing import Callable, List, Optional
 
-from research.engine import (FEE, SLIP, Result, Risk, atr, donchian_sig, ema_gate, htf_gate,
+from research.engine import (FEE, SLIP, Result, Risk, atr, donchian_sig, ema_gate, htf_gate, returns_from_levels,
                              load_funding, load_klines, metrics, simulate, supertrend_sig,
                              tsmom_sig)
 
@@ -126,7 +126,7 @@ def walk_forward(tf: str, base, cfgs: List[Cfg], fund_t, fund_r, train: int, tes
 
 def stitched_report(tf: str, res: Result):
     m = metrics(res, tf)
-    rets = [res.eq[0] - 1.0] + [res.eq[i] / res.eq[i - 1] - 1 for i in range(1, len(res.eq))]
+    rets = returns_from_levels(res.eq)
     lo, md, hi = block_bootstrap_sharpe(rets, BPY[tf], L=10 if tf == '1d' else 20)
     return m, (lo, md, hi)
 

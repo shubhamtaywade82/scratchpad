@@ -1,0 +1,70 @@
+
+==================== 1h: 2600 bars, screen at 5x, risk 1%/trade ====================
+sweep N24 T4                 WF tot   -33.9%  Sh -6.52  MDD  -41.1%  n 110  WR 34.5%  PF 0.49  L/S 48/62  stops 59 liq 0 skip   0  boot -10.72/-6.72/-2.90  folds+ 1/5
+sweep N24 T8                 WF tot   -21.6%  Sh -3.89  MDD  -27.8%  n  80  WR 33.8%  PF 0.60  L/S 38/42  stops 46 liq 0 skip   3  boot -7.32/-3.91/-0.58  folds+ 1/5
+sweep N24 T16                WF tot   -21.6%  Sh -3.79  MDD  -26.9%  n  64  WR 31.2%  PF 0.56  L/S 33/31  stops 41 liq 0 skip   5  boot -7.06/-3.90/-0.75  folds+ 1/5
+sweep N72 T4                 WF tot   -13.8%  Sh -3.58  MDD  -18.9%  n  49  WR 38.8%  PF 0.53  L/S 14/35  stops 24 liq 0 skip   0  boot -6.71/-3.63/-0.47  folds+ 1/5
+sweep N72 T8                 WF tot    -3.3%  Sh -0.67  MDD  -10.2%  n  36  WR 41.7%  PF 0.86  L/S 12/24  stops 18 liq 0 skip   0  boot -3.99/-0.85/+2.93  folds+ 3/5
+sweep N72 T16                WF tot    -4.7%  Sh -0.96  MDD  -11.6%  n  31  WR 38.7%  PF 0.79  L/S 11/20  stops 17 liq 0 skip   2  boot -4.18/-1.14/+2.44  folds+ 3/5
+taker-cont m6 z1.0           WF tot   -10.5%  Sh -3.18  MDD  -12.8%  n 133  WR 34.6%  PF 0.69  L/S 68/65  stops 11 liq 0 skip   0  boot -7.67/-3.46/+0.72  folds+ 1/5
+taker-absorb m6 z1.0 T4      WF tot    -4.4%  Sh -1.75  MDD   -6.6%  n 100  WR 40.0%  PF 0.79  L/S 49/51  stops  6 liq 0 skip   0  boot -5.14/-1.83/+1.72  folds+ 1/5
+taker-absorb m6 z1.0 T8      WF tot    -2.4%  Sh -0.69  MDD   -8.0%  n  84  WR 52.4%  PF 0.90  L/S 39/45  stops 14 liq 0 skip   0  boot -4.15/-0.82/+2.43  folds+ 2/5
+taker-cont m6 z2.0           WF tot    -4.6%  Sh -2.35  MDD   -6.9%  n  42  WR 40.5%  PF 0.59  L/S 17/25  stops  4 liq 0 skip   0  boot -5.96/-2.34/+1.10  folds+ 2/5
+taker-absorb m6 z2.0 T4      WF tot    +4.3%  Sh +3.82  MDD   -1.4%  n  22  WR 63.6%  PF 2.67  L/S 16/6  stops  1 liq 0 skip   0  boot -0.95/+3.68/+7.37  folds+ 4/5
+taker-absorb m6 z2.0 T8      WF tot    +5.3%  Sh +3.50  MDD   -2.7%  n  22  WR 59.1%  PF 2.18  L/S 16/6  stops  1 liq 0 skip   0  boot -1.06/+3.29/+7.67  folds+ 3/5
+taker-cont m24 z1.0          WF tot    +9.0%  Sh +2.31  MDD   -6.9%  n  48  WR 37.5%  PF 1.49  L/S 25/23  stops 11 liq 0 skip   0  boot -2.09/+2.10/+5.94  folds+ 3/5
+taker-absorb m24 z1.0 T4     WF tot    -6.1%  Sh -2.51  MDD  -11.0%  n  68  WR 42.6%  PF 0.69  L/S 33/35  stops 11 liq 0 skip   0  boot -5.78/-2.53/+0.92  folds+ 2/5
+taker-absorb m24 z1.0 T8     WF tot    -8.0%  Sh -3.33  MDD  -10.8%  n  46  WR 41.3%  PF 0.59  L/S 23/23  stops 16 liq 0 skip   0  boot -7.04/-3.28/+0.02  folds+ 2/5
+taker-cont m24 z2.0          WF tot    +6.1%  Sh +1.98  MDD   -5.9%  n  22  WR 31.8%  PF 1.57  L/S 9/13  stops  8 liq 0 skip   0  boot -3.37/+1.63/+5.90  folds+ 3/5
+taker-absorb m24 z2.0 T4     WF tot    +1.3%  Sh +1.01  MDD   -3.2%  n  21  WR 66.7%  PF 1.36  L/S 13/8  stops  1 liq 0 skip   0  boot -1.73/+1.02/+4.60  folds+ 2/5
+taker-absorb m24 z2.0 T8     WF tot    +2.3%  Sh +1.57  MDD   -3.3%  n  20  WR 55.0%  PF 1.59  L/S 12/8  stops  1 liq 0 skip   0  boot -1.61/+1.55/+5.39  folds+ 3/5
+VR W120 q4 thr0.1            WF tot   -24.0%  Sh -8.32  MDD  -24.4%  n 299  WR 39.5%  PF 0.53  L/S 154/145  stops 25 liq 0 skip   0  boot -12.75/-8.61/-4.50  folds+ 1/5
+VR W120 q4 thr0.25           WF tot   -10.7%  Sh -5.88  MDD  -12.1%  n  95  WR 36.8%  PF 0.43  L/S 50/45  stops 10 liq 0 skip   0  boot -9.35/-5.89/-2.17  folds+ 0/5
+VR W120 q8 thr0.1            WF tot   -16.6%  Sh -4.89  MDD  -19.0%  n 276  WR 48.2%  PF 0.66  L/S 137/139  stops 23 liq 0 skip   0  boot -9.07/-5.26/-1.79  folds+ 0/5
+VR W120 q8 thr0.25           WF tot   -13.4%  Sh -5.28  MDD  -14.1%  n 174  WR 45.4%  PF 0.57  L/S 86/88  stops 17 liq 0 skip   0  boot -8.84/-5.39/-1.72  folds+ 0/5
+VR W240 q4 thr0.1            WF tot   -25.7%  Sh -8.82  MDD  -26.5%  n 304  WR 41.4%  PF 0.51  L/S 154/150  stops 29 liq 0 skip   0  boot -12.56/-9.01/-4.84  folds+ 0/5
+VR W240 q4 thr0.25           WF tot    -1.0%  Sh -4.21  MDD   -1.0%  n   7  WR 28.6%  PF 0.05  L/S 4/3  stops  0 liq 0 skip   0  boot -6.36/-4.07/-0.83  folds+ 0/5
+VR W240 q8 thr0.1            WF tot   -16.1%  Sh -4.64  MDD  -18.9%  n 277  WR 49.5%  PF 0.66  L/S 140/137  stops 30 liq 0 skip   0  boot -7.59/-4.37/-1.24  folds+ 0/5
+VR W240 q8 thr0.25           WF tot   -13.6%  Sh -6.20  MDD  -13.9%  n 129  WR 39.5%  PF 0.49  L/S 70/59  stops 15 liq 0 skip   0  boot -9.45/-6.21/-3.04  folds+ 0/5
+HMM train720 thr0.6          WF tot   -13.5%  Sh -3.57  MDD  -15.5%  n 199  WR 41.7%  PF 0.71  L/S 142/57  stops 22 liq 0 skip   0  boot -7.32/-3.35/+0.61  folds+ 1/5
+HMM train720 thr0.8          WF tot   -23.5%  Sh -7.31  MDD  -24.5%  n 301  WR 42.9%  PF 0.58  L/S 229/72  stops 20 liq 0 skip   0  boot -11.07/-7.07/-3.42  folds+ 0/5
+-- breadth: 6/28 cells positive WF OOS; median WF Sh -3.45
+   sweep  positive 0/6  median Sh -3.69  median tot -17.7%
+   taker  positive 6/12  median Sh +0.16  median tot -0.6%
+   vr     positive 0/8  median Sh -5.58  median tot -14.8%
+   hmm    positive 0/2  median Sh -5.44  median tot -18.5%
+
+==================== 15m: 7000 bars, screen at 5x, risk 1%/trade ====================
+sweep N48 T4                 WF tot   -55.6%  Sh -12.24  MDD  -55.6%  n 191  WR 32.5%  PF 0.44  L/S 84/107  stops 95 liq 0 skip   0  boot -16.80/-12.32/-7.63  folds+ 0/7
+sweep N48 T8                 WF tot   -53.0%  Sh -10.82  MDD  -53.0%  n 150  WR 30.7%  PF 0.41  L/S 64/86  stops 89 liq 0 skip   2  boot -14.73/-11.01/-6.51  folds+ 0/7
+sweep N48 T16                WF tot   -51.2%  Sh -9.90  MDD  -51.2%  n 112  WR 24.1%  PF 0.36  L/S 49/63  stops 82 liq 0 skip   2  boot -13.83/-10.05/-6.18  folds+ 0/7
+sweep N192 T4                WF tot   -22.9%  Sh -6.66  MDD  -26.6%  n  68  WR 30.9%  PF 0.48  L/S 23/45  stops 32 liq 0 skip   0  boot -11.40/-6.71/-2.11  folds+ 2/7
+sweep N192 T8                WF tot   -16.7%  Sh -4.11  MDD  -22.7%  n  58  WR 34.5%  PF 0.57  L/S 19/39  stops 29 liq 0 skip   0  boot -8.47/-4.18/+0.22  folds+ 3/7
+sweep N192 T16               WF tot   -19.1%  Sh -4.34  MDD  -23.5%  n  42  WR 23.8%  PF 0.49  L/S 16/26  stops 30 liq 0 skip   0  boot -8.49/-4.48/+0.07  folds+ 1/7
+taker-cont m16 z1.0          WF tot   -22.9%  Sh -5.09  MDD  -26.5%  n 194  WR 34.5%  PF 0.69  L/S 102/92  stops 35 liq 0 skip   0  boot -9.62/-4.95/-0.25  folds+ 3/7
+taker-absorb m16 z1.0 T4     WF tot   -31.9%  Sh -10.83  MDD  -33.9%  n 242  WR 38.4%  PF 0.49  L/S 122/120  stops 32 liq 0 skip   0  boot -15.11/-10.77/-6.74  folds+ 1/7
+taker-absorb m16 z1.0 T8     WF tot   -16.5%  Sh -4.42  MDD  -22.9%  n 180  WR 42.8%  PF 0.74  L/S 90/90  stops 39 liq 0 skip   0  boot -9.41/-4.51/+0.19  folds+ 2/7
+taker-cont m16 z2.0          WF tot   -11.7%  Sh -3.68  MDD  -13.2%  n  81  WR 33.3%  PF 0.66  L/S 42/39  stops 20 liq 0 skip   0  boot -8.17/-3.77/+0.55  folds+ 1/7
+taker-absorb m16 z2.0 T4     WF tot   -10.3%  Sh -6.43  MDD  -11.9%  n  69  WR 37.7%  PF 0.47  L/S 34/35  stops 10 liq 0 skip   0  boot -11.05/-6.46/-1.90  folds+ 3/7
+taker-absorb m16 z2.0 T8     WF tot   -12.2%  Sh -6.00  MDD  -13.7%  n  58  WR 36.2%  PF 0.45  L/S 27/31  stops 14 liq 0 skip   0  boot -10.26/-6.03/-1.30  folds+ 2/7
+taker-cont m64 z1.0          WF tot    +3.4%  Sh +0.85  MDD  -11.8%  n  84  WR 36.9%  PF 1.13  L/S 41/43  stops 32 liq 0 skip   0  boot -3.42/+0.87/+5.02  folds+ 4/7
+taker-absorb m64 z1.0 T4     WF tot   -27.7%  Sh -8.02  MDD  -35.0%  n 191  WR 34.0%  PF 0.59  L/S 94/97  stops 36 liq 0 skip   0  boot -12.79/-8.10/-3.57  folds+ 2/7
+taker-absorb m64 z1.0 T8     WF tot   -13.4%  Sh -3.62  MDD  -25.1%  n 109  WR 34.9%  PF 0.75  L/S 54/55  stops 35 liq 0 skip   0  boot -8.59/-3.65/+1.12  folds+ 2/7
+taker-cont m64 z2.0          WF tot    +0.9%  Sh +0.36  MDD  -11.1%  n  61  WR 31.1%  PF 1.09  L/S 30/31  stops 23 liq 0 skip   0  boot -3.61/+0.34/+4.40  folds+ 3/7
+taker-absorb m64 z2.0 T4     WF tot   -13.3%  Sh -6.56  MDD  -16.8%  n  95  WR 38.9%  PF 0.53  L/S 53/42  stops 15 liq 0 skip   0  boot -11.02/-6.40/-2.23  folds+ 2/7
+taker-absorb m64 z2.0 T8     WF tot   -12.0%  Sh -5.06  MDD  -18.0%  n  70  WR 40.0%  PF 0.58  L/S 37/33  stops 20 liq 0 skip   0  boot -10.03/-5.13/-0.50  folds+ 2/7
+VR W240 q4 thr0.1            WF tot   -51.3%  Sh -14.94  MDD  -51.6%  n 802  WR 38.8%  PF 0.52  L/S 400/402  stops 40 liq 0 skip   0  boot -19.67/-14.99/-10.13  folds+ 0/7
+VR W240 q4 thr0.25           WF tot   -15.8%  Sh -7.38  MDD  -16.7%  n 186  WR 33.9%  PF 0.53  L/S 92/94  stops  8 liq 0 skip   0  boot -12.00/-7.45/-3.64  folds+ 0/7
+VR W240 q8 thr0.1            WF tot   -62.6%  Sh -18.73  MDD  -62.8%  n 718  WR 36.6%  PF 0.43  L/S 356/362  stops 72 liq 0 skip   0  boot -23.91/-18.80/-13.59  folds+ 0/7
+VR W240 q8 thr0.25           WF tot   -34.6%  Sh -11.18  MDD  -34.9%  n 388  WR 38.7%  PF 0.49  L/S 199/189  stops 33 liq 0 skip   0  boot -15.65/-11.28/-7.20  folds+ 0/7
+VR W480 q4 thr0.1            WF tot   -57.5%  Sh -18.73  MDD  -57.5%  n 730  WR 36.6%  PF 0.42  L/S 364/366  stops 44 liq 0 skip   0  boot -24.01/-18.72/-14.08  folds+ 0/7
+VR W480 q4 thr0.25           WF tot    -2.5%  Sh -1.49  MDD   -5.5%  n  79  WR 40.5%  PF 0.83  L/S 41/38  stops  3 liq 0 skip   0  boot -6.81/-1.74/+3.13  folds+ 1/7
+VR W480 q8 thr0.1            WF tot   -53.2%  Sh -16.41  MDD  -53.3%  n 603  WR 39.1%  PF 0.45  L/S 302/301  stops 62 liq 0 skip   0  boot -21.14/-16.67/-11.63  folds+ 0/7
+VR W480 q8 thr0.25           WF tot   -19.5%  Sh -8.10  MDD  -21.3%  n 191  WR 39.8%  PF 0.51  L/S 95/96  stops 20 liq 0 skip   0  boot -12.20/-8.37/-4.17  folds+ 1/7
+HMM train1440 thr0.6         WF tot   -34.9%  Sh -7.72  MDD  -36.4%  n 403  WR 37.7%  PF 0.64  L/S 307/96  stops 53 liq 0 skip   0  boot -11.89/-7.69/-3.34  folds+ 1/7
+HMM train1440 thr0.8         WF tot   -46.4%  Sh -12.11  MDD  -46.9%  n 611  WR 35.8%  PF 0.57  L/S 524/87  stops 31 liq 0 skip   0  boot -16.23/-12.05/-7.76  folds+ 0/7
+-- breadth: 2/28 cells positive WF OOS; median WF Sh -7.02
+   sweep  positive 0/6  median Sh -8.28  median tot -37.1%
+   taker  positive 2/12  median Sh -5.07  median tot -12.8%
+   vr     positive 0/8  median Sh -13.06  median tot -43.0%
+   hmm    positive 0/2  median Sh -9.92  median tot -40.7%
