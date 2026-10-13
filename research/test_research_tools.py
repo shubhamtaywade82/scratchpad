@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 
 from research.cross_asset import features
-from research.expectancy import wilson
+from research.expectancy import mean_ci, positions_net, win_rate_note, wilson
 from research.quarter_hour import corr
 
 
@@ -35,6 +35,28 @@ class Expectancy(unittest.TestCase):
     def test_expectancy_example_from_the_report(self):
         # 55% win rate, 200 average win, 300 average loss -> -25 (report's worked example)
         self.assertAlmostEqual(0.55 * 200 - 0.45 * 300, -25)
+
+    def test_win_rate_note_reports_interval_below_50(self):
+        # Regression: the old check `hi < 0.5 < lo` could never be true, so an interval entirely below 50% printed "includes 50%"
+        self.assertIn('below', win_rate_note(*wilson(19, 56)))      # 19 of 56 (33.9%), CI 22.9%..47.0%, as for the 1h cell
+        self.assertIn('above', win_rate_note(*wilson(70, 100)))
+        self.assertIn('includes', win_rate_note(*wilson(50, 100)))
+
+    def test_mean_ci_brackets_sample_mean(self):
+        rets = [0.02, -0.005, 0.03, -0.01, 0.015, -0.005, 0.04, -0.008]
+        lo, hi = mean_ci(rets, B=2000)
+        self.assertLess(lo, sum(rets) / len(rets))
+        self.assertGreater(hi, sum(rets) / len(rets))
+
+    def test_mean_ci_degenerate_for_constant_returns(self):
+        lo, hi = mean_ci([0.01] * 10, B=200)
+        self.assertAlmostEqual(lo, 0.01)
+        self.assertAlmostEqual(hi, 0.01)
+
+    def test_partial_closes_sum_into_one_position(self):
+        trades = [dict(side=1, k_in=5, ep=10.0, ret=0.01), dict(side=1, k_in=5, ep=10.0, ret=0.02),
+                  dict(side=-1, k_in=5, ep=10.0, ret=-0.01)]
+        self.assertEqual(sorted(positions_net(trades)), [-0.01, 0.03])
 
 
 class Corr(unittest.TestCase):
