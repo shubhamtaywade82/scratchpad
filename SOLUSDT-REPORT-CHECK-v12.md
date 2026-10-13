@@ -9,7 +9,7 @@ Of the five recommendations, none is adopted as a live signal on the evidence so
 - The **constant-notional ₹10,000 at 10× plan is contradicted** by our leverage study and must not be used. Size by risk, not by notional.
 - **Expectancy from the surviving candidates is not statistically established.** Both positive means have 95% CIs that include zero.
 - **Cross-asset return prediction** is not established at 1h or 15m (§3). At 1h the sign is informative, but the edge disappears when execution is one bar late. At 15m the causal rule loses at every cost level.
-- **Order-flow imbalance at quarter-hour boundaries** shows nothing on all 15m bars (§2). The OKX 5m volume-burst part is pending §4.
+- **Order-flow imbalance at quarter-hour boundaries** shows nothing on all 15m bars (§2). OKX 5m data shows a volume and volatility excess at quarter-hour marks against a placebo grid (§4). That is a seasonality, not a directional signal, and it matters for execution risk on stops.
 - **Futures basis** is the only idea with a plausible mechanism. It rests on four contracts.
 
 ## 2. Verdicts
@@ -19,7 +19,7 @@ Of the five recommendations, none is adopted as a live signal on the evidence so
 | 1 | Cross-asset return prediction: lagged BTC / ETH returns predict SOL's next return | `research/cross_asset.py`: OKX SOL, BTC, ETH; 1h (2022–2026, 90-day train / 30-day test) and 15m (from 2025-04, 30 / 15 days); OLS, walk-forward, 8 bps per side | 1h: CROSS k=0.5 +38.7% net, Sharpe +0.80, but the threshold is a grid peak (k=0.25 gives −55%), 15 of 55 folds positive, and a one-bar delay gives −18%. Out-of-sample R² is negative in every row. See §3. | **Not established at 1h or 15m.** 1h: the sign is informative (flip null −45%), but the edge needs sub-hour execution. 15m: causal −14.8%, loses at every cost level; the mirror rule is breakeven after 8 bps per side. See §3.4. |
 | 2 | Regime-filtered trend / breakout | Donchian40 + EMA200 (v5); Supertrend variants (v7); ADX gate, squeeze (v9); HMM and variance-ratio regimes (`research/ideas.py`) | 4h Donchian40: +0.371% per position, 95% CI −0.32% .. +1.39% (29 positions). 1h vol-adaptive Supertrend: +0.314% per position, CI −0.22% .. +1.13% (56 positions). ADX gate rejected (v9). | **No validated regime filter.** Means are positive but not distinguishable from zero on 29–56 positions. |
 | 3 | Futures basis and carry | Carry: Binance perp funding × OKX spot, daily, 4 y (`research/carry_test.py`). Basis: OKX SOL delivery futures against the perp (`research/basis_test.py`). | Carry: +3.5%/yr per notional, +1.7%/yr per capital, net of placeholder costs. Basis: 4 traded contracts, mean +1.72% net after funding estimate (16–82 days held). | **Carry not supported** at the 15–25%/yr figure in the earlier funding proposal (v11 §1). **Basis plausible, untested at scale** (4 contracts). |
-| 4 | Time-aligned order-flow imbalance at quarter-hour boundaries (Kim & Hansen, arXiv 2607.09426) | `research/quarter_hour.py`: Binance SOLUSDT 15m, 73 days, taker imbalance `(2·takerBuy − vol) / vol` against forward returns; day-block bootstrap | Part 1 (all 15m bars): corr +0.0061 at 4h (6,983 events, CI −0.019 .. +0.030) and +0.0086 at 12h (6,951 events, CI −0.016 .. +0.032). Both intervals include zero. | **Not supported** on this data. Part 2 (OKX 5m volume bursts at boundaries) is pending §4. |
+| 4 | Time-aligned order-flow imbalance at quarter-hour boundaries (Kim & Hansen, arXiv 2607.09426) | `research/quarter_hour.py`: Binance SOLUSDT 15m, 73 days, taker imbalance `(2·takerBuy − vol) / vol` against forward returns; day-block bootstrap | Part 1 (all 15m bars): corr +0.0061 at 4h (6,983 events, CI −0.019 .. +0.030) and +0.0086 at 12h (6,951 events, CI −0.016 .. +0.032). Both intervals include zero. | **Direction not supported.** Part 2 (OKX 5m): volume and \|return\| are about 14% higher at quarter-hour marks than at a placebo grid (§4). That is a seasonality, not a direction signal. |
 | 5 | Constant-notional ₹10,000 at 10× | `research/leverage.py`: Donchian40 + EMA200 on 4h, walk-forward, 5 / 7 / 10 / 12 / 15×, fixed notional vs 1% and 2% risk sizing | Stop 2A (2 ATR). Fixed notional: 5× → −55.4% (MDD −87.5%); 10× → −99.7% (MDD −100.0%, one liquidation); 15× → −100.0% (two liquidations). Risk-sized 1%: +14.2% to +16.4% at every leverage, MDD −7.2% to −7.8%, effective leverage 0.28×–0.29×. | **Contradicted.** Constant notional ruins the account at 10×. Leverage is a margin ceiling, not a position size. |
 
 ## 3. Cross-asset return prediction
@@ -106,7 +106,21 @@ Verdict for §3 overall: **cross-asset return prediction is not established at 1
 
 ## 4. Quarter-hour order-flow, Part 2 (volume bursts)
 
-PENDING: needs `data/okx/SOL-USDT-SWAP-5m.json`. OKX candles carry no buy/sell split, so only the volume and |return| parts of the paper's claim can be tested here. The taker-imbalance part cannot be reproduced on OKX.
+OKX SOL-USDT-SWAP 5m (56,222 bars, 196 days, 2026-04-01 onward). Marked bars open at :00, :15, :30, :45 (18,740). A placebo grid opens at :05, :20, :35, :50, with the same spacing and count. Day-block bootstrap, 2,000 draws. OKX candles carry no buy/sell split, so the imbalance part of the claim cannot be tested here.
+
+| Grid | Volume ratio (marked / other) | 95% CI | \|Return\| ratio | 95% CI |
+|---|---|---|---|---|
+| Quarter-hour (:00, :15, :30, :45) | 1.136 | 1.117 .. 1.157 | 1.137 | 1.117 .. 1.157 |
+| Placebo (:05, :20, :35, :50) | 1.009 | 0.993 .. 1.025 | 1.019 | 1.004 .. 1.036 |
+
+Reading:
+
+- **The quarter-hour marks carry about 14% more volume and about 14% larger absolute moves than other bars.** The placebo grid is near 1.0 on volume, so the excess is specific to the quarter-hour marks, not to every 5m grid. The |return| placebo interval only just excludes 1.
+- **This is a volatility and volume seasonality, not a direction signal.** Larger moves do not tell you which way price goes, so this part of the claim does not support a directional trade.
+- **Execution implication.** Bars that open on quarter-hour marks have wider ranges. Stops and market orders placed on those bars face more slippage. This is an execution-protection risk, not an entry signal.
+- **Not separated.** The marked set includes the hourly :00 bars, which carry their own seasonality. Splitting :00 from :15, :30, :45 is the next step if this is pursued.
+
+Verdict for §4: the volume and volatility part is **supported as a seasonality**, specific to the quarter-hour grid. The directional imbalance claim is **not testable on OKX** and was **not supported** on Binance 15m (§2).
 
 ## 5. Corrections found during this review
 

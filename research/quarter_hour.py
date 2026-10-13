@@ -66,8 +66,9 @@ def block_ci(rows, B=2000, seed=1):
     return out[int(0.025 * len(out))], out[int(0.975 * len(out))]
 
 
-def volume_bursts(path='data/okx/SOL-USDT-SWAP-5m.json', B=2000, seed=2):
-    """OKX SOL-USDT-SWAP 5m candles. Boundary bars = the 5m bars that open on :00, :15, :30, :45.
+def volume_bursts(path='data/okx/SOL-USDT-SWAP-5m.json', offset=0, B=2000, seed=2):
+    """OKX SOL-USDT-SWAP 5m candles. Marked bars = the 5m bars that open at minute % 15 == offset. offset=0 is the
+    quarter-hour claim (:00, :15, :30, :45); offset=5 (:05, :20, :35, :50) is a placebo grid with the same spacing.
     Compares mean volume and mean absolute log return of boundary bars against all other 5m bars, with a day-block
     bootstrap on the ratio. OKX candles carry no buy/sell split, so the imbalance part of the paper cannot be tested here."""
     import json
@@ -80,7 +81,7 @@ def volume_bursts(path='data/okx/SOL-USDT-SWAP-5m.json', B=2000, seed=2):
         d = datetime.fromtimestamp(t / 1000, timezone.utc).date()
         v = rows[i]['volCcy']
         ar = abs(math.log(rows[i]['c'] / rows[i - 1]['c']))
-        on = minute % 15 == 0
+        on = minute % 15 == offset
         days.setdefault(d, []).append((on, v, ar))
     all_days = sorted(days)
     def ratio(sample_days):
@@ -100,9 +101,10 @@ def volume_bursts(path='data/okx/SOL-USDT-SWAP-5m.json', B=2000, seed=2):
     boots_v.sort()
     boots_r.sort()
     n_on = sum(1 for d in all_days for on, _, _ in days[d] if on)
-    print(f"OKX SOL 5m: {len(rows)} bars, {len(all_days)} days, {n_on} boundary bars")
-    print(f"   volume ratio (boundary / other): {vr:.3f}   day-block 95% CI {boots_v[int(0.025 * B)]:.3f} .. {boots_v[int(0.975 * B)]:.3f}")
-    print(f"   |return| ratio (boundary / other): {rr:.3f}   day-block 95% CI {boots_r[int(0.025 * B)]:.3f} .. {boots_r[int(0.975 * B)]:.3f}")
+    label = 'quarter-hour boundary' if offset == 0 else f'placebo, bars at :{offset:02d} mod 15'
+    print(f"OKX SOL 5m, {label}: {len(rows)} bars, {len(all_days)} days, {n_on} marked bars")
+    print(f"   volume ratio (marked / other): {vr:.3f}   day-block 95% CI {boots_v[int(0.025 * B)]:.3f} .. {boots_v[int(0.975 * B)]:.3f}")
+    print(f"   |return| ratio (marked / other): {rr:.3f}   day-block 95% CI {boots_r[int(0.025 * B)]:.3f} .. {boots_r[int(0.975 * B)]:.3f}")
 
 
 def main():
@@ -121,7 +123,8 @@ def main():
         print(f"{'all 15m bars':<22} {hname:>8} {len(rows):>7} {r:>+15.4f} {lo:>+9.4f} .. {hi:>+7.4f}  ({sig})")
     print("\nPart 2: volume and volatility bursts at quarter-hour boundaries (5m bars, OKX; no buy/sell split).")
     try:
-        volume_bursts()
+        volume_bursts(offset=0)
+        volume_bursts(offset=5)
     except FileNotFoundError:
         print("   5m data not available")
 
