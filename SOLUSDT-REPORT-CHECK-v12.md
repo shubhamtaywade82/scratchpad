@@ -8,14 +8,15 @@ Of the five recommendations, none is adopted as a live signal on the evidence so
 
 - The **constant-notional ₹10,000 at 10× plan is contradicted** by our leverage study and must not be used. Size by risk, not by notional.
 - **Expectancy from the surviving candidates is not statistically established.** Both positive means have 95% CIs that include zero.
-- **Cross-asset return prediction** and **order-flow imbalance at quarter-hour boundaries** are being tested (sections 3 and 4). The quarter-hour all-bar test is already done and shows nothing.
+- **Cross-asset return prediction** is not established at 1h or 15m (§3). At 1h the sign is informative, but the edge disappears when execution is one bar late. At 15m the causal rule loses at every cost level.
+- **Order-flow imbalance at quarter-hour boundaries** shows nothing on all 15m bars (§2). The OKX 5m volume-burst part is pending §4.
 - **Futures basis** is the only idea with a plausible mechanism. It rests on four contracts.
 
 ## 2. Verdicts
 
 | # | Report recommendation | What we tested | Result | Verdict |
 |---|---|---|---|---|
-| 1 | Cross-asset return prediction: lagged BTC / ETH returns predict SOL's next return | `research/cross_asset.py`: OKX SOL, BTC, ETH; 1h (2022–2026, 90-day train / 30-day test) and 15m (from 2025-04, 30 / 15 days); OLS, walk-forward, 8 bps per side | 1h: CROSS k=0.5 +38.7% net, Sharpe +0.80, but the threshold is a grid peak (k=0.25 gives −55%), 15 of 55 folds positive, and a one-bar delay gives −18%. Out-of-sample R² is negative in every row. See §3. | **Not established at 1h.** The sign is informative (flip null −45%), but the edge needs sub-hour execution. 15m result pending §3.4. |
+| 1 | Cross-asset return prediction: lagged BTC / ETH returns predict SOL's next return | `research/cross_asset.py`: OKX SOL, BTC, ETH; 1h (2022–2026, 90-day train / 30-day test) and 15m (from 2025-04, 30 / 15 days); OLS, walk-forward, 8 bps per side | 1h: CROSS k=0.5 +38.7% net, Sharpe +0.80, but the threshold is a grid peak (k=0.25 gives −55%), 15 of 55 folds positive, and a one-bar delay gives −18%. Out-of-sample R² is negative in every row. See §3. | **Not established at 1h or 15m.** 1h: the sign is informative (flip null −45%), but the edge needs sub-hour execution. 15m: causal −14.8%, loses at every cost level; the mirror rule is breakeven after 8 bps per side. See §3.4. |
 | 2 | Regime-filtered trend / breakout | Donchian40 + EMA200 (v5); Supertrend variants (v7); ADX gate, squeeze (v9); HMM and variance-ratio regimes (`research/ideas.py`) | 4h Donchian40: +0.371% per position, 95% CI −0.32% .. +1.39% (29 positions). 1h vol-adaptive Supertrend: +0.314% per position, CI −0.22% .. +1.13% (56 positions). ADX gate rejected (v9). | **No validated regime filter.** Means are positive but not distinguishable from zero on 29–56 positions. |
 | 3 | Futures basis and carry | Carry: Binance perp funding × OKX spot, daily, 4 y (`research/carry_test.py`). Basis: OKX SOL delivery futures against the perp (`research/basis_test.py`). | Carry: +3.5%/yr per notional, +1.7%/yr per capital, net of placeholder costs. Basis: 4 traded contracts, mean +1.72% net after funding estimate (16–82 days held). | **Carry not supported** at the 15–25%/yr figure in the earlier funding proposal (v11 §1). **Basis plausible, untested at scale** (4 contracts). |
 | 4 | Time-aligned order-flow imbalance at quarter-hour boundaries (Kim & Hansen, arXiv 2607.09426) | `research/quarter_hour.py`: Binance SOLUSDT 15m, 73 days, taker imbalance `(2·takerBuy − vol) / vol` against forward returns; day-block bootstrap | Part 1 (all 15m bars): corr +0.0061 at 4h (6,983 events, CI −0.019 .. +0.030) and +0.0086 at 12h (6,951 events, CI −0.016 .. +0.032). Both intervals include zero. | **Not supported** on this data. Part 2 (OKX 5m volume bursts at boundaries) is pending §4. |
@@ -67,7 +68,41 @@ Verdict: **not established.** The sign is informative, but the edge depends on s
 
 ### 3.4 15m
 
-PENDING: needs `data/okx/SOL-USDT-SWAP-15m.json`, `BTC-USDT-SWAP-15m.json` and `ETH-USDT-SWAP-15m.json` (from 2025-04-01). The 15m delay-1 null is the latency test that 1h data cannot provide.
+OKX SOL, BTC and ETH 15m closes from 2025-04-01 (53,780 aligned bars). 30-day train, 15-day test, 35 folds.
+
+| Features | k | OOS R² | Net total | Sharpe | MDD | Round trips | Round-trip win | In market |
+|---|---|---|---|---|---|---|---|---|
+| OWN | 0.5 | −0.22% | −10.0% | −0.55 | −12.9% | 55 | 36.4% | 0.1% |
+| **CROSS** | **0.5** | **−0.55%** | **−14.8%** | **−1.19** | **−15.0%** | **47** | **40.4%** | **0.1%** |
+| MARKET | 0.5 | −0.22% | −8.8% | −0.53 | −13.2% | 12 | 25.0% | 0.0% |
+| ALL | 0.5 | −0.76% | −24.7% | −1.39 | −25.0% | 131 | 32.1% | 0.3% |
+
+CROSS and MARKET robustness at k = 0.5:
+
+| Test | CROSS | MARKET |
+|---|---|---|
+| Threshold k = 0.25 / 0.5 / 0.75 / 1.0 (net, Sharpe) | −66.8% (−4.36) / −14.8% (−1.19) / −10.0% (−0.84) / +0.2% (+0.05) | −23.2% (−1.14) / −8.8% (−0.53) / +0.2% (+0.06) / +8.4% (+0.83) |
+| Causal | −14.8% (Sh −1.19) | −8.8% (Sh −0.53) |
+| Sign-flipped (8 bps) | −0.1% (Sh +0.03) | +3.7% (Sh +0.29) |
+| Acts one bar late (15 min) | +2.2% (Sh +0.22) | +5.7% (Sh +0.41) |
+| Acts two bars late | −7.0% (Sh −1.21) | +2.5% (Sh +0.27) |
+| Cost 0 / 4 / 8 / 12 bps per side | −8.2% / −11.6% / −14.8% / −18.0% | −7.0% / −7.9% / −8.8% / −9.7% |
+
+CROSS at k = 0.5, detail:
+
+- 47 round trips, 19 winners (40.4%, Wilson 95% CI 27.6–54.7%).
+- Folds positive: 3 of 35.
+- Block bootstrap (1-day blocks, 2,000 draws): total return −33.0% .. +2.9%, Sharpe −2.61 .. +0.29.
+- Best three folds: +3.9%, +1.9%, 0.0%. Without them, the remaining folds total −19.6%.
+
+Reading:
+
+- **The causal rule loses at every cost level, including zero.** Its gross return is negative, so the 15m sign points the wrong way for the 1h pattern.
+- **The flipped rule is the mirror image before costs, and it is breakeven after them.** At 8 bps per side it is −0.1%. This is a post hoc finding from the flip null, not a pre-declared rule. It would need a fresh out-of-sample period and a lower execution cost (maker fills are a new, unverified assumption) before it could be called a candidate.
+- **The one-bar-late result (+2.2%) is noise at this scale.** It does not show the edge persists under latency.
+- **The 1h and 15m signs differ.** At 1h the prediction carries continuation (the sign is informative, though latency-dependent). At 15m it carries reversal, and that reversal does not clear costs. Two different effects, neither tradable as stated.
+
+Verdict for §3 overall: **cross-asset return prediction is not established at 1h or 15m.** The 1h continuation result depends on sub-hour execution. The 15m reversal is breakeven at taker costs.
 
 ## 4. Quarter-hour order-flow, Part 2 (volume bursts)
 
@@ -93,7 +128,7 @@ python3 -m unittest research.test_research_tools -v   # 9 tests, OK
 python3 -m unittest research.test_engine research.test_forward research.test_webstrats -v
 python3 -m research.expectancy                        # regenerates research/results/expectancy.txt
 python3 -m research.quarter_hour                     # Part 1 regenerates research/results/quarter-hour.txt
-python3 -m research.cross_asset                      # PENDING §3
+python3 -m research.cross_asset                      # §3 (1h and 15m), writes research/results/cross-asset.txt
 ```
 
 ## 8. Reproduce data
