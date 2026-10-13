@@ -144,24 +144,7 @@ def fmt(m):
             f"L {m['nl']}({m['el'] * 100:+.2f}%) S {m['ns']}({m['es'] * 100:+.2f}%)")
 
 
-def run(tf: str, fund_t, fund_r):
-    base = load_klines(tf)
-    load = lambda t: load_klines(t)
-    cfgs = build_configs(tf, base, load)
-    train, test = WINDOWS[tf]
-    n = len(base)
-    print(f"\n==================== {tf}: {n} bars ({n / BPY[tf] * 365:.0f} d), {len(cfgs)} configs ====================")
-
-    # 1. walk-forward
-    res, folds = walk_forward(tf, base, cfgs, fund_t, fund_r, train, test)
-    m, (lo, md, hi) = stitched_report(tf, res)
-    print(f"[WF OOS] {len(folds)} folds x {test} bars  {fmt(m)}")
-    print(f"         block-bootstrap OOS Sharpe 5/50/95: {lo:+.2f} / {md:+.2f} / {hi:+.2f}")
-    for f in folds:
-        print(f"         fold {f['start']:>5}-{f['end']:<5} train_Sh {f['train_sharpe']:+5.2f}  "
-              f"oos {f['oos_total'] * 100:+6.1f}% Sh {f['oos_sharpe']:+5.2f} n {f['oos_n']:2d}  {f['chosen']}")
-
-    # 2. in-sample best over the full sample (optimistic, shows selection bias)
+def _find_is_best(base, cfgs: List[Cfg], n: int, tf: str, fund_t, fund_r):
     best_full = None
     for c in cfgs:
         r = simulate(base, c.sig, c.risk, 1, n, A=atr(base, 14), fund_t=fund_t, fund_r=fund_r)
@@ -170,8 +153,12 @@ def run(tf: str, fund_t, fund_r):
             best_full = (c, mm)
     if best_full:
         print(f"[IS best, full sample, OPTIMISTIC] {best_full[0].name}: {fmt(best_full[1])}")
+        g = metrics(simulate(base, best_full[0].sig, best_full[0].risk, 1, n, A=atr(base, 14), fee=0.0, slip=0.0), tf)
+        print(f"[gross, zero cost, IS best] n {g['n']}  exp/tr {g['exp'] * 100:+.3f}%  total {g['total'] * 100:+.1f}%  Sh {g['sharpe']:+.2f}")
+    return best_full
 
-    # 3. v4 baseline, a priori (not searched): 4h/1d Donchian40 with EMA200 gate, no stop
+
+def _report_v4_baseline(base, n: int, tf: str, fund_t, fund_r):
     if tf in ('4h', '1d'):
         c = Cfg('v4 DON40+EMA200 nostop', donchian_sig(base, 40, gate=ema_gate(base, 200)), Risk(), 'DON')
         cut = int(n * CUT)
@@ -180,11 +167,22 @@ def run(tf: str, fund_t, fund_r):
         print(f"[v4 baseline full] {fmt(full)}")
         print(f"[v4 baseline OOS ] {fmt(oos)}")
 
-    # 4. gross (no fee/slip/funding) on the in-sample best: is there any pre-cost edge?
-    if best_full:
-        c = best_full[0]
-        g = metrics(simulate(base, c.sig, c.risk, 1, n, A=atr(base, 14), fee=0.0, slip=0.0), tf)
-        print(f"[gross, zero cost, IS best] n {g['n']}  exp/tr {g['exp'] * 100:+.3f}%  total {g['total'] * 100:+.1f}%  Sh {g['sharpe']:+.2f}")
+
+def run(tf: str, fund_t, fund_r):
+    base = load_klines(tf)
+    cfgs = build_configs(tf, base, load_klines)
+    train, test = WINDOWS[tf]
+    n = len(base)
+    print(f"\n==================== {tf}: {n} bars ({n / BPY[tf] * 365:.0f} d), {len(cfgs)} configs ====================")
+    res, folds = walk_forward(tf, base, cfgs, fund_t, fund_r, train, test)
+    m, (lo, md, hi) = stitched_report(tf, res)
+    print(f"[WF OOS] {len(folds)} folds x {test} bars  {fmt(m)}")
+    print(f"         block-bootstrap OOS Sharpe 5/50/95: {lo:+.2f} / {md:+.2f} / {hi:+.2f}")
+    for f in folds:
+        print(f"         fold {f['start']:>5}-{f['end']:<5} train_Sh {f['train_sharpe']:+5.2f}  "
+              f"oos {f['oos_total'] * 100:+6.1f}% Sh {f['oos_sharpe']:+5.2f} n {f['oos_n']:2d}  {f['chosen']}")
+    _find_is_best(base, cfgs, n, tf, fund_t, fund_r)
+    _report_v4_baseline(base, n, tf, fund_t, fund_r)
     return res, folds, m
 
 

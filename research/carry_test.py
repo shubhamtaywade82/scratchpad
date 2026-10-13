@@ -50,32 +50,34 @@ def tracking(perp, spot):
     return len(common), corr, ann_te, common
 
 
+def _step_carry_state(state: int, rate: Optional[float], enter_thr: float, exit_thr: float):
+    if rate is None:
+        return state, False, False
+    if state == 0 and rate > enter_thr:
+        return 1, True, False
+    if state == 1 and rate < exit_thr:
+        return 0, False, True
+    return state, False, False
+
+
 def carry(days, perp, spot, ft, fr, enter_thr: float, exit_thr: float):
     """Holding interval for day i is (open_i, open_{i+1}]. Funding inside it is received by the short perp.
     Entry and exit decisions use only the latest settlement at or before the day's open."""
     pnl = dict(funding=0.0, basis=0.0, cost=0.0)
     yearly = {}
-    cycles = 0
-    in_days = 0
-    state = 0
-    j = 0
-    rate_now = None
+    cycles, in_days, state, j, rate_now = 0, 0, 0, 0, None
     for i in range(len(days) - 1):
         d, d1 = days[i], days[i + 1]
         y = datetime.fromtimestamp(d / 1000, timezone.utc).year
         while j < len(ft) and ft[j] <= d:
             rate_now = fr[j]
             j += 1
-        if rate_now is not None:
-            if state == 0 and rate_now > enter_thr:
-                state = 1
-                cycles += 1
-                pnl['cost'] -= CYCLE_COST / 2
-                yearly[y] = yearly.get(y, 0.0) - CYCLE_COST / 2
-            elif state == 1 and rate_now < exit_thr:
-                state = 0
-                pnl['cost'] -= CYCLE_COST / 2
-                yearly[y] = yearly.get(y, 0.0) - CYCLE_COST / 2
+        state, entered, exited = _step_carry_state(state, rate_now, enter_thr, exit_thr)
+        if entered:
+            cycles += 1
+        if entered or exited:
+            pnl['cost'] -= CYCLE_COST / 2
+            yearly[y] = yearly.get(y, 0.0) - CYCLE_COST / 2
         if state == 1:
             f = _sum_interval(ft, fr, d, d1)
             b = (spot[d1] / spot[d] - 1) - (perp[d1] / perp[d] - 1)

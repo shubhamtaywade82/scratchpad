@@ -66,13 +66,8 @@ def block_ci(rows, B=2000, seed=1):
     return out[int(0.025 * len(out))], out[int(0.975 * len(out))]
 
 
-def volume_bursts(path='data/okx/SOL-USDT-SWAP-5m.json', B=2000, seed=2):
-    """OKX SOL-USDT-SWAP 5m candles. Boundary bars = the 5m bars that open on :00, :15, :30, :45.
-    Compares mean volume and mean absolute log return of boundary bars against all other 5m bars, with a day-block
-    bootstrap on the ratio. OKX candles carry no buy/sell split, so the imbalance part of the paper cannot be tested here."""
-    import json
-    rows = json.load(open(path))['rows']
-    rows.sort(key=lambda r: r['t'])
+def _group_5m_by_day(rows):
+    rows = sorted(rows, key=lambda r: r['t'])
     days = {}
     for i in range(1, len(rows)):
         t = rows[i]['t']
@@ -80,27 +75,38 @@ def volume_bursts(path='data/okx/SOL-USDT-SWAP-5m.json', B=2000, seed=2):
         d = datetime.fromtimestamp(t / 1000, timezone.utc).date()
         v = rows[i]['volCcy']
         ar = abs(math.log(rows[i]['c'] / rows[i - 1]['c']))
-        on = minute % 15 == 0
-        days.setdefault(d, []).append((on, v, ar))
+        days.setdefault(d, []).append((minute % 15 == 0, v, ar))
+    return days
+
+
+def _boundary_ratios(days, sample_days):
+    bv = [v for d in sample_days for on, v, _ in days[d] if on]
+    ov = [v for d in sample_days for on, v, _ in days[d] if not on]
+    br = [a for d in sample_days for on, _, a in days[d] if on]
+    orr = [a for d in sample_days for on, _, a in days[d] if not on]
+    return st.fmean(bv) / st.fmean(ov), st.fmean(br) / st.fmean(orr)
+
+
+def volume_bursts(path='data/okx/SOL-USDT-SWAP-5m.json', B=2000, seed=2):
+    """OKX SOL-USDT-SWAP 5m candles. Boundary bars = the 5m bars that open on :00, :15, :30, :45.
+    Compares mean volume and mean absolute log return of boundary bars against all other 5m bars, with a day-block
+    bootstrap on the ratio. OKX candles carry no buy/sell split, so the imbalance part of the paper cannot be tested here."""
+    import json
+    days = _group_5m_by_day(json.load(open(path))['rows'])
     all_days = sorted(days)
-    def ratio(sample_days):
-        bv = [v for d in sample_days for on, v, _ in days[d] if on]
-        ov = [v for d in sample_days for on, v, _ in days[d] if not on]
-        br = [a for d in sample_days for on, _, a in days[d] if on]
-        orr = [a for d in sample_days for on, _, a in days[d] if not on]
-        return st.fmean(bv) / st.fmean(ov), st.fmean(br) / st.fmean(orr)
-    vr, rr = ratio(all_days)
+    vr, rr = _boundary_ratios(days, all_days)
     rnd = random.Random(seed)
     boots_v, boots_r = [], []
     for _ in range(B):
         samp = [rnd.choice(all_days) for _ in all_days]
-        a, b = ratio(samp)
+        a, b = _boundary_ratios(days, samp)
         boots_v.append(a)
         boots_r.append(b)
     boots_v.sort()
     boots_r.sort()
     n_on = sum(1 for d in all_days for on, _, _ in days[d] if on)
-    print(f"OKX SOL 5m: {len(rows)} bars, {len(all_days)} days, {n_on} boundary bars")
+    n_rows = sum(len(days[d]) for d in all_days) + 1
+    print(f"OKX SOL 5m: {n_rows} bars, {len(all_days)} days, {n_on} boundary bars")
     print(f"   volume ratio (boundary / other): {vr:.3f}   day-block 95% CI {boots_v[int(0.025 * B)]:.3f} .. {boots_v[int(0.975 * B)]:.3f}")
     print(f"   |return| ratio (boundary / other): {rr:.3f}   day-block 95% CI {boots_r[int(0.025 * B)]:.3f} .. {boots_r[int(0.975 * B)]:.3f}")
 
