@@ -1,0 +1,66 @@
+======================================================================
+SOLUSDT ANALYSIS — fetched 2026-10-13T02:54:32.514Z
+1d: 1500 candles  2022-09-05 -> 2026-10-13
+4h: 1800 candles  2025-12-17 -> 2026-10-13
+1h: 1440 candles  2026-08-14 -> 2026-10-13
+======================================================================
+
+--- PRICE / RETURNS (daily) ---
+Last close: $106.73
+Return 7d: -11.6%
+Return 30d: +7.5%
+Return 90d: +38.1%
+Return 180d: +19.9%
+Return 365d: -48.9%
+52w High $202.44 (-47.3% from high), 52w Low $62.20 (+71.6% from low)
+All-time(period) high $261.97 on 2025-01-18
+All-time(period) low $9.64 on 2022-12-29
+
+Yearly returns:
+  2022: -69.0%
+  2023: +918.2%
+  2024: +72.2%
+  2025: -35.8%
+  2026: -15.9%
+
+--- VOLATILITY / RISK (daily) ---
+Annualized vol (365d): 64.2% | (90d): 56.0%
+Max drawdown over period: -76.3% (2025-01-18 -> 2026-06-06)
+Max drawdown last 90d: -13.4%
+Sharpe (365d, logret): -0.72
+
+--- TREND / MOMENTUM (daily) ---
+SMA20: $116.38 — price is -8.3% vs SMA20
+SMA50: $109.28 — price is -2.3% vs SMA50
+SMA100: $93.54 — price is +14.1% vs SMA100
+SMA200: $87.07 — price is +22.6% vs SMA200
+EMA20 $112.82 | EMA50 $107.45 | EMA200 $97.48
+Golden-cross state: EMA50 > EMA200  (bullish)
+RSI(14): 40.8 (neutral)
+MACD: line -0.15, signal +2.01, hist -2.16 (bearish)
+Last MACD cross (12 bars ago): bearish on 2026-10-01
+Bollinger(20,2): $105.78 / $116.38 / $126.97 — %B = 4%
+ATR(14): $4.96 (4.6% of price)
+
+--- VOLUME & ORDER FLOW ---
+Avg daily volume: 30d 2,388,179 SOL vs 90d 2,151,753 SOL (+11.0%)
+Avg daily quote volume (30d): $271.7M
+Taker-buy ratio: 30d 50.3% | 90d 50.5% (buy pressure)
+
+--- 4H TIMEFRAME ---
+Price $106.72 | RSI(14) 34.1 | EMA50 > EMA200 | MACD hist -0.20
+vs SMA20: -2.9% | vs SMA200: -4.9%
+
+--- 1H TIMEFRAME ---
+Price $106.72 | RSI(14) 42.1 | MACD hist -0.34 | avg hourly quote vol $12.4M
+
+--- KEY LEVELS (daily swings, last 180d) ---
+Support: $74.84(2026-07-17), $83.00(2026-04-19), $84.34(2026-05-22), $99.34(2026-09-01)
+Resistance: $112.03(2026-09-18), $121.88(2026-09-25)
+
+--- BACKTESTS (daily, long-only, next-bar-open entry, fees 0.1%) ---
+Buy&Hold (since warmup): +416.6% total, +58.6% CAGR
+SMA50/200 trend   :    +31.1% total |    +7.9% CAGR | MDD  -68.3% |   6 trades | win   17% | time-in-mkt 55%
+20/50 EMA cross   :    +62.0% total |   +12.9% CAGR | MDD  -64.2% |  17 trades | win   18% | time-in-mkt 49%
+90d momentum      :   +121.1% total |   +22.8% CAGR | MDD  -59.8% |  35 trades | win   34% | time-in-mkt 55%
+RSI mean-revert   :     +3.7% total |    +0.9% CAGR | MDD  -53.1% |   7 trades | win   43% | time-in-mkt 18%

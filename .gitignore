@@ -1,0 +1,4 @@
+node_modules/
+*.log
+analysis-output.txt
+analysis-v2-output.txt

@@ -1,0 +1,19 @@
+daily-sum funding: mean -0.0156% median +0.0120% p5 -0.0005% p95 0.0007% min -17.166% max +0.305%
+
+== SHORT VARIANTS (added to long-only gate; funding included) ==
+LS symmetric always-in                               tot      -8% CAGR   -2.0% MDD  -86.8% Sharpe  0.35 tr   40 | longPnL   +201% shortPnL    -72% (705d/595d)
+LS: short only if <SMA200 & 30dmom<-10%              tot     +36% CAGR   +7.8% MDD  -76.7% Sharpe  0.45 tr   85 | longPnL   +202% shortPnL    -48% (705d/253d)
+LS: short only if <SMA200 & 90dmom<-10%              tot     +22% CAGR   +5.0% MDD  -83.3% Sharpe  0.43 tr   72 | longPnL   +202% shortPnL    -54% (705d/381d)
+LS: short only if <SMA200 & RSI<45 (not oversold)    tot      -7% CAGR   -1.7% MDD  -85.3% Sharpe  0.33 tr  121 | longPnL   +202% shortPnL    -82% (705d/306d)
+LS short size 0.25x                                  tot    +150% CAGR  +25.0% MDD  -68.4% Sharpe  0.67 tr   41 | longPnL   +227% shortPnL    -19% (904d/595d)
+LS short size 0.50x                                  tot     +91% CAGR  +17.1% MDD  -75.6% Sharpe  0.60 tr   41 | longPnL   +227% shortPnL    -37% (904d/595d)
+LS short size 0.75x                                  tot     +38% CAGR   +8.2% MDD  -81.7% Sharpe  0.52 tr   41 | longPnL   +227% shortPnL    -55% (904d/595d)
+vol-target LS (long full VT, short 0.5x VT)          tot     +73% CAGR  +14.2% MDD  -44.4% Sharpe  0.56 tr 1300 | longPnL   +108% shortPnL    -20% (705d/595d)
+
+== FUNDING-AWARE SHORT SIZING (avoid short when we would pay funding) ==
+LS funding-scaled short, mom-free                    tot     -10% CAGR   -2.5% MDD  -85.2% Sharpe  0.43 tr  416 | longPnL   +226% shortPnL    -85% (904d/595d)
+BEST CANDIDATE: long gate + mom-gated funding-scaled short tot     +32% CAGR   +7.0% MDD  -77.8% Sharpe  0.44 tr  259 | longPnL   +202% shortPnL    -58% (705d/253d)
+
+== sanity: no funding cost on either side ==
+long-only gate (funding ON)                          tot    +203% CAGR  +31.0% MDD  -60.3% Sharpe  0.75 tr   39 | longPnL   +203% shortPnL     +0% (705d/  0d)
+long-only gate (funding OFF)                         tot    +265% CAGR  +37.1% MDD  -58.3% Sharpe  0.82 tr   39 | longPnL   +203% shortPnL     +0% (705d/  0d)

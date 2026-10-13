@@ -1,0 +1,20 @@
+== SHORT-SIDE P&L DECOMPOSITION (price vs funding), symmetric LS ==
+LS always-in                                     tot      -8% MDD  -86.8% Sh  0.35 | pricePnL L  +201% S   -72% | funding L-18.7% S-1.1%
+
+== ASYMMETRIC FAMILY: long gate + short size s, optional mom filter ==
+short size 0.00                                  tot    +203% MDD  -60.3% Sh  0.75 | pricePnL L  +203% S    +0% | funding L-18.7% S+0.0%
+short size 0.25                                  tot    +145% MDD  -68.4% Sh  0.66 | pricePnL L  +202% S   -19% | funding L-18.7% S-0.3%
+short size 0.50                                  tot     +87% MDD  -75.6% Sh  0.55 | pricePnL L  +202% S   -37% | funding L-18.7% S-0.6%
+short size 0.00 & mom30<-10%                     tot    +203% MDD  -60.3% Sh  0.75 | pricePnL L  +203% S    +0% | funding L-18.7% S+0.0%
+short size 0.25 & mom30<-10%                     tot    +161% MDD  -63.3% Sh  0.68 | pricePnL L  +203% S   -13% | funding L-18.7% S-0.5%
+short size 0.50 & mom30<-10%                     tot    +118% MDD  -67.4% Sh  0.61 | pricePnL L  +202% S   -25% | funding L-18.7% S-1.0%
+short size 0.00 & mom30<-20%                     tot    +203% MDD  -60.3% Sh  0.75 | pricePnL L  +203% S    +0% | funding L-18.7% S+0.0%
+short size 0.25 & mom30<-20%                     tot    +189% MDD  -61.5% Sh  0.72 | pricePnL L  +203% S    -3% | funding L-18.7% S-0.4%
+short size 0.50 & mom30<-20%                     tot    +168% MDD  -62.9% Sh  0.69 | pricePnL L  +203% S    -6% | funding L-18.7% S-0.8%
+
+== per-year returns of chosen hybrid: long gate + 0.25x short when mom30<-10% ==
+2022: B&H    -69.0% | hybrid     +0.0% | static-short    -27.7%
+2023: B&H  +1003.0% | hybrid   +205.9% | static-short    -96.7%
+2024: B&H    +76.5% | hybrid    -23.5% | static-short    -67.1%
+2025: B&H    -34.7% | hybrid    -17.3% | static-short    -27.3%
+2026: B&H    -16.0% | hybrid    +20.9% | static-short    -13.8%
