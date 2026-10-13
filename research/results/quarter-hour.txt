@@ -1,0 +1,9 @@
+Binance SOLUSDT 15m: 7000 bars, taker volume present: True
+Part 1: taker imbalance vs forward returns, all 15m bars.
+        (every 15m bar opens on a quarter-hour mark, so a boundary/placebo split is not possible at this frequency)
+set                     horizon  events  corr(imb, fwd)     day-block 95% CI
+all 15m bars                 4h    6983         +0.0061   -0.0194 .. +0.0303  (includes 0)
+all 15m bars                12h    6951         +0.0086   -0.0159 .. +0.0318  (includes 0)
+
+Part 2: volume and volatility bursts at quarter-hour boundaries (5m bars, OKX; no buy/sell split).
+   5m data not available
