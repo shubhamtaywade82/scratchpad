@@ -1,0 +1,32 @@
+{
+ "deployed_utc": "2026-10-13T04:19:58.135963+00:00",
+ "start_open_time_ms": 1791867600000,
+ "start_utc": "2026-10-13T05:00:00+00:00",
+ "signal": "vol-adaptive Supertrend p20 L100 1.5-4 (candidate)",
+ "benchmark": "fixed Supertrend p10 x2 (benchmark)",
+ "risk": {
+  "sizing": "risk",
+  "risk_pct": 0.01,
+  "lev": 5.0,
+  "sl_mult": 3.0
+ },
+ "costs": "taker 5 bps + slippage 3 bps per side; no funding (spot)",
+ "data": "kraken SOLUSD 60m",
+ "status": "WAITING",
+ "forward_bars": 0,
+ "equity": 1.0,
+ "bars_total": 299,
+ "last_bar_utc": "2026-10-13T03:00:00+00:00",
+ "signal_equity": 1.0,
+ "signal_closed": [],
+ "signal_open_position": null,
+ "signal_flat_bars": 0,
+ "signal_positions": 0,
+ "benchmark_equity": 1.0,
+ "benchmark_closed": [],
+ "benchmark_open_position": null,
+ "benchmark_flat_bars": 0,
+ "benchmark_positions": 0,
+ "last_update_utc": "2026-10-13T04:19:58.370002+00:00",
+ "new_bars_this_run": 0
+}
