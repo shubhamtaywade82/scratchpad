@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 
 from research.cross_asset import block_bootstrap, features, round_trips, trade
-from research.expectancy import mean_ci, positions_net, win_rate_note, wilson
+from research.expectancy import block_mean_ci, mean_ci, positions_net, win_rate_note, wilson
 from research.quarter_hour import corr
 
 
@@ -24,6 +24,12 @@ class CrossAsset(unittest.TestCase):
         self.assertTrue(np.allclose(X[:, 0], r[1:-1]))      # current interval
         self.assertTrue(np.allclose(X[:, 1], r[:-2]))       # lag interval
         self.assertTrue(np.allclose(y, r[2:]))              # next interval
+
+    def test_validate_and_extract_closes_rejects_gaps(self):
+        from research.cross_asset import _validate_and_extract_closes
+        rows = [dict(t=1000, c=10.0), dict(t=3000, c=11.0)]
+        with self.assertRaises(ValueError):
+            _validate_and_extract_closes(rows, 1000, 'TEST')
 
 
 class Expectancy(unittest.TestCase):
@@ -52,6 +58,12 @@ class Expectancy(unittest.TestCase):
         lo, hi = mean_ci([0.01] * 10, B=200)
         self.assertAlmostEqual(lo, 0.01)
         self.assertAlmostEqual(hi, 0.01)
+
+    def test_block_mean_ci_brackets_sample_mean(self):
+        rets = [0.02, -0.005, 0.03, -0.01, 0.015, -0.005, 0.04, -0.008]
+        blo, bhi = block_mean_ci(rets, block_size=2, B=2000)
+        self.assertLess(blo, sum(rets) / len(rets))
+        self.assertGreater(bhi, sum(rets) / len(rets))
 
     def test_partial_closes_sum_into_one_position(self):
         trades = [dict(side=1, k_in=5, ep=10.0, ret=0.01), dict(side=1, k_in=5, ep=10.0, ret=0.02),
@@ -110,6 +122,36 @@ class CrossAssetSimulator(unittest.TestCase):
 class Corr(unittest.TestCase):
     def test_perfect_correlation(self):
         self.assertAlmostEqual(corr([1, 2, 3, 4], [2, 4, 6, 8]), 1.0)
+
+
+class EnsemblePortfolio(unittest.TestCase):
+    def test_calc_portfolio_stats_zero_returns(self):
+        from research.ensemble import _calc_portfolio_stats
+        stats = _calc_portfolio_stats([[0.0] * 10], [])
+        self.assertAlmostEqual(stats['tot'], 0.0)
+        self.assertAlmostEqual(stats['mdd'], 0.0)
+        self.assertEqual(stats['n'], 0)
+
+    def test_calc_portfolio_stats_drawdown_and_trades(self):
+        from research.ensemble import _calc_portfolio_stats
+        # Two equal assets: coin A has +10% then -10%, coin B has 0% then -10%
+        # Average returns: bar 0 = +5%, bar 1 = -10%
+        # Equity: bar 0 = 1.05, bar 1 = 1.05 * 0.9 = 0.945 -> mdd = 0.945/1.05 - 1 = -0.10 (-10%)
+        trades = [dict(ret=0.05), dict(ret=-0.10)]
+        stats = _calc_portfolio_stats([[0.10, -0.10], [0.0, -0.10]], trades, bpy=365)
+        self.assertAlmostEqual(stats['mdd'], -0.10)
+        self.assertEqual(stats['n'], 2)
+        self.assertAlmostEqual(stats['wr'], 0.5)
+
+    def test_load_resampled_4h_invariants(self):
+        from research.ensemble import load_resampled_4h
+        s = load_resampled_4h('SOL')
+        self.assertEqual(s.tf, '4h')
+        self.assertGreater(len(s), 3000)
+        # Check OHLC bar integrity on a sample slice
+        for i in range(min(50, len(s))):
+            self.assertGreaterEqual(s.h[i], max(s.o[i], s.c[i]))
+            self.assertLessEqual(s.l[i], min(s.o[i], s.c[i]))
 
 
 if __name__ == '__main__':

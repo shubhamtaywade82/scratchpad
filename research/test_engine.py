@@ -510,5 +510,22 @@ class ScaleOut(unittest.TestCase):
                 Risk(tp_frac=bad).validate()
 
 
+class LedgerReconciliation(unittest.TestCase):
+    def test_trade_ledger_reconciles_with_equity_under_funding_and_fees(self):
+        ohlc = flat(2) + [(100, 105, 98, 103)] + [(103, 106, 101, 104)] + [(104, 105, 99, 100)] + flat(3, 100)
+        s = bars(ohlc)
+        sig = [0] * len(s)
+        sig[1:4] = [1, 1, 1]
+        fund_t = [s.t[2] + 1000, s.t[3] + 1000]
+        fund_r = [0.001, -0.0005]
+        r = simulate(s, sig, Risk(sizing='fixed', lev=2.0), 1, len(s), fund_t=fund_t, fund_r=fund_r)
+        self.assertGreater(len(r.trades), 0)
+        for t in r.trades:
+            self.assertIn('funding', t)
+            self.assertAlmostEqual(t['pnl'], t['gross'] - t['exit_fee'] - t['entry_fee'] + t['funding'], 12)
+        # Final equity must exactly match 1.0 + sum of all trade PnLs
+        self.assertAlmostEqual(1.0 + sum(t['pnl'] for t in r.trades), r.eq[-1], 12)
+
+
 if __name__ == '__main__':
     unittest.main()

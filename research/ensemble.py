@@ -8,12 +8,14 @@ Designs are declared below BEFORE running; they are not tuned on these results.
 
 Usage:  python3 -m research.ensemble 4h 1d 1h 15m
 """
+import json
 import math
 import statistics as st
 import sys
 
-from research.engine import (Risk, atr, donchian_sig, ema_gate, htf_gate, load_funding, returns_from_levels,
-                             load_klines, metrics, simulate)
+from research.engine import (Risk, Series, atr, donchian_sig, ema_gate, htf_gate, load_funding, returns_from_levels,
+                             load_klines, metrics, simulate, to_series)
+from research.evalwin import walk_w
 from research.ideas import walk
 from research.search import BPY, block_bootstrap_sharpe
 
@@ -82,7 +84,71 @@ def run(tf, fund_t, fund_r):
         print(f"           block-bootstrap Sharpe 5/50/95: {lo:+.2f} / {md:+.2f} / {hi:+.2f}")
 
 
+def load_resampled_4h(inst: str) -> Series:
+    with open(f'data/okx/{inst}-USDT-SWAP-15m.json') as f:
+        rows = json.load(f)['rows']
+    bars = []
+    for i in range(0, len(rows) - 15, 16):
+        c = rows[i:i + 16]
+        bars.append(dict(
+            openTime=c[0]['t'], open=c[0]['o'],
+            high=max(x['h'] for x in c),
+            low=min(x['l'] for x in c),
+            close=c[-1]['c'],
+            volume=sum(x.get('vol', 0.0) for x in c)
+        ))
+    return to_series('4h', bars)
+
+
+def _calc_portfolio_stats(rets_matrix, all_trades, bpy: int = 2190) -> dict:
+    port_rets = [sum(col) / len(col) for col in zip(*rets_matrix)]
+    eq, peak, mdd = [1.0], 1.0, 0.0
+    for r in port_rets:
+        eq.append(eq[-1] * (1.0 + r))
+        peak = max(peak, eq[-1])
+        mdd = min(mdd, eq[-1] / peak - 1.0)
+    mu, sd = st.fmean(port_rets), st.pstdev(port_rets) or 1e-12
+    years = len(port_rets) / bpy
+    cagr = (eq[-1] ** (1 / years) - 1) if years > 0 and eq[-1] > 0 else -1.0
+    wins = [t['ret'] for t in all_trades if t['ret'] > 0]
+    losses = [t['ret'] for t in all_trades if t['ret'] <= 0]
+    gp, gl = sum(wins), -sum(losses)
+    return dict(
+        tot=eq[-1] - 1.0, cagr=cagr, sharpe=mu / sd * math.sqrt(bpy), mdd=mdd,
+        calmar=(cagr / abs(mdd)) if mdd < 0 else 0.0,
+        n=len(all_trades), wr=len(wins) / len(all_trades) if all_trades else 0.0,
+        pf=(gp / gl) if gl > 0 else 0.0, rets=port_rets
+    )
+
+
+def run_portfolio(assets=('BTC', 'ETH', 'SOL')) -> dict:
+    print(f"\n==================== MULTI-ASSET PORTFOLIO ({', '.join(assets)}) | 4h DON40+EMA200 ====================")
+    risk = Risk(sizing='risk', risk_pct=0.01, lev=5.0, sl_mult=3.0)
+    rets_matrix, all_trades = [], []
+    for coin in assets:
+        s = load_resampled_4h(coin)
+        sig = donchian_sig(s, 40, gate=ema_gate(s, 200))
+        res, folds = walk_w(s, sig, risk, [], [], 360, 180, '4h')
+        m = metrics(res, '4h')
+        all_trades.extend(res.trades)
+        rets_matrix.append(returns_from_levels(res.eq))
+        fpos = sum(1 for f in folds if f > 0)
+        print(f"  {coin:<5} {fmt(m)}  folds+ {fpos}/{len(folds)}")
+    min_len = min(len(r) for r in rets_matrix)
+    stats = _calc_portfolio_stats([r[:min_len] for r in rets_matrix], all_trades)
+    lo, md, hi = block_bootstrap_sharpe(stats['rets'], 2190, B=2000, L=20)
+    print(f"\n  COMBINED 3-ASSET PORTFOLIO (1/3 risk allocation each):")
+    print(f"    tot {stats['tot'] * 100:+7.2f}%  CAGR {stats['cagr'] * 100:+6.2f}%/yr  Sh {stats['sharpe']:+5.2f}  "
+          f"MDD {stats['mdd'] * 100:6.2f}%  Calmar {stats['calmar']:+5.2f}  n {stats['n']:3d}  WR {stats['wr'] * 100:4.1f}%  PF {stats['pf']:4.2f}")
+    print(f"    block-bootstrap Sharpe 5/50/95: {lo:+.2f} / {md:+.2f} / {hi:+.2f}")
+    return stats
+
+
 if __name__ == '__main__':
-    ft, fr = load_funding()
-    for tf in (sys.argv[1:] or ['4h', '1d']):
-        run(tf, ft, fr)
+    args = sys.argv[1:]
+    if 'portfolio' in args:
+        run_portfolio()
+    else:
+        ft, fr = load_funding()
+        for tf in (args or ['4h', '1d']):
+            run(tf, ft, fr)

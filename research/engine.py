@@ -197,6 +197,7 @@ class _Book:
         self.d: Optional[float] = None      # initial stop distance in price units (defines 1R)
         self.tp: Optional[float] = None     # take-profit level
         self.stop_kind = 'init'             # 'init' | 'be' | 'trail': what set the current stop
+        self.funding_pnl = 0.0
 
     def open(self, side, k, o, qty, stop, liq_frac, slip=None, fee=None, d=None, tp_r=None):
         s = self.slip if slip is None else slip
@@ -209,7 +210,7 @@ class _Book:
         self.liq = px * (1 - liq_frac) if side > 0 else px * (1 + liq_frac)
         self.d = d
         self.tp = px + side * tp_r * d if (tp_r and d) else None
-        self.stop_kind = 'init'
+        self.stop_kind, self.funding_pnl = 'init', 0.0
         self.k_in, self.E_in = k, self.E + self.entry_fee  # equity before this trade's fees
 
     def ratchet(self, cand, kind):
@@ -217,15 +218,17 @@ class _Book:
         if self.stop is None or (cand > self.stop if self.side > 0 else cand < self.stop):
             self.stop, self.stop_kind = cand, kind
 
-    def _record_trade(self, k: int, px: float, q: float, reason: str, kind: str, exit_fee: float, entry_part: float):
+    def _record_trade(self, k: int, px: float, q: float, reason: str, kind: str,
+                      exit_fee: float, entry_part: float, fund_part: float = 0.0):
         gross = self.side * q * (px - self.ep)
-        pnl = gross - exit_fee - entry_part
+        pnl = gross - exit_fee - entry_part + fund_part
         self.E += gross - exit_fee
         self.entry_fee -= entry_part
         r = (self.side * (px - self.ep) / self.d) if self.d else None
         self.trades.append(dict(
             side=self.side, k_in=self.k_in, k_out=k, reason=reason, kind=kind,
-            qty=q, ep=self.ep, px=px, pnl=pnl, ret=pnl / self.E_in, bars=k - self.k_in,
+            qty=q, ep=self.ep, px=px, gross=gross, entry_fee=entry_part, exit_fee=exit_fee,
+            funding=fund_part, pnl=pnl, ret=pnl / self.E_in, bars=k - self.k_in,
             eff_lev=q * self.ep / self.E_in, r=r,
         ))
 
@@ -233,7 +236,9 @@ class _Book:
         """Scale out: close a fraction of the position at a limit price. The position stays open."""
         f = self.fee if fee is None else fee
         q = self.qty * frac
-        self._record_trade(k, px_raw, q, 'tp_partial', 'tp_partial', f * q * px_raw, self.entry_fee * frac)
+        fund_part = self.funding_pnl * frac
+        self.funding_pnl -= fund_part
+        self._record_trade(k, px_raw, q, 'tp_partial', 'tp_partial', f * q * px_raw, self.entry_fee * frac, fund_part)
         self.qty -= q
 
     def close(self, px_raw, k, reason, slip=None, fee=None):
@@ -243,7 +248,9 @@ class _Book:
         limit = reason in ('tp', 'tp_gap')
         px = px_raw if limit else (px_raw * (1 - s) if self.side > 0 else px_raw * (1 + s))
         kind = self.stop_kind if reason in ('stop', 'gap_stop') else reason
-        self._record_trade(k, px, self.qty, reason, kind, f * self.qty * px, self.entry_fee)
+        fund_part = self.funding_pnl
+        self.funding_pnl = 0.0
+        self._record_trade(k, px, self.qty, reason, kind, f * self.qty * px, self.entry_fee, fund_part)
         self.side, self.qty, self.stop, self.ext, self.liq = 0, 0.0, None, None, None
         self.d, self.tp, self.stop_kind, self.entry_fee = None, None, 'init', 0.0
         if self.E <= 0:
@@ -255,7 +262,9 @@ class _Book:
     def charge_funding(self, fund_t: list, fund_r: list, fi: int, t_k: int, prev_c: float) -> int:
         while fi < len(fund_t) and fund_t[fi] <= t_k:
             if self.side:
-                self.E -= self.side * self.qty * prev_c * fund_r[fi]
+                payment = self.side * self.qty * prev_c * fund_r[fi]
+                self.E -= payment
+                self.funding_pnl -= payment
                 if self.E <= 0:
                     self.E, self.ruined = 0.0, True
                     self.side, self.qty = 0, 0.0

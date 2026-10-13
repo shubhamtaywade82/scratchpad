@@ -25,6 +25,7 @@ from research.engine import (BARS_PER_YEAR, FEE, SLIP, Result, Risk, atr, donchi
                              supertrend_sig, tsmom_sig)
 
 MIN_TRADES = 3
+MIN_TRADES_BY_TF = {'15m': 15, '1h': 10, '4h': 6, '1d': 4}
 CUT = 0.6                                  # v4 split, used only for the comparison table
 WINDOWS = {                                # (train bars, test bars) per timeframe
     '15m': (1440, 720),                    # 15 d / 7.5 d
@@ -35,6 +36,14 @@ WINDOWS = {                                # (train bars, test bars) per timefra
 DON_N = {'15m': [48, 96, 192, 384], '1h': [24, 48, 72, 120], '4h': [20, 30, 40, 60, 80], '1d': [20, 40, 55, 80, 120]}
 TSMOM_L = {'15m': [96, 288, 672], '1h': [24, 72, 168], '4h': [30, 60, 120, 240], '1d': [20, 60, 120, 200]}
 HTF_FOR = {'15m': '1h', '1h': '4h'}        # intraday trend gate source
+
+
+def _score_config(m: dict) -> float:
+    """Robust selection score: penalizes low-sample variance spikes and requires positive return."""
+    if m['total'] <= 0 or m['pf'] < 1.0:
+        return -math.inf
+    trade_weight = math.sqrt(min(m['n'], 20) / 20.0)
+    return m['sharpe'] * trade_weight
 
 
 @dataclass
@@ -102,12 +111,15 @@ def block_bootstrap_sharpe(rets: List[float], bpy: int, B: int = 1000, L: int = 
 
 
 def _select_train_config(cfgs: List[Cfg], base, train: int, start: int, A, fund_t, fund_r, tf: str):
-    best = None
+    min_n = MIN_TRADES_BY_TF.get(tf, 6)
+    best, best_score = None, -math.inf
     for c in cfgs:
         r = simulate(base, c.sig, c.risk, max(1, start - train), start, A=A, fund_t=fund_t, fund_r=fund_r)
         m = metrics(r, tf)
-        if m['n'] >= MIN_TRADES and (best is None or m['sharpe'] > best[1]['sharpe']):
-            best = (c, m)
+        if m['n'] >= min_n:
+            score = _score_config(m)
+            if score > best_score:
+                best, best_score = (c, m), score
     return best
 
 
@@ -158,12 +170,15 @@ def fmt(m):
 
 
 def _find_is_best(base, cfgs: List[Cfg], n: int, tf: str, fund_t, fund_r):
-    best_full = None
+    min_n = MIN_TRADES_BY_TF.get(tf, 6)
+    best_full, best_score = None, -math.inf
     for c in cfgs:
         r = simulate(base, c.sig, c.risk, 1, n, A=atr(base, 14), fund_t=fund_t, fund_r=fund_r)
         mm = metrics(r, tf)
-        if mm['n'] >= MIN_TRADES and (best_full is None or mm['sharpe'] > best_full[1]['sharpe']):
-            best_full = (c, mm)
+        if mm['n'] >= min_n:
+            score = _score_config(mm)
+            if score > best_score:
+                best_full, best_score = (c, mm), score
     if best_full:
         print(f"[IS best, full sample, OPTIMISTIC] {best_full[0].name}: {fmt(best_full[1])}")
         g = metrics(simulate(base, best_full[0].sig, best_full[0].risk, 1, n, A=atr(base, 14), fee=0.0, slip=0.0), tf)

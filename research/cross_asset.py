@@ -34,16 +34,30 @@ COST = 0.0008        # per side
 CONFIGS = {'1h': dict(train=2160, test=720, bpy=8760), '15m': dict(train=2880, test=1440, bpy=35040)}
 
 
+def _validate_and_extract_closes(rows: list, step_ms: int, inst: str) -> dict:
+    rows = sorted(rows, key=lambda r: r['t'])
+    ts = [int(r['t']) for r in rows]
+    for a, b in zip(ts, ts[1:]):
+        if b - a != step_ms:
+            raise ValueError(f"{inst}: non-contiguous bar delta {b - a} != {step_ms} at {a}")
+    return {r['t']: float(r['c']) for r in rows}
+
+
 def load(tf: str):
+    step = 3_600_000 if tf == '1h' else 900_000
     def closes(inst):
-        rows = json.load(open(f'data/okx/{inst}-{"1H" if tf == "1h" else "15m"}.json'))['rows']
-        return {r['t']: r['c'] for r in rows}
+        with open(f'data/okx/{inst}-{"1H" if tf == "1h" else "15m"}.json') as f:
+            rows = json.load(f)['rows']
+        return _validate_and_extract_closes(rows, step, inst)
     s = closes('SOL-USDT-SWAP')
     b = closes('BTC-USDT-SWAP')
     e = closes('ETH-USDT-SWAP')
     common = sorted(set(s) & set(b) & set(e))
     if tf == '15m':
         common = [t for t in common if t >= 1743465600000]          # from 2025-04-01
+    for a, b in zip(common, common[1:]):
+        if b - a != step:
+            raise ValueError(f"aligned cross-asset gap: delta {b - a} != {step} between {a} and {b}")
     ls = np.log([s[t] for t in common])
     lb = np.log([b[t] for t in common])
     le = np.log([e[t] for t in common])

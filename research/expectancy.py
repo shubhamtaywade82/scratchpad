@@ -42,11 +42,27 @@ def win_rate_note(lo, hi):
 
 
 def mean_ci(rets, B=10000, seed=3):
-    """Bootstrap 95% CI of the mean per-position return. Positions are resampled with replacement. The expectancy
-    E = p*W - (1-p)*L equals this mean exactly, so the interval is a CI on E itself."""
+    """IID Bootstrap 95% CI of the mean per-position return. Positions are resampled with replacement."""
     n = len(rets)
     rnd = random.Random(seed)
     means = sorted(sum(rnd.choice(rets) for _ in range(n)) / n for _ in range(B))
+    return means[int(0.025 * B)], means[int(0.975 * B)]
+
+
+def block_mean_ci(rets, block_size=4, B=10000, seed=3):
+    """Block bootstrap 95% CI preserving trade clustering and serial dependence."""
+    n = len(rets)
+    if n < block_size:
+        return mean_ci(rets, B=B, seed=seed)
+    rnd = random.Random(seed)
+    means = []
+    for _ in range(B):
+        sample = []
+        while len(sample) < n:
+            start = rnd.randint(0, n - block_size)
+            sample.extend(rets[start:start + block_size])
+        means.append(sum(sample[:n]) / n)
+    means.sort()
     return means[int(0.025 * B)], means[int(0.975 * B)]
 
 
@@ -62,7 +78,9 @@ def summarise(name, rets):
     print(f"{name:<34} positions {n:>3}  win rate {p * 100:5.1f}% (95% CI {lo * 100:4.1f}-{hi * 100:4.1f}%)  "
           f"avg win {W * 100:+.2f}%  avg loss {L * 100:.2f}%  expectancy {E * 100:+.3f}%/position")
     clo, chi = mean_ci(rets)
-    print(f"   expectancy 95% bootstrap CI {clo * 100:+.3f}% .. {chi * 100:+.3f}%  ({'excludes' if clo > 0 or chi < 0 else 'includes'} 0)")
+    blo, bhi = block_mean_ci(rets, block_size=4)
+    print(f"   IID bootstrap 95% CI   {clo * 100:+.3f}% .. {chi * 100:+.3f}%  ({'excludes' if clo > 0 or chi < 0 else 'includes'} 0)")
+    print(f"   Block bootstrap 95% CI {blo * 100:+.3f}% .. {bhi * 100:+.3f}%  ({'excludes' if blo > 0 or bhi < 0 else 'includes'} 0)")
     print("   " + win_rate_note(lo, hi))
 
 
