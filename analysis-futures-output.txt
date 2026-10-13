@@ -1,0 +1,54 @@
+========================================================================
+SOLUSDT USD-M PERPETUAL FUTURES — LONG & SHORT ANALYSIS
+bars=1500  2022-09-05 -> 2026-10-13  last close=106.59
+========================================================================
+
+-- FUNDING (every 8h, 4575 observations) --
+median 0.0046% (5.0% APR ann.) | mean -0.0051% (-5.6% APR)
+positive funding share: 67% | p20 -0.0048% | p80 0.0100% | min -2.0000% max 0.1193%
+last 30d: median 0.0033% (3.6% APR), current premiumIndex-based last rate 0.0032%
+LIVE: mark=106.6000 index=106.6621 nextFundingRate=-0.0064% | OI=8539376 SOL ($910.3M) | 24h vol=$2625M chg=-4.7%
+
+-- FUNDING AS CONTRARIAN SIGNAL (daily-sum funding vs forward return) --
+long-crowded (funding >= p80) -> fwd  3d: mean  +0.86%  win +50%  (n=370)
+long-crowded (funding >= p80) -> fwd  7d: mean  +1.93%  win +49%  (n=370)
+long-crowded (funding >= p80) -> fwd 14d: mean  +3.20%  win +48%  (n=370)
+long-crowded (funding >= p80) -> fwd 30d: mean +10.04%  win +53%  (n=367)
+short-crowded (funding <= p20) -> fwd  3d: mean  +1.03%  win +53%  (n=255)
+short-crowded (funding <= p20) -> fwd  7d: mean  +2.05%  win +52%  (n=255)
+short-crowded (funding <= p20) -> fwd 14d: mean  +6.60%  win +57%  (n=255)
+short-crowded (funding <= p20) -> fwd 30d: mean +15.46%  win +57%  (n=255)
+deep negative (funding < -0.05%/8h avg) -> fwd  3d: mean  +2.56%  win +48%  (n=33)
+deep negative (funding < -0.05%/8h avg) -> fwd  7d: mean  +5.27%  win +55%  (n=33)
+deep negative (funding < -0.05%/8h avg) -> fwd 14d: mean +22.80%  win +58%  (n=33)
+deep negative (funding < -0.05%/8h avg) -> fwd 30d: mean +24.82%  win +42%  (n=33)
+
+-- BACKTESTS (signal@close t -> hold t->t+1, fee 0.07%/side, funding included) --
+no-trade (cash)                                tot      +0% CAGR   +0.0% MDD    0.0% Sharpe  0.00 trades    0
+buy & hold 1x long                             tot    +313% CAGR  +41.3% MDD  -76.0% Sharpe  0.83 trades    1
+hold 1x short (static)                         tot    -100% CAGR  -72.6% MDD  -99.8% Sharpe -0.83 trades    1
+regime gate: long >SMA200 / short <SMA200      tot      -8% CAGR   -2.0% MDD  -86.8% Sharpe  0.35 trades   40
+   same, WITHOUT funding (sanity)              tot     +12% CAGR   +2.8% MDD  -85.9% Sharpe  0.41 trades   40
+EMA20/200 cross long/short                     tot     -95% CAGR  -51.8% MDD  -98.4% Sharpe -0.24 trades   24
+MACD hist sign long/short                      tot     -44% CAGR  -13.2% MDD  -85.1% Sharpe  0.38 trades  107
+RSI mean-revert LS (<30 long, >70 short)       tot     -61% CAGR  -20.6% MDD  -81.5% Sharpe -0.22 trades   36
+funding contrarian (deep-neg->long, hot->short) tot     +31% CAGR   +6.7% MDD  -46.0% Sharpe  0.36 trades   14
+regime gate, half-size when crowded            tot     -81% CAGR  -33.4% MDD  -94.3% Sharpe  0.10 trades   44
+vol-target 40% + SMA200 gate, LS               tot     +26% CAGR   +5.7% MDD  -58.1% Sharpe  0.34 trades 1297
+short-only: <SMA200 & 30d mom <-10%            tot     -55% CAGR  -17.7% MDD  -61.5% Sharpe -0.34 trades   32
+long-only gate (v2 best, w/ funding)           tot    +203% CAGR  +31.0% MDD  -60.3% Sharpe  0.75 trades   20
+
+-- WHERE THE RETURN COMES FROM (regime gate LS) --
+long days: 705 contribution +204% | short days: 794 contribution -95%
+
+-- YEARLY: buy&hold vs LS-regime-gate (approx, close-to-close) --
+2022: B&H    -69.0%   LS-gate    +34.0%
+2023: B&H  +1003.0%   LS-gate    -25.5%
+2024: B&H    +76.5%   LS-gate    -51.5%
+2025: B&H    -34.7%   LS-gate    -31.1%
+2026: B&H    -16.0%   LS-gate    +43.9%
+
+-- OPEN INTEREST & CROWD (last ~30d, Binance history limit) --
+OI value now $911M | 30d change -5.2% | 30d range $882M–$1078M
+top-trader POSITION L/S: 2.24 (latest) avg30d 2.22
+top-trader ACCOUNT L/S: 2.71 | global ACCOUNT L/S: 2.36 | taker buy/sell: 0.94
