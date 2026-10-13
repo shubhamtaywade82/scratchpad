@@ -4,7 +4,7 @@ Instrument: Binance USD-M SOLUSDT perpetual, isolated margin. Data: kline OHLCV 
 
 ## 1. Direct decision
 
-1. **Intraday lead (1h): aggressor-absorption, paper-trade only.** Long when the volume-weighted taker imbalance over 6 bars is at least 2σ below its trailing 100-bar mean and the bar closes up (sellers hit the bid and got absorbed). Short is the mirror. Hold 4 bars. Initial stop 3×ATR(14). Risk 1% of equity per trade. Margin ceiling 10×. Evidence is real but thin: 22 out-of-sample trades, walk-forward +4.3%, 4/5 folds positive, and it survives both null checks (section 3c). Its trades are 16 long and 6 short, so it is long-biased.
+1. **Intraday lead (1h): aggressor-absorption, paper-trade only.** Long when the volume-weighted taker imbalance over 6 bars is at least 2σ below its trailing 100-bar mean and the bar closes up (sellers hit the bid and got absorbed). Short is the mirror. Hold 4 bars. Initial stop 3×ATR(14). Risk 1% of equity per trade. Margin ceiling 10×. Evidence is real but thin: 22 out-of-sample trades, walk-forward +4.3%, 4/5 folds positive, and it behaves like a directional signal under both null checks (section 3c). Its trades are 16 long and 6 short, so it is long-biased.
 2. **Swing lead (4h): aggressor-absorption as a second, paper-only candidate** (m=18, 2σ, hold 4 bars, 3×ATR stop, 1% risk). Walk-forward +3.9% at 10×, Sharpe 1.86, MDD −1.7%, 24 trades. Keep the v5 Donchian(40)+EMA200 candidate as the primary swing system; it is the only design with a stable parameter plateau.
 3. **Dropped:** liquidity-sweep fade, variance-ratio regime switching, and the 2-state Gaussian HMM. All three have negative breadth on every timeframe.
 4. **No 15m setup qualifies.**
@@ -51,14 +51,16 @@ The 1h figure is the lead's screen configuration. The 2-ATR row is shown for the
 
 ### 3c. Null checks (`research/results/nulltest.txt`)
 
-If the result were not directional, flipping the sign or shifting the signal in time would leave it positive.
+If the result were not directional, flipping the sign or delaying the signal would leave it positive.
 
-| Lead | Original | Direction flipped | Shift −12 / −6 / +6 / +12 bars |
-|---|---|---|---|
-| 1h taker-absorb m6 z2 T4 | +4.3% (Sh +3.82) | −6.5% (Sh −6.43) | −0.2% / −9.1% / −3.1% / −1.2% |
-| 4h taker-absorb m18 z2 T4 | +3.9% (Sh +1.86) | −4.2% (Sh −2.01) | −9.2% / −7.4% / −2.2% / −2.1% |
+| Lead | Original | Direction flipped | Delayed 6 bars | Delayed 12 bars |
+|---|---|---|---|---|
+| 1h taker-absorb m6 z2 T4 | +4.3% (Sh +3.82) | −6.5% (Sh −6.43) | −3.1% (Sh −2.17) | −1.2% (Sh −1.41) |
+| 4h taker-absorb m18 z2 T4 | +3.9% (Sh +1.86) | −4.2% (Sh −2.01) | −2.2% (Sh −0.93) | −2.1% (Sh −0.98) |
 
-Both leads pass: the effect depends on direction and timing. The shifted runs are the same signal, delayed or advanced. Flipping direction turns it negative, which is the evidence that the signal carries directional information. The sample is still small.
+Both leads fail the nulls. Flipping direction turns the result negative, and any delay does too. This is evidence that the signal carries directional information. It is not evidence of a profitable edge: the sample is still small.
+
+**Correction:** an earlier version of this table reported "advanced" (negative-shift) runs. Those read future bars, so they were invalid and are removed. The nulls now use causal delays only (`engine.delay_sig` rejects negative delays).
 
 ### 3d. Leverage geometry (`research/results/leverage.txt`)
 
@@ -102,7 +104,7 @@ For a 1% risk and a 3-ATR stop on 4h (stop ≈ 6%), effective leverage is about 
 - `research/engine.py`: causal simulator, now with isolated-margin liquidation, leverage-dependent entry buffer, structural stops, ruin floor, and one-attempt-per-episode entries. Invariants 1–9 are documented at the top.
 - `research/ideas.py`: sweep fade, taker imbalance (continuation and absorption), variance-ratio regime, 2-state Gaussian HMM with fold-wise fit and causal filter, and the screen.
 - `research/leverage.py`: liquidation geometry, leverage × sizing grid with block-bootstrap drawdown distribution.
-- `research/nulltest.py`: direction-flip and time-shift nulls for the taker leads.
+- `research/nulltest.py`: direction-flip and causal-delay nulls for the taker leads.
 - `research/test_engine.py`: 36 tests, including liquidation, gap liquidation, buffer skip, structural stop size and side, ruin, the HMM filter, and the sweep and taker definitions.
 - Regression against v5: the 4h, 1h and 15m walk-forward, the fixed-design and the sensitivity outputs are byte-identical to the v5 results. Only the 1d walk-forward changed (correction above).
 
@@ -126,7 +128,7 @@ python3 -m research.leverage                         # research/results/leverage
 python3 -m research.nulltest                         # research/results/nulltest.txt
 ```
 
-Expected: the 1h absorption cell `taker-absorb m6 z2.0 T4` reads `WF tot +4.3%  Sh +3.82  n 22` at 5×/3-ATR. Flipped-direction and shifted runs are negative in `nulltest.txt`.
+Expected: the 1h absorption cell `taker-absorb m6 z2.0 T4` reads `WF tot +4.3%  Sh +3.82  n 22` at 5×/3-ATR. Flipped-direction and delayed runs are negative in `nulltest.txt`.
 
 ## 6. Next steps
 

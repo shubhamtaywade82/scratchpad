@@ -335,5 +335,68 @@ class Ideas(unittest.TestCase):
             self.assertAlmostEqual(sum(p), 1.0, 9)
 
 
+class AdaptiveST(unittest.TestCase):
+    @staticmethod
+    def _random_bars(n, seed):
+        import random
+        rnd = random.Random(seed)
+        c = 100.0
+        ohlc = []
+        for _ in range(n):
+            o = c
+            c = max(1.0, c * (1 + rnd.gauss(0, 0.01)))
+            h = max(o, c) * (1 + abs(rnd.gauss(0, 0.004)))
+            l = min(o, c) * (1 - abs(rnd.gauss(0, 0.004)))
+            ohlc.append((o, h, l, c))
+        return bars(ohlc)
+
+    @staticmethod
+    def _truncate(s, m):
+        return Series(s.tf, s.t[:m], s.o[:m], s.h[:m], s.l[:m], s.c[:m])
+
+    def test_dynamic_supertrend_with_constant_multiplier_matches_engine(self):
+        from research.adaptive_st import supertrend_dyn
+        from research.engine import atr, supertrend_sig
+        s = self._random_bars(300, 1)
+        A = atr(s, 10)
+        dyn = supertrend_dyn(s, A, [3.0] * len(s))
+        self.assertEqual(dyn, supertrend_sig(s, 10, 3.0))
+
+    def test_vol_adaptive_is_causal(self):
+        from research.adaptive_st import vol_adaptive_st_sig
+        s = self._random_bars(400, 2)
+        full = vol_adaptive_st_sig(s, 10, 50, 2.0, 4.0)
+        m = 250
+        part = vol_adaptive_st_sig(self._truncate(s, m), 10, 50, 2.0, 4.0)
+        self.assertEqual(full[:m], part)            # future bars must not change any past signal
+
+    def test_perf_adaptive_is_causal(self):
+        from research.adaptive_st import perf_adaptive_st_sig
+        s = self._random_bars(400, 3)
+        full = perf_adaptive_st_sig(s, 10, 20)
+        m = 250
+        part = perf_adaptive_st_sig(self._truncate(s, m), 10, 20)
+        self.assertEqual(full[:m], part)
+
+    def test_perf_adaptive_follows_the_only_instance_that_is_right(self):
+        # strictly rising closes: long direction wins for every multiplier; the chosen signal must be +1 after warm-up
+        from research.adaptive_st import perf_adaptive_st_sig
+        ohlc = [(100 + i, 100 + i + 0.5, 100 + i - 0.5, 100 + i + 0.2) for i in range(60)]
+        sig = perf_adaptive_st_sig(bars(ohlc), 10, 20)
+        self.assertTrue(all(v == 1 for v in sig[30:]))
+
+
+class DelaySig(unittest.TestCase):
+    def test_delay_shifts_forward_and_zero_fills(self):
+        from research.engine import delay_sig
+        self.assertEqual(delay_sig([1, 2, 3, 4], 2), [0, 0, 1, 2])
+        self.assertEqual(delay_sig([1, 2, 3], 0), [1, 2, 3])
+
+    def test_negative_delay_is_rejected(self):
+        from research.engine import delay_sig
+        with self.assertRaises(ValueError):
+            delay_sig([1, 2, 3], -1)
+
+
 if __name__ == '__main__':
     unittest.main()

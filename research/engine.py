@@ -444,3 +444,11 @@ def tsmom_sig(s: Series, lookback: int) -> List[int]:
         d = s.c[k] - s.c[k - lookback]
         out[k] = 1 if d > 0 else (-1 if d < 0 else 0)
     return out
+
+
+def delay_sig(sig: List[int], d: int) -> List[int]:
+    """Signal delayed by d >= 0 bars: out[k] = sig[k - d]. Used for timing nulls. Advancing a signal
+    (negative d) would read future bars, so it is rejected."""
+    if d < 0:
+        raise ValueError("delay must be >= 0: a negative delay reads future bars")
+    return [0] * d + list(sig[:len(sig) - d]) if d else list(sig)
