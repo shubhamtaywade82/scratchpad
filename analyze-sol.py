@@ -3,7 +3,7 @@
 import json, math, statistics as st
 from datetime import datetime, timezone
 
-with open('/workspace/data/SOLUSDT-klines.json') as f:
+with open('data/SOLUSDT-klines.json') as f:
     blob = json.load(f)
 
 def load(iv):
