@@ -1,0 +1,27 @@
+
+==================== 1d: 1500 bars, adaptive Supertrend vs fixed, 1x, risk 1%, stop 3 ATR ====================
+fixed  p10 x3.0        WF tot   +19.9%  Sh +0.77  MDD  -13.7%  n  31  WR 41.9%  PF 2.74  L/S 15/16  stops  6 liq 0 skip   0  boot -0.19/+0.76/+1.65  folds+ 3/6
+fixed  p20 x3.0        WF tot   +14.6%  Sh +0.69  MDD  -13.3%  n  33  WR 39.4%  PF 2.15  L/S 17/16  stops  7 liq 0 skip   0  boot -0.38/+0.66/+1.66  folds+ 4/6
+fixed  p10 x2.0        WF tot   +16.4%  Sh +0.80  MDD  -13.9%  n  53  WR 39.6%  PF 2.09  L/S 27/26  stops  5 liq 0 skip   0  boot -0.22/+0.76/+1.70  folds+ 3/6
+fixed  p10 x4.0        WF tot   +17.2%  Sh +0.71  MDD  -11.6%  n  25  WR 24.0%  PF 2.51  L/S 12/13  stops 11 liq 0 skip   0  boot -0.29/+0.68/+1.63  folds+ 2/6
+vol    p10 L100 2.0-4.0 WF tot   +18.2%  Sh +0.68  MDD  -14.9%  n  39  WR 33.3%  PF 2.23  L/S 19/20  stops  9 liq 0 skip   0  boot -0.31/+0.66/+1.57  folds+ 2/6
+vol    p10 L100 1.5-4.0 WF tot   +16.2%  Sh +0.73  MDD  -13.9%  n  43  WR 39.5%  PF 2.21  L/S 21/22  stops  5 liq 0 skip   0  boot -0.23/+0.71/+1.65  folds+ 3/6
+vol    p10 L200 2.0-4.0 WF tot   +19.1%  Sh +0.71  MDD  -14.4%  n  39  WR 35.9%  PF 2.35  L/S 19/20  stops  9 liq 0 skip   0  boot -0.29/+0.70/+1.60  folds+ 2/6
+vol    p10 L200 1.5-4.0 WF tot   +18.9%  Sh +0.82  MDD  -10.2%  n  45  WR 37.8%  PF 2.34  L/S 22/23  stops  7 liq 0 skip   0  boot -0.13/+0.78/+1.71  folds+ 3/6
+vol    p20 L100 2.0-4.0 WF tot    +7.7%  Sh +0.43  MDD  -16.6%  n  39  WR 33.3%  PF 1.53  L/S 19/20  stops 10 liq 0 skip   0  boot -0.63/+0.40/+1.36  folds+ 3/6
+vol    p20 L100 1.5-4.0 WF tot   +14.8%  Sh +0.73  MDD  -13.7%  n  43  WR 37.2%  PF 1.95  L/S 21/22  stops  8 liq 0 skip   0  boot -0.24/+0.70/+1.63  folds+ 3/6
+vol    p20 L200 2.0-4.0 WF tot   +10.4%  Sh +0.57  MDD  -13.7%  n  39  WR 35.9%  PF 1.75  L/S 19/20  stops 10 liq 0 skip   0  boot -0.46/+0.54/+1.46  folds+ 4/6
+vol    p20 L200 1.5-4.0 WF tot   +15.9%  Sh +0.78  MDD  -13.7%  n  45  WR 35.6%  PF 1.97  L/S 22/23  stops  7 liq 0 skip   0  boot -0.19/+0.75/+1.70  folds+ 3/6
+perf   p10 W20         WF tot   +19.4%  Sh +0.88  MDD  -12.8%  n 106  WR 22.6%  PF 2.08  L/S 53/53  stops  1 liq 0 skip   0  boot -0.17/+0.84/+1.79  folds+ 3/6
+perf   p10 W50         WF tot   +16.4%  Sh +0.78  MDD  -13.8%  n  86  WR 22.1%  PF 1.94  L/S 43/43  stops  2 liq 0 skip   0  boot -0.24/+0.74/+1.72  folds+ 3/6
+perf   p10 W100        WF tot   +17.9%  Sh +0.84  MDD  -12.5%  n  69  WR 26.1%  PF 2.10  L/S 34/35  stops  3 liq 0 skip   0  boot -0.19/+0.81/+1.75  folds+ 4/6
+perf   p20 W20         WF tot    +9.9%  Sh +0.50  MDD  -16.1%  n 116  WR 18.1%  PF 1.47  L/S 58/58  stops  3 liq 0 skip   0  boot -0.54/+0.47/+1.49  folds+ 3/6
+perf   p20 W50         WF tot    +7.8%  Sh +0.41  MDD  -17.7%  n  94  WR 17.0%  PF 1.42  L/S 47/47  stops  4 liq 0 skip   0  boot -0.70/+0.36/+1.37  folds+ 3/6
+perf   p20 W100        WF tot   +10.9%  Sh +0.55  MDD  -16.9%  n  64  WR 23.4%  PF 1.62  L/S 32/32  stops  5 liq 0 skip   0  boot -0.51/+0.52/+1.51  folds+ 3/6
+-- family summary (WF OOS)
+   fixed  positive 4/4  median Sh +0.74  median tot +16.8%
+   vol    positive 8/8  median Sh +0.72  median tot +16.0%
+   perf   positive 6/6  median Sh +0.66  median tot +13.6%
+-- direction-flip null (adaptive cells)
+   vol    flipped positive 2/8  median tot -4.1%
+   perf   flipped positive 3/6  median tot -0.4%

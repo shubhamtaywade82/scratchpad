@@ -1,0 +1,18 @@
+
+==================== 1h: 2600 bars, web strategies, 5x, risk 1%, stop 3 ATR ====================
+ST p10 x3 ungated              WF tot    +6.6%  Sh +1.31  MDD  -13.8%  n  49  L/S 25/24  stops 10 liq 0 skip   0  folds+ 1/5  flipped   -6.3%
+ST p10 x3 + ADX>20             WF tot    +8.4%  Sh +1.66  MDD  -12.5%  n  43  L/S 20/23  stops 10 liq 0 skip   0  folds+ 1/5  flipped   -4.6%
+ST p10 x3 + ADX>25             WF tot    +3.8%  Sh +0.92  MDD  -11.7%  n  36  L/S 19/17  stops  8 liq 0 skip   0  folds+ 2/5  flipped   -8.9%
+vol-adaptive p20 L100 1.5-4 ungated WF tot   +16.7%  Sh +2.88  MDD   -9.1%  n  56  L/S 27/29  stops  7 liq 0 skip   0  folds+ 4/5  flipped  -12.2%
+vol-adaptive p20 L100 1.5-4 + ADX>20 WF tot   +15.4%  Sh +2.80  MDD  -11.4%  n  46  L/S 20/26  stops  6 liq 0 skip   0  folds+ 4/5  flipped   -3.2%
+vol-adaptive p20 L100 1.5-4 + ADX>25 WF tot   +17.6%  Sh +3.30  MDD  -10.0%  n  37  L/S 16/21  stops  4 liq 0 skip   0  folds+ 4/5  flipped   -9.0%
+squeeze BB2 KC1.5              WF tot    +3.0%  Sh +0.87  MDD   -7.9%  n  45  L/S 26/19  stops  5 liq 0 skip   0  folds+ 3/5  flipped   +0.5%
+squeeze BB2 KC2                WF tot    +5.4%  Sh +1.42  MDD   -8.3%  n  46  L/S 24/22  stops  4 liq 0 skip   0  folds+ 3/5  flipped   +1.3%
+TSMOM short L6                 WF tot   -28.1%  Sh -6.61  MDD  -30.5%  n 395  L/S 197/198  stops  8 liq 0 skip   0  folds+ 1/5  flipped  -23.2%
+TSMOM short L12                WF tot    -9.3%  Sh -1.83  MDD  -15.6%  n 262  L/S 130/132  stops  4 liq 0 skip   0  folds+ 1/5  flipped  -23.2%
+TSMOM short L24                WF tot    +2.8%  Sh +0.63  MDD  -15.2%  n 157  L/S 79/78  stops  0 liq 0 skip   0  folds+ 3/5  flipped  -23.3%
+-- breadth: 9/11 cells positive WF OOS; median Sh +1.31
+   base     positive 2/2  median Sh +2.10  median tot +11.7%  flipped positive 0/2
+   adx      positive 4/4  median Sh +2.23  median tot +11.9%  flipped positive 0/4
+   squeeze  positive 2/2  median Sh +1.15  median tot +4.2%  flipped positive 2/2
+   tsmom    positive 1/3  median Sh -1.83  median tot -9.3%  flipped positive 0/3

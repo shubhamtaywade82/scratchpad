@@ -1,0 +1,10 @@
+aligned hourly bars: 41909 from 2022-01-01 to 2026-10-13
+==================== SOL/AVAX pair, walk-forward, Engle-Granger gated ====================
+
+1h: train 2160 / test 720 bars, 55 folds, cointegrated in 13
+   WF total -20.27%   Sharpe -0.71   MDD -22.84%   trades 14
+   folds with trades: 10; per-fold returns: +0.00% -2.47% -8.08% +0.11% -7.53% +0.00% +2.05% -3.21% -0.47% +0.00% +3.42% -1.66% -3.92%
+
+1d: train 365 / test 91 bars, 15 folds, cointegrated in 0
+   WF total +0.00%   Sharpe +nan   MDD 0.00%   trades 0
+   folds with trades: 0; per-fold returns: 

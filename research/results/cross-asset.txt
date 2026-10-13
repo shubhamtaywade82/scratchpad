@@ -1,0 +1,33 @@
+
+1h: 41909 aligned bars
+
+==================== cross-asset return prediction, SOL, 1h ====================
+features    k    OOS R2       net  Sh net      MDD    RT   RT win    RT win 95% CI  in mkt
+OWN       0.0   -0.174%   -100.0%   -4.70  -100.0% 15369    45.8%   45.0 ..  46.6%  100.0%
+OWN       0.5   -0.174%     +3.7%   +0.13   -27.8%    51    45.1%   32.3 ..  58.6%    0.1%
+CROSS     0.0   -0.497%   -100.0%   -5.70  -100.0% 17302    44.2%   43.5 ..  45.0%  100.0%
+CROSS     0.5   -0.497%    +38.7%   +0.80    -9.6%    72    58.3%   46.8 ..  69.0%    0.2%
+MARKET    0.0   -0.248%   -100.0%   -4.01  -100.0% 15115    46.6%   45.8 ..  47.4%  100.0%
+MARKET    0.5   -0.248%    +22.3%   +0.60    -6.7%    38    63.2%   47.3 ..  76.6%    0.1%
+ALL       0.0   -0.567%   -100.0%   -5.55  -100.0% 18710    43.6%   42.9 ..  44.3%  100.0%
+ALL       0.5   -0.567%    +29.1%   +0.39   -29.8%   136    59.6%   51.2 ..  67.4%    0.4%
+
+--- 1h: threshold sweep (k), total net return and Sharpe
+features k=0.25  k=0.5   k=0.75  k=1.0 
+CROSS     -55.1% -0.55   +38.7% +0.80   +11.1% +0.49    +8.5% +0.73
+MARKET    +13.5% +0.24   +22.3% +0.60    +4.9% +0.33   +10.0% +0.82
+
+--- 1h: nulls and costs at k=0.5 (net total return / Sharpe)
+features           causal        flip sign          delay 1          delay 2
+CROSS         +38.7% +0.80     -45.1% -1.31     -18.2% -0.44      -9.4% -0.25
+MARKET        +22.3% +0.60     -29.7% -0.92     -12.2% -0.37      -4.7% -0.21
+
+--- 1h: cost sensitivity at k=0.5, causal (net total return / Sharpe)
+CROSS     0 bps:  +55.6% +1.06    4 bps:  +46.9% +0.93    8 bps:  +38.7% +0.80   12 bps:  +30.9% +0.67
+MARKET    0 bps:  +29.9% +0.76    4 bps:  +26.1% +0.68    8 bps:  +22.3% +0.60   12 bps:  +18.6% +0.52
+
+--- 1h: CROSS k=0.5 causal, detail
+   round trips 72, winners 42, folds positive 15 of 55
+   block bootstrap (1-day blocks, 2000 draws): total -3.8% .. +106.3%,  Sharpe -0.04 .. +1.66
+   best 3 folds: +11.7% +8.4% +5.4%; total without them: +8.7%
+15m: data missing (data/okx/SOL-USDT-SWAP-15m.json); skipped

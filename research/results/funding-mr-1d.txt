@@ -1,0 +1,12 @@
+
+==================== funding mean reversion (directional), 1d, 1x, 1% risk, 3-ATR stop ====================
+cell                         WF tot     Sh     MDD    n     L/S folds+  flipped
+stdev z N90 thr2              -0.5%  -0.10   -2.9%   38 29/9     2/6       -0.9%
+stdev z N90 thr2.5            +2.2%  +0.52   -2.2%   28 19/9     5/6       -3.1%
+stdev z N270 thr2             +0.4%  +0.08   -4.3%   40 29/11    3/6       -1.6%
+stdev z N270 thr2.5           +0.0%  +0.01   -3.3%   25 17/8     3/6       -1.1%
+robust z N90 thr2             +1.2%  +0.26   -2.4%   49 41/8     3/6       -3.9%
+robust z N90 thr2.5           +1.9%  +0.42   -2.5%   39 31/8     4/6       -4.1%
+robust z N270 thr2            +1.0%  +0.16   -4.5%   55 45/10    3/6       -2.1%
+robust z N270 thr2.5          +2.1%  +0.35   -2.6%   42 32/10    4/6       -3.1%
+-- 7/8 cells positive WF OOS; flipped positive 0/8

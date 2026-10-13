@@ -1,0 +1,58 @@
+==================== 4h Donchian(40) + EMA200 scale-out grid | 5x, risk 1%, initial stop 3 ATR ====================
+variant                                          WF tot     Sh     MDD  Calmar  pos  win%  meanR folds+
+BASELINE stop + signal flip                      +10.1%  +1.28   -6.1%   +1.67   29   31%  +0.39   3/5
+scale 25% at 1R                                   +7.0%  +1.07   -5.6%   +1.24   29   31%  +0.28   3/5
+scale 25% at 1R, trail 3 after 1R                 +4.2%  +0.77   -4.8%   +0.89   29   31%  +0.18   3/5
+scale 25% at 1R, BE 1R                            +6.6%  +1.02   -5.6%   +1.18   29   31%  +0.27   3/5
+scale 25% at 1R, BE 1R, trail 3 after 1R          +4.3%  +0.79   -4.8%   +0.90   29   31%  +0.18   3/5
+scale 50% at 1R                                   +3.8%  +0.73   -5.2%   +0.75   29   31%  +0.17   3/5
+scale 50% at 1R, trail 3 after 1R                 +2.0%  +0.44   -4.5%   +0.45   29   31%  +0.10   3/5
+scale 50% at 1R, BE 1R                            +3.6%  +0.69   -5.2%   +0.70   29   31%  +0.16   3/5
+scale 50% at 1R, BE 1R, trail 3 after 1R          +2.1%  +0.45   -4.5%   +0.46   29   31%  +0.10   3/5
+scale 75% at 1R                                   +0.8%  +0.19   -4.7%   +0.16   29   31%  +0.05   3/5
+scale 75% at 1R, trail 3 after 1R                 -0.2%  -0.01   -4.2%   -0.04   29   31%  +0.02   3/5
+scale 75% at 1R, BE 1R                            +0.6%  +0.17   -4.7%   +0.14   29   31%  +0.05   3/5
+scale 75% at 1R, BE 1R, trail 3 after 1R          -0.1%  -0.00   -4.2%   -0.03   29   31%  +0.02   3/5
+scale 25% at 1.5R                                 +7.1%  +1.07   -5.7%   +1.26   29   31%  +0.28   3/5
+scale 25% at 1.5R, trail 3 after 1R               +4.2%  +0.74   -4.9%   +0.85   29   28%  +0.18   3/5
+scale 25% at 1.5R, BE 1R                          +6.8%  +1.02   -5.7%   +1.19   29   28%  +0.27   3/5
+scale 25% at 1.5R, BE 1R, trail 3 after 1R        +4.3%  +0.76   -4.9%   +0.87   29   28%  +0.18   3/5
+scale 50% at 1.5R                                 +4.2%  +0.75   -5.3%   +0.79   29   31%  +0.18   3/5
+scale 50% at 1.5R, trail 3 after 1R               +1.9%  +0.40   -4.7%   +0.41   29   28%  +0.10   3/5
+scale 50% at 1.5R, BE 1R                          +3.9%  +0.71   -5.3%   +0.74   29   28%  +0.17   3/5
+scale 50% at 1.5R, BE 1R, trail 3 after 1R        +2.0%  +0.42   -4.7%   +0.43   29   28%  +0.10   3/5
+scale 75% at 1.5R                                 +1.3%  +0.28   -5.0%   +0.25   29   31%  +0.07   3/5
+scale 75% at 1.5R, trail 3 after 1R               -0.3%  -0.03   -5.0%   -0.06   29   28%  +0.02   3/5
+scale 75% at 1.5R, BE 1R                          +1.1%  +0.25   -5.0%   +0.22   29   28%  +0.07   3/5
+scale 75% at 1.5R, BE 1R, trail 3 after 1R        -0.2%  -0.01   -5.0%   -0.04   29   28%  +0.02   3/5
+scale 25% at 2R                                   +7.5%  +1.10   -5.6%   +1.33   29   31%  +0.30   3/5
+scale 25% at 2R, trail 3 after 1R                 +4.4%  +0.77   -4.9%   +0.90   29   28%  +0.19   3/5
+scale 25% at 2R, BE 1R                            +7.0%  +1.04   -5.6%   +1.24   29   24%  +0.28   3/5
+scale 25% at 2R, BE 1R, trail 3 after 1R          +4.5%  +0.79   -4.9%   +0.92   29   28%  +0.19   3/5
+scale 50% at 2R                                   +4.9%  +0.83   -5.3%   +0.92   29   31%  +0.20   3/5
+scale 50% at 2R, trail 3 after 1R                 +2.4%  +0.47   -5.0%   +0.48   29   28%  +0.11   3/5
+scale 50% at 2R, BE 1R                            +4.4%  +0.76   -5.3%   +0.83   29   24%  +0.19   3/5
+scale 50% at 2R, BE 1R, trail 3 after 1R          +2.5%  +0.49   -4.9%   +0.51   29   28%  +0.12   3/5
+scale 75% at 2R                                   +2.3%  +0.45   -5.0%   +0.46   29   31%  +0.11   3/5
+scale 75% at 2R, trail 3 after 1R                 +0.4%  +0.11   -5.4%   +0.07   29   28%  +0.04   3/5
+scale 75% at 2R, BE 1R                            +1.8%  +0.37   -5.0%   +0.37   29   24%  +0.09   3/5
+scale 75% at 2R, BE 1R, trail 3 after 1R          +0.5%  +0.13   -5.3%   +0.09   29   28%  +0.05   3/5
+scale 25% at 3R                                   +8.3%  +1.20   -5.6%   +1.47   29   31%  +0.32   3/5
+scale 25% at 3R, trail 3 after 1R                 +5.4%  +0.92   -4.9%   +1.11   29   28%  +0.22   3/5
+scale 25% at 3R, BE 1R                            +7.8%  +1.14   -5.6%   +1.38   29   24%  +0.31   3/5
+scale 25% at 3R, BE 1R, trail 3 after 1R          +5.5%  +0.94   -4.9%   +1.13   29   28%  +0.22   3/5
+scale 50% at 3R                                   +6.5%  +1.06   -5.3%   +1.22   29   31%  +0.26   3/5
+scale 50% at 3R, trail 3 after 1R                 +4.4%  +0.80   -4.7%   +0.92   29   28%  +0.18   3/5
+scale 50% at 3R, BE 1R                            +6.0%  +0.99   -5.3%   +1.13   29   24%  +0.24   3/5
+scale 50% at 3R, BE 1R, trail 3 after 1R          +4.5%  +0.82   -4.7%   +0.94   29   28%  +0.19   3/5
+scale 75% at 3R                                   +4.6%  +0.84   -5.0%   +0.93   29   31%  +0.19   3/5
+scale 75% at 3R, trail 3 after 1R                 +3.3%  +0.65   -4.8%   +0.70   29   28%  +0.15   3/5
+scale 75% at 3R, BE 1R                            +4.2%  +0.76   -5.0%   +0.84   29   24%  +0.18   3/5
+scale 75% at 3R, BE 1R, trail 3 after 1R          +3.4%  +0.67   -4.7%   +0.74   29   28%  +0.15   3/5
+
+-- breadth over 48 variants vs baseline:
+   beat baseline Sharpe   0/48  (baseline +1.28; median variant +0.75)
+   beat baseline Calmar   0/48  (baseline +1.67; median variant +0.81)
+   beat baseline WF total 0/48  (baseline +10.1%)
+   smaller MDD            48/48  (baseline -6.1%)
+-- best Calmar: scale 25% at 3R  Calmar +1.47, Sh +1.20, WF +8.3%, MDD -5.6%  (selected in-sample from 48; not a finding on its own)

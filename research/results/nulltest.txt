@@ -1,14 +1,10 @@
 
 1h taker-absorb m6 z2.0 T4: original          WF   +4.3%  Sh +3.82  n 22
 1h taker-absorb m6 z2.0 T4: direction flipped  WF   -6.5%  Sh -6.43  n 22
-1h taker-absorb m6 z2.0 T4: shifted -12 bars  WF   -0.2%  Sh -0.16  n 23
-1h taker-absorb m6 z2.0 T4: shifted  -6 bars  WF   -9.1%  Sh -10.23  n 22
-1h taker-absorb m6 z2.0 T4: shifted  +6 bars  WF   -3.1%  Sh -2.17  n 22
-1h taker-absorb m6 z2.0 T4: shifted +12 bars  WF   -1.2%  Sh -1.41  n 21
+1h taker-absorb m6 z2.0 T4: delayed  6 bars  WF   -3.1%  Sh -2.17  n 22
+1h taker-absorb m6 z2.0 T4: delayed 12 bars  WF   -1.2%  Sh -1.41  n 21
 
 4h taker-absorb m18 z2.0 T4: original          WF   +3.9%  Sh +1.86  n 24
 4h taker-absorb m18 z2.0 T4: direction flipped  WF   -4.2%  Sh -2.01  n 24
-4h taker-absorb m18 z2.0 T4: shifted -12 bars  WF   -9.2%  Sh -4.07  n 24
-4h taker-absorb m18 z2.0 T4: shifted  -6 bars  WF   -7.4%  Sh -3.60  n 22
-4h taker-absorb m18 z2.0 T4: shifted  +6 bars  WF   -2.2%  Sh -0.93  n 22
-4h taker-absorb m18 z2.0 T4: shifted +12 bars  WF   -2.1%  Sh -0.98  n 21
+4h taker-absorb m18 z2.0 T4: delayed  6 bars  WF   -2.2%  Sh -0.93  n 22
+4h taker-absorb m18 z2.0 T4: delayed 12 bars  WF   -2.1%  Sh -0.98  n 21

@@ -1,0 +1,10 @@
+
+==================== null checks, 1d TSMOM short, 1x ====================
+TSMOM L5   original   WF tot   +13.3%  Sh +0.91  MDD   -6.3%  n 219  folds+ 4/6
+TSMOM L5   flipped    WF tot   -10.7%  Sh -1.05  MDD  -11.0%  n 219  folds+ 1/6
+TSMOM L5   delay 1    WF tot   +17.2%  Sh +1.16  MDD   -5.5%  n 221  folds+ 4/6
+TSMOM L5   delay 3    WF tot    +1.2%  Sh +0.11  MDD   -5.8%  n 219  folds+ 4/6
+TSMOM L10  original   WF tot   +12.5%  Sh +0.80  MDD   -6.2%  n 145  folds+ 3/6
+TSMOM L10  flipped    WF tot    -9.5%  Sh -0.99  MDD  -10.2%  n 145  folds+ 1/6
+TSMOM L10  delay 1    WF tot    +1.9%  Sh +0.15  MDD  -10.6%  n 146  folds+ 3/6
+TSMOM L10  delay 3    WF tot    +4.4%  Sh +0.31  MDD  -10.6%  n 147  folds+ 3/6

@@ -1,0 +1,16 @@
+
+OKX SOL OI 1H: 718 steps, unconditional mean next-step return +0.010%
+category       N   mean fwd   t-stat  vs uncond
+P+OI+        191    +0.053%    +1.20    +0.042%
+P+OI-        158    -0.036%    -0.86    -0.047%
+P-OI+        184    +0.012%    +0.25    +0.001%
+P-OI-        185    +0.006%    +0.13    -0.005%
+
+OKX SOL OI 1D: 178 steps, unconditional mean next-step return +0.146%
+category       N   mean fwd   t-stat  vs uncond
+P+OI+         61    +0.242%    +0.66    +0.096%
+P+OI-         33    -0.384%    -0.87    -0.530%
+P-OI+         28    -0.662%    -1.30    -0.808%
+P-OI-         56    +0.757%    +1.53    +0.611%
+
+A |t| below ~2 is not evidence of a directional pattern. Cells above have 40-180 observations.

@@ -5,3 +5,5 @@ analysis-v2-output.txt
 analysis-v3-output.txt
 analysis-v3b-output.txt
 __pycache__/
+data/okx/
+data/hl/

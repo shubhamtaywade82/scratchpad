@@ -1,0 +1,10 @@
+
+==================== null checks, 4h at 5x ====================
+vol p10 L100 1.5-4.0   original   WF tot   +12.8%  Sh +1.25  n  68
+vol p10 L100 1.5-4.0   flipped    WF tot    -9.9%  Sh -1.66  n  68
+vol p10 L100 1.5-4.0   delay 6    WF tot   +10.3%  Sh +1.08  n  68
+vol p10 L100 1.5-4.0   delay 12   WF tot    -3.7%  Sh -0.34  n  67
+vol p20 L100 1.5-4.0   original   WF tot   +13.3%  Sh +1.30  n  68
+vol p20 L100 1.5-4.0   flipped    WF tot   -10.1%  Sh -1.73  n  68
+vol p20 L100 1.5-4.0   delay 6    WF tot    +0.1%  Sh +0.07  n  68
+vol p20 L100 1.5-4.0   delay 12   WF tot    -2.1%  Sh -0.19  n  67

@@ -1,0 +1,7 @@
+==================== expectancy per position, walk-forward, 5x, 1% risk, 3-ATR stop, net of costs ====================
+1h vol-adaptive ST, stop-only      positions  56  win rate  33.9% (95% CI 22.9-47.0%)  avg win +1.95%  avg loss 0.52%  expectancy +0.314%/position
+   expectancy 95% bootstrap CI -0.216% .. +1.132%  (includes 0)
+   win-rate CI excludes 50% (below): any edge comes from payoff size, not hit rate
+4h Donchian40 + EMA200, stop-only  positions  29  win rate  31.0% (95% CI 17.3-49.2%)  avg win +2.42%  avg loss 0.55%  expectancy +0.371%/position
+   expectancy 95% bootstrap CI -0.319% .. +1.385%  (includes 0)
+   win-rate CI excludes 50% (below): any edge comes from payoff size, not hit rate
