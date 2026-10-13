@@ -398,5 +398,117 @@ class DelaySig(unittest.TestCase):
             delay_sig([1, 2, 3], -1)
 
 
+class Exits(unittest.TestCase):
+    """Take-profit, breakeven and trail activation. Entry at bar 3's open (100), stop 2 x ATR(1) = 98, 1R = 2."""
+
+    def setUp(self):
+        self.A = [1.0] * 12
+
+    def _sig(self, s):
+        sig = [0] * len(s)
+        sig[2:] = [1] * (len(s) - 2)
+        return sig
+
+    def test_take_profit_fills_at_level_without_slippage(self):
+        ohlc = flat(3) + [(100, 104, 99.5, 103.5)] + flat(6, 103.5)
+        s = bars(ohlc)
+        r = simulate(s, self._sig(s), Risk(sl_mult=2.0, tp_r=1.5), 1, len(s), A=self.A, fee=0, slip=0.0003)
+        t = r.trades[0]
+        self.assertEqual(t['reason'], 'tp')
+        self.assertAlmostEqual(t['px'], t['ep'] + 1.5 * 2.0)   # limit price, no slippage applied
+        self.assertAlmostEqual(t['r'], 1.5)
+
+    def test_stop_wins_a_same_bar_tie_with_take_profit(self):
+        ohlc = flat(3) + [(100, 104, 97.0, 103.5)] + flat(6, 103.5)   # both 98 stop and 103 target touched
+        s = bars(ohlc)
+        r = simulate(s, self._sig(s), Risk(sl_mult=2.0, tp_r=1.5), 1, len(s), A=self.A, fee=0, slip=0)
+        self.assertEqual(r.trades[0]['reason'], 'stop')
+
+    def test_take_profit_gap_fills_at_open(self):
+        ohlc = flat(3) + [(100, 100.5, 99.5, 100), (105, 106, 104.5, 105.5)] + flat(6, 105.5)
+        s = bars(ohlc)
+        r = simulate(s, self._sig(s), Risk(sl_mult=2.0, tp_r=1.5), 1, len(s), A=self.A, fee=0, slip=0)
+        t = r.trades[0]
+        self.assertEqual(t['reason'], 'tp_gap')
+        self.assertAlmostEqual(t['px'], 105.0)
+
+    def test_no_take_profit_without_a_stop_distance(self):
+        ohlc = flat(3) + [(100, 110, 99.5, 109)] + flat(6, 109)
+        s = bars(ohlc)
+        r = simulate(s, self._sig(s), Risk(tp_r=1.5), 1, len(s), A=self.A, fee=0, slip=0)
+        self.assertEqual(r.trades[0]['reason'], 'eod')
+
+    def test_breakeven_moves_stop_to_entry_after_one_r(self):
+        ohlc = flat(3) + [(100, 102.5, 99.5, 102)] + [(101, 101.5, 99.5, 100.5)] + flat(6, 100.5)
+        s = bars(ohlc)
+        r = simulate(s, self._sig(s), Risk(sl_mult=2.0, be_r=1.0), 1, len(s), A=self.A, fee=0, slip=0)
+        t = r.trades[0]
+        self.assertEqual(t['reason'], 'stop')
+        self.assertEqual(t['kind'], 'be')
+        self.assertAlmostEqual(t['px'], 100.0)
+        self.assertAlmostEqual(t['r'], 0.0)
+
+    def test_trail_waits_for_activation(self):
+        # bar 3 reaches only 1.25R; bar 4 low 99 would breach a chandelier stop of 101.5, but not the 98 initial stop
+        ohlc = flat(3) + [(100, 102.5, 99.5, 102)] + [(102, 102, 99, 99.5)] + flat(6, 99.5)
+        s = bars(ohlc)
+        r = simulate(s, self._sig(s), Risk(sl_mult=2.0, trail_mult=1.0, trail_act_r=2.0), 1, len(s),
+                     A=self.A, fee=0, slip=0)
+        self.assertEqual(r.trades[0]['reason'], 'eod')           # trail not yet active: no early exit
+
+    def test_trail_active_after_activation_exits_on_chandelier(self):
+        ohlc = flat(3) + [(100, 102.5, 99.5, 102)] + [(102, 102, 99, 99.5)] + flat(6, 99.5)
+        s = bars(ohlc)
+        r = simulate(s, self._sig(s), Risk(sl_mult=2.0, trail_mult=1.0, trail_act_r=1.0), 1, len(s),
+                     A=self.A, fee=0, slip=0)
+        t = r.trades[0]
+        self.assertEqual(t['kind'], 'trail')
+        self.assertAlmostEqual(t['px'], 101.5)                  # 102.5 extreme - 1 x ATR
+
+    def test_no_reentry_after_take_profit_while_signal_persists(self):
+        ohlc = flat(3) + [(100, 104, 99.5, 103.5)] + flat(6, 103.5)
+        s = bars(ohlc)
+        r = simulate(s, self._sig(s), Risk(sl_mult=2.0, tp_r=1.5), 1, len(s), A=self.A, fee=0, slip=0)
+        self.assertEqual(len(r.trades), 1)
+
+    def test_validate_rejects_bad_exit_parameters(self):
+        for bad in (Risk(tp_r=0.0), Risk(be_r=-1.0), Risk(trail_act_r=-0.5)):
+            with self.assertRaises(ValueError):
+                bad.validate()
+
+
+class ScaleOut(unittest.TestCase):
+    def test_partial_then_signal_exit_pnl_is_exact(self):
+        # entry 100 with d = 2 (2 x ATR 1); qty = 1% / 2 = 0.005. Half closes at the 102 target (1R) on bar 3.
+        # Remainder exits at bar 6's open (101.5) when the signal drops to flat.
+        ohlc = flat(3) + [(100, 103, 99.5, 102.5)] + [(102, 102.5, 101, 101.5)] + flat(6, 101.5)
+        s = bars(ohlc)
+        sig = [0] * len(s); sig[2:5] = [1, 1, 1]           # desired long at the opens of bars 3, 4, 5
+        r = simulate(s, sig, Risk(sizing='risk', sl_mult=2.0, tp_r=1.0, tp_frac=0.5), 1, len(s), A=[1.0] * len(s),
+                     fee=0, slip=0)
+        self.assertEqual([t['reason'] for t in r.trades], ['tp_partial', 'signal'])
+        q = 0.005
+        self.assertAlmostEqual(r.trades[0]['qty'], q / 2)
+        self.assertAlmostEqual(r.trades[0]['px'], 102.0)
+        self.assertAlmostEqual(r.trades[1]['px'], 101.5)
+        expected = (q / 2) * (102.0 - 100.0) + (q / 2) * (101.5 - 100.0)
+        self.assertAlmostEqual(sum(t['pnl'] for t in r.trades), expected, 12)
+
+    def test_scale_out_keeps_position_open(self):
+        ohlc = flat(3) + [(100, 103, 99.5, 102.5)] + flat(6, 102.5)
+        s = bars(ohlc)
+        sig = [0] * len(s); sig[2:] = [1] * (len(s) - 2)
+        r = simulate(s, sig, Risk(sl_mult=2.0, tp_r=1.0, tp_frac=0.5), 1, len(s), A=[1.0] * len(s), fee=0, slip=0)
+        reasons = [t['reason'] for t in r.trades]
+        self.assertIn('tp_partial', reasons)
+        self.assertEqual(reasons[-1], 'eod')                 # the remainder is still held to the window end
+        self.assertEqual(r.pos[-1], 0)
+
+    def test_tp_frac_validation(self):
+        for bad in (0.0, 1.5, -0.5):
+            with self.assertRaises(ValueError):
+                Risk(tp_frac=bad).validate()
+
+
 if __name__ == '__main__':
     unittest.main()

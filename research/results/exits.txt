@@ -1,0 +1,72 @@
+
+==================== A 1h adaptive Supertrend p20 L100 1.5-4 | 1h | 5x, risk 1%, initial stop 3 ATR ====================
+exit                                           WF tot     Sh     MDD  Calmar  pos  win%  meanR  exit mix (of closes)
+E0 stop only                                   +16.7%  +2.88   -9.1%   +1.84   56   34%  +0.36  init 12% signal 79% eod 9%
+E1 trail 3 ATR                                  +6.6%  +1.92   -5.9%   +1.12   56   45%  +0.17  init 2% trail 86% signal 5% eod 7%
+E2 trail 3 ATR after 1R                         +2.6%  +0.79   -7.0%   +0.37   56   41%  +0.10  init 12% trail 43% signal 38% eod 7%
+E3 breakeven 1R                                +17.3%  +2.97   -9.0%   +1.93   56   27%  +0.37  init 12% be 20% signal 59% eod 9%
+E4 TP 1.5R                                      +6.8%  +2.06   -6.4%   +1.07   56   36%  +0.17  init 12% tp 32% signal 48% eod 7%
+E5 TP 2R                                        +2.5%  +0.73   -7.0%   +0.35   56   34%  +0.10  init 12% tp 18% signal 62% eod 7%
+E6 TP 3R                                        +3.7%  +1.01   -6.5%   +0.57   56   34%  +0.13  init 12% tp 11% signal 70% eod 7%
+E7 BE 1R + TP 2R                                +3.1%  +0.90   -6.8%   +0.45   56   29%  +0.11  init 12% be 18% tp 18% signal 45% eod 7%
+E8 BE 1R + TP 3R                                +4.2%  +1.13   -6.2%   +0.68   56   27%  +0.13  init 12% be 20% tp 11% signal 50% eod 7%
+E9 BE 1R + trail 2 after 1R                     +3.8%  +1.22   -6.0%   +0.63   56   46%  +0.12  init 12% trail 43% signal 38% eod 7%
+E10 scale 50% at 1R                            +11.1%  +2.87   -5.7%   +1.93   56   46%  +0.25  init 9% tp_partial 30% signal 55% eod 6%
+E11 scale 50% at 1R, BE, trail 3 after 1R       +3.8%  +1.31   -6.1%   +0.63   56   46%  +0.12  init 9% be 1% trail 29% tp_partial 30% signal 26% eod 5%
+E12 scale 50% at 2R, BE 1R                     +10.3%  +2.36   -6.2%   +1.67   56   29%  +0.24  init 11% be 17% tp_partial 15% signal 50% eod 8%
+-- 1/12 exit variants beat the stop-only baseline on Sharpe (baseline Sh +2.88, median variant Sh +1.26)
+-- 2/12 beat the baseline on Calmar (return / |MDD|, baseline +1.84)
+
+==================== C 1h taker-absorb m6 z2 T4 | 1h | 5x, risk 1%, initial stop 3 ATR ====================
+exit                                           WF tot     Sh     MDD  Calmar  pos  win%  meanR  exit mix (of closes)
+E0 stop only                                    +4.3%  +3.82   -1.4%   +3.03   22   64%  +0.25  init 5% signal 95%
+E1 trail 3 ATR                                  +4.6%  +4.16   -1.2%   +3.86   22   64%  +0.26  trail 5% signal 95%
+E2 trail 3 ATR after 1R                         +4.3%  +3.82   -1.4%   +3.03   22   64%  +0.25  init 5% signal 95%
+E3 breakeven 1R                                 +4.3%  +3.82   -1.4%   +3.03   22   64%  +0.25  init 5% signal 95%
+E4 TP 1.5R                                      +4.0%  +3.86   -1.4%   +2.88   22   64%  +0.23  init 5% tp 9% signal 86%
+E5 TP 2R                                        +5.0%  +4.12   -1.4%   +3.63   22   64%  +0.28  init 5% tp 9% signal 86%
+E6 TP 3R                                        +4.3%  +3.82   -1.4%   +3.03   22   64%  +0.25  init 5% signal 95%
+E7 BE 1R + TP 2R                                +5.0%  +4.12   -1.4%   +3.63   22   64%  +0.28  init 5% tp 9% signal 86%
+E8 BE 1R + TP 3R                                +4.3%  +3.82   -1.4%   +3.03   22   64%  +0.25  init 5% signal 95%
+E9 BE 1R + trail 2 after 1R                     +4.3%  +3.82   -1.4%   +3.03   22   64%  +0.25  init 5% signal 95%
+E10 scale 50% at 1R                             +3.6%  +3.64   -1.4%   +2.60   22   64%  +0.21  init 4% tp_partial 12% signal 84%
+E11 scale 50% at 1R, BE, trail 3 after 1R       +3.6%  +3.64   -1.4%   +2.60   22   64%  +0.21  init 4% tp_partial 12% signal 84%
+E12 scale 50% at 2R, BE 1R                      +4.6%  +4.00   -1.4%   +3.39   22   64%  +0.26  init 4% tp_partial 8% signal 88%
+-- 5/12 exit variants beat the stop-only baseline on Sharpe (baseline Sh +3.82, median variant Sh +3.82)
+-- 4/12 beat the baseline on Calmar (return / |MDD|, baseline +3.03)
+
+==================== B 4h Donchian40 + EMA200 | 4h | 5x, risk 1%, initial stop 3 ATR ====================
+exit                                           WF tot     Sh     MDD  Calmar  pos  win%  meanR  exit mix (of closes)
+E0 stop only                                   +10.1%  +1.28   -6.1%   +1.67   29   31%  +0.39  init 10% signal 86% eod 3%
+E1 trail 3 ATR                                  +8.4%  +1.36   -4.5%   +1.84   29   28%  +0.32  trail 79% signal 17% eod 3%
+E2 trail 3 ATR after 1R                         +6.5%  +1.01   -5.0%   +1.28   29   28%  +0.26  init 10% trail 31% signal 55% eod 3%
+E3 breakeven 1R                                 +9.6%  +1.23   -6.1%   +1.59   29   24%  +0.37  init 10% be 7% signal 79% eod 3%
+E4 TP 1.5R                                      -1.6%  -0.32   -4.8%   -0.34   29   31%  -0.03  init 10% tp 21% signal 66% eod 3%
+E5 TP 2R                                        -0.3%  -0.03   -4.8%   -0.06   29   31%  +0.02  init 10% tp 17% signal 69% eod 3%
+E6 TP 3R                                        +2.8%  +0.54   -4.8%   +0.59   29   31%  +0.13  init 10% tp 14% signal 72% eod 3%
+E7 BE 1R + TP 2R                                -0.8%  -0.11   -4.9%   -0.15   29   24%  +0.00  init 10% be 7% tp 17% signal 62% eod 3%
+E8 BE 1R + TP 3R                                +2.3%  +0.46   -4.8%   +0.49   29   24%  +0.11  init 10% be 7% tp 14% signal 66% eod 3%
+E9 BE 1R + trail 2 after 1R                     -0.9%  -0.15   -6.2%   -0.14   29   31%  -0.00  init 10% trail 31% signal 55% eod 3%
+E10 scale 50% at 1R                             +3.8%  +0.73   -5.2%   +0.75   29   31%  +0.17  init 8% tp_partial 24% signal 66% eod 3%
+E11 scale 50% at 1R, BE, trail 3 after 1R       +2.1%  +0.45   -4.5%   +0.46   29   31%  +0.10  init 8% be 3% trail 21% tp_partial 24% signal 42% eod 3%
+E12 scale 50% at 2R, BE 1R                      +4.4%  +0.76   -5.3%   +0.83   29   24%  +0.19  init 9% be 6% tp_partial 15% signal 68% eod 3%
+-- 1/12 exit variants beat the stop-only baseline on Sharpe (baseline Sh +1.28, median variant Sh +0.50)
+-- 1/12 beat the baseline on Calmar (return / |MDD|, baseline +1.67)
+
+==================== D 4h taker-absorb m18 z2 T4 | 4h | 5x, risk 1%, initial stop 3 ATR ====================
+exit                                           WF tot     Sh     MDD  Calmar  pos  win%  meanR  exit mix (of closes)
+E0 stop only                                    +3.0%  +1.37   -1.7%   +1.81   25   52%  +0.14  init 4% signal 92% eod 4%
+E1 trail 3 ATR                                  +2.6%  +1.20   -1.5%   +1.77   25   48%  +0.12  trail 12% signal 84% eod 4%
+E2 trail 3 ATR after 1R                         +3.0%  +1.37   -1.7%   +1.81   25   52%  +0.14  init 4% signal 92% eod 4%
+E3 breakeven 1R                                 +3.0%  +1.37   -1.7%   +1.81   25   52%  +0.14  init 4% signal 92% eod 4%
+E4 TP 1.5R                                      +3.4%  +1.48   -1.7%   +2.03   25   52%  +0.15  init 4% tp 8% signal 84% eod 4%
+E5 TP 2R                                        +3.0%  +1.37   -1.7%   +1.81   25   52%  +0.14  init 4% signal 92% eod 4%
+E6 TP 3R                                        +3.0%  +1.37   -1.7%   +1.81   25   52%  +0.14  init 4% signal 92% eod 4%
+E7 BE 1R + TP 2R                                +3.0%  +1.37   -1.7%   +1.81   25   52%  +0.14  init 4% signal 92% eod 4%
+E8 BE 1R + TP 3R                                +3.0%  +1.37   -1.7%   +1.81   25   52%  +0.14  init 4% signal 92% eod 4%
+E9 BE 1R + trail 2 after 1R                     +3.0%  +1.37   -1.7%   +1.81   25   52%  +0.14  init 4% signal 92% eod 4%
+E10 scale 50% at 1R                             +2.6%  +1.24   -1.7%   +1.58   25   52%  +0.12  init 4% tp_partial 11% signal 82% eod 4%
+E11 scale 50% at 1R, BE, trail 3 after 1R       +2.6%  +1.24   -1.7%   +1.58   25   52%  +0.12  init 4% tp_partial 11% signal 82% eod 4%
+E12 scale 50% at 2R, BE 1R                      +3.0%  +1.37   -1.7%   +1.81   25   52%  +0.14  init 4% signal 92% eod 4%
+-- 1/12 exit variants beat the stop-only baseline on Sharpe (baseline Sh +1.37, median variant Sh +1.37)
+-- 1/12 beat the baseline on Calmar (return / |MDD|, baseline +1.81)
