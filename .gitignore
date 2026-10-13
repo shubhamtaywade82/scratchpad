@@ -1,4 +1,3 @@
-node_modules/
 *.log
-analysis-output.txt
-analysis-v2-output.txt
+analysis-v3-output.txt
+analysis-v3b-output.txt

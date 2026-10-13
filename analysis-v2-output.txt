@@ -1,0 +1,52 @@
+OpenBLAS WARNING - could not determine the L2 cache size on this system, assuming 256k
+OpenBLAS WARNING - could not determine the L2 cache size on this system, assuming 256k
+==============================================================================
+SOLUSDT v2 — last candle 2026-10-13 00:00:00+00:00
+==============================================================================
+
+--- 1) REGIMES (k-means, daily) ---
+   share  avg_fwd30d  avg_atr%  avg_px_vs_sma200
+0  0.508       0.046     5.596            -5.732
+1  0.282       0.146     6.684            72.415
+2  0.209       0.055     8.909            -6.043
+cluster centers (z):
+    atr_z  mom20_z  trend_z  dd_z  vol_z
+0  -0.54    -0.19    -0.44 -0.39  -0.31
+1   0.05     1.08     1.12  1.15   0.46
+2   1.26    -0.98    -0.44 -0.60   0.13
+
+--- 2) BACKTESTS (daily, next-open fill, fee+slip 0.12%/side, warmup from 2023-03-24 ) ---
+                        strategy   total   cagr    mdd  sharpe exposure
+                      Buy & Hold +416.0% +58.5% -76.3%    0.97     100%
+             SMA200 trend filter +258.8% +43.1% -58.6%    0.87      56%
+                 EMA50/200 cross +134.0% +27.0% -64.6%    0.69      59%
+                  ~100d momentum +390.0% +56.2% -49.4%    1.02      58%
+    Vol-target 40% + SMA200 gate +110.4% +23.2% -34.8%    0.80      56%
+Cycle accumulation (buy deep DD)  +26.8%  +6.9% -38.0%    0.42      72%
+
+--- 3) WALK-FORWARD PREDICTION TEST (label: next-day up/down) ---
+LogReg: mean test acc 0.463 (+/-0.032) | long/short strat total -83.6%, Sharpe -1.07, MDD -87.3%
+RandomForest: mean test acc 0.497 (+/-0.036) | long/short strat total -57.6%, Sharpe -0.31, MDD -67.9%
+
+--- 4) MONTE CARLO (1000 bootstrap paths, 1y horizon) ---
+Buy&Hold: median 1y return +31.4% | P(loss) 34% | P(+50%) 44% | P(> -50%) 6% | median maxDD -45%
+Vol-target+SMA200: median 1y return +39.6% | P(loss) 7% | P(+50%) 38% | P(> -50%) 0% | median maxDD -15%
+
+--- Final table (incl. variants added after first print) ---
+                           strategy   total   cagr    mdd  sharpe exposure
+                         Buy & Hold +416.0% +58.5% -76.3%    0.97     100%
+                SMA200 trend filter +258.8% +43.1% -58.6%    0.87      56%
+                    EMA50/200 cross +134.0% +27.0% -64.6%    0.69      59%
+                     ~100d momentum +390.0% +56.2% -49.4%    1.02      58%
+       Vol-target 40% + SMA200 gate +110.4% +23.2% -34.8%    0.80      56%
+   Cycle accumulation (buy deep DD)  +26.8%  +6.9% -38.0%    0.42      72%
+Vol-target + SMA200 + 4h trend gate   +9.5%  +2.6%  -8.6%    0.38       4%
+     Vol-target 40% (no trend gate) +215.8% +38.1% -56.3%    0.95     100%
+OpenBLAS WARNING - could not determine the L2 cache size on this system, assuming 256k
+
+--- CURRENT SIGNAL STATE (vol-target 40% + SMA200 gate) ---
+Date 2026-10-13 | close $106.73 | px vs SMA200 +22.6%
+20d realized vol 55% | target weight today = 0.73x
+Weight 30d ago 0.72x, 90d ago 0.00x | max hist weight 0.87x
+Rolling-1y Sharpe now: strategy 0.98 vs B&H 0.51
+Worst rolling-1y Sharpe seen: strategy -1.69, B&H -2.20

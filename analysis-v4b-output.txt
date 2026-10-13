@@ -1,0 +1,66 @@
+loading...
+
+=== 15m (73d, train 4200b / OOS 2800b), lev=1.0 ===
+Donchian20 [full]              tot   -39.7% Sh -5.53 MDD  -42.1% n  241 WR 25.7% PF 0.69 hold  13.5b | L:129(-0.06%) S:112(-0.25%)
+  ->OOS                        tot   -21.8% Sh -4.42 MDD  -26.2% n  100 WR 26.0% PF 0.65 hold  13.1b | L:55(-0.25%) S:45(-0.11%)
+Donchian48 [full]              tot   -19.3% Sh -1.80 MDD  -23.6% n  121 WR 26.4% PF 0.85 hold  29.2b | L:62(+0.27%) S:59(-0.50%)
+  ->OOS                        tot    -4.1% Sh -0.43 MDD  -18.1% n   49 WR 32.7% PF 0.99 hold  31.6b | L:25(+0.20%) S:24(-0.23%)
+Donchian20+SL1.5 [full]        tot   -75.6% Sh -14.98 MDD  -76.5% n  408 WR 15.7% PF 0.41 hold   7.6b | L:223(-0.26%) S:185(-0.32%)
+  ->OOS                        tot   -48.4% Sh -11.25 MDD  -50.1% n  172 WR 15.1% PF 0.39 hold   7.2b | L:99(-0.37%) S:73(-0.28%)
+EMA12/48 [full]                tot   -30.9% Sh -2.25 MDD  -32.3% n  198 WR 19.7% PF 0.83 hold  33.7b | L:99(+0.14%) S:99(-0.36%)
+  ->OOS                        tot    -8.5% Sh -0.85 MDD  -26.0% n   74 WR 20.3% PF 0.93 hold  35.9b | L:37(+0.13%) S:37(-0.22%)
+RSI7 MR 25/75 [full]           tot   -85.2% Sh -24.84 MDD  -85.4% n  902 WR 45.3% PF 0.49 hold   1.7b | L:392(-0.13%) S:510(-0.18%)
+  ->OOS                        tot   -58.6% Sh -17.07 MDD  -59.2% n  367 WR 44.7% PF 0.47 hold   1.6b | L:185(-0.17%) S:182(-0.21%)
+RSI14 MR 30/70 [full]          tot   -68.0% Sh -14.26 MDD  -69.1% n  497 WR 47.1% PF 0.59 hold   3.2b | L:187(-0.09%) S:310(-0.23%)
+  ->OOS                        tot   -39.5% Sh -9.54 MDD  -41.4% n  209 WR 45.9% PF 0.59 hold   3.2b | L:92(-0.12%) S:117(-0.24%)
+B&H full Sharpe +3.27; B&H OOS Sharpe +1.53
+
+=== 1h (108d, train 1560b / OOS 1040b), lev=1.0 ===
+Donchian24 (~1d) [full]        tot   +33.6% Sh +1.94 MDD  -10.6% n   65 WR 35.4% PF 1.74 hold  20.9b | L:33(+1.28%) S:32(-0.15%)
+  ->OOS                        tot    +3.8% Sh +0.56 MDD  -10.6% n   30 WR 36.7% PF 1.27 hold  19.6b | L:15(+0.49%) S:15(-0.03%)
+Donchian72 (~3d) [full]        tot   -14.1% Sh -0.79 MDD  -22.2% n   32 WR 25.0% PF 0.82 hold  40.5b | L:15(+0.94%) S:17(-1.40%)
+  ->OOS                        tot   -13.4% Sh -1.71 MDD  -18.3% n   13 WR 15.4% PF 0.56 hold  41.4b | L:7(-0.78%) S:6(-1.15%)
+EMA10/50 [full]                tot   -14.9% Sh -0.59 MDD  -25.6% n   71 WR 23.9% PF 0.92 hold  34.6b | L:36(+0.54%) S:35(-0.74%)
+  ->OOS                        tot   -23.1% Sh -3.14 MDD  -24.5% n   31 WR 22.6% PF 0.47 hold  32.1b | L:16(-0.58%) S:15(-0.93%)
+RSI14 MR 30/70 [full]          tot   -43.8% Sh -4.57 MDD  -46.3% n  143 WR 49.7% PF 0.66 hold   5.5b | L:56(-0.02%) S:87(-0.54%)
+  ->OOS                        tot    -7.5% Sh -0.89 MDD  -24.8% n   63 WR 55.6% PF 0.93 hold   6.4b | L:33(-0.11%) S:30(-0.00%)
+B&H full Sharpe +2.48; B&H OOS Sharpe +0.26
+
+=== 4h (450d, train 1620b / OOS 1080b), lev=1.0 ===
+Donchian20 (~3.3d) [full]      tot   -27.0% Sh -0.26 MDD  -58.7% n   90 WR 26.7% PF 0.96 hold  14.8b | L:47(-0.58%) S:43(+0.45%)
+  ->OOS                        tot   +27.4% Sh +0.78 MDD  -13.8% n   33 WR 36.4% PF 1.66 hold  16.8b | L:16(+2.10%) S:17(-0.06%)
+Donchian40 (~6.7d) [full]      tot    -0.7% Sh +0.22 MDD  -42.6% n   43 WR 39.5% PF 1.16 hold  27.9b | L:20(+0.24%) S:23(+0.61%)
+  ->OOS                        tot   +37.9% Sh +0.92 MDD   -8.8% n   15 WR 40.0% PF 2.62 hold  34.0b | L:7(+5.41%) S:8(+0.29%)
+Donchian60 (~10d) [full]       tot   +18.8% Sh +0.51 MDD  -36.0% n   29 WR 51.7% PF 1.44 hold  46.3b | L:15(-0.09%) S:14(+2.56%)
+  ->OOS                        tot   +18.6% Sh +0.64 MDD  -13.0% n   12 WR 50.0% PF 1.99 hold  46.0b | L:7(+2.67%) S:5(+0.78%)
+EMA10/40 [full]                tot   -31.3% Sh -0.17 MDD  -60.6% n   74 WR 28.4% PF 0.98 hold  34.2b | L:37(-0.25%) S:37(+0.11%)
+  ->OOS                        tot   +20.0% Sh +0.55 MDD  -14.5% n   29 WR 27.6% PF 1.53 hold  35.0b | L:15(+2.40%) S:14(-0.47%)
+RSI14 MR 30/70 [full]          tot   -76.4% Sh -2.16 MDD  -79.5% n  142 WR 45.1% PF 0.65 hold   5.0b | L:69(-1.38%) S:73(-0.42%)
+  ->OOS                        tot   -46.3% Sh -1.76 MDD  -51.1% n   55 WR 43.6% PF 0.57 hold   5.0b | L:19(-0.35%) S:36(-1.37%)
+B&H full Sharpe -0.62; B&H OOS Sharpe +0.84
+
+=== ENSEMBLES (fractional blended signals, lev=blended) ===
+DonchianEns 4h [20, 40, 60] [full] tot    +3.2% Sh +0.28 MDD  -40.6% n   47 WR 36.2% PF 1.19 hold  25.7b | L:22(+0.17%) S:25(+0.77%)
+  ->OOS                        tot   +37.7% Sh +0.91 MDD   -8.8% n   15 WR 40.0% PF 2.64 hold  33.7b | L:7(+5.41%) S:8(+0.27%)
+DonchianEns 1h [24, 72] [full] tot    +9.2% Sh +0.82 MDD  -13.9% n   38 WR 28.9% PF 1.38 hold  19.9b | L:19(+1.18%) S:19(-0.41%)
+  ->OOS                        tot    -4.6% Sh -0.60 MDD   -9.0% n   17 WR 29.4% PF 0.86 hold  19.5b | L:10(-0.46%) S:7(+0.24%)
+
+=== PARAM PERTURBATION (OOS Sharpe) ===
+4h Donchian: n16:+0.32 n20:+0.78 n24:+0.56 n32:+0.73 n40:+0.92 n48:+1.09 n60:+0.64 n72:+0.26
+1h Donchian: n16:-0.45 n24:+0.56 n36:-3.37 n48:-2.15 n72:-1.71 n96:-1.34
+
+=== OOS BLOCK-BOOTSTRAP SHARPE (5/50/95 pct) ===
+15m Donchian48     -5.72 / -0.84 / +2.73
+15m RSI7MR         -20.94 / -16.84 / -12.52
+1h Donchian24      -3.56 / +0.34 / +2.82
+1h RSI14MR         -5.36 / -0.79 / +3.80
+4h Donchian40      -1.03 / +0.91 / +1.73
+4h Donchian60      -1.59 / +0.58 / +1.66
+=== v4c addendum ===
+TOD long-top4/short-bot4 (OOS): {'total': -0.316, 'sharpe': -13.319, 'mdd': -0.325, 'n': 174, 'wr': 0.328, 'pf': 0.5, 'hold': 4.333, 'nl': 87, 'avgL': -0.148, 'ns': 87, 'avgS': -0.185}
+Split-half corr of hourly means: -0.373
+NR-breakout all: {'total': -0.2, 'sharpe': -13.428, 'mdd': -0.2, 'n': 108, 'wr': 0.167, 'pf': 0.238, 'hold': 0.185, 'nl': 62, 'avgL': -0.135, 'ns': 46, 'avgS': -0.184}
+NR-breakout OOS: {'total': -0.088, 'sharpe': -9.993, 'mdd': -0.088, 'n': 43, 'wr': 0.209, 'pf': 0.165, 'hold': 0.233, 'nl': 29, 'avgL': -0.166, 'ns': 14, 'avgS': -0.159}
+D40 long-gated-by-EMA200 full: {'total': 0.537, 'sharpe': 1.006, 'mdd': -0.281, 'n': 39, 'wr': 0.41, 'pf': 1.792, 'hold': 25.974, 'nl': 18, 'avgL': 1.728, 'ns': 21, 'avgS': 1.378}
+   OOS: {'total': 0.39, 'sharpe': 0.966, 'mdd': -0.081, 'n': 14, 'wr': 0.429, 'pf': 2.711, 'hold': 34.5, 'nl': 6, 'avgL': 6.45, 'ns': 8, 'avgS': 0.286}
+D40 both-sides EMA200-gated OOS: {'total': 0.342, 'sharpe': 0.879, 'mdd': -0.081, 'n': 16, 'wr': 0.312, 'pf': 2.469, 'hold': 30.5, 'nl': 6, 'avgL': 6.45, 'ns': 10, 'avgS': -0.112}
