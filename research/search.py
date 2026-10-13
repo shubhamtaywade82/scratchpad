@@ -19,9 +19,9 @@ import sys
 from dataclasses import dataclass
 from typing import Callable, List, Optional
 
-from research.engine import (FEE, SLIP, Result, Risk, atr, donchian_sig, ema_gate, htf_gate, returns_from_levels,
-                             load_funding, load_klines, metrics, simulate, supertrend_sig,
-                             tsmom_sig)
+from research.engine import (BARS_PER_YEAR, FEE, SLIP, Result, Risk, atr, donchian_sig, ema_gate, htf_gate,
+                             returns_from_levels, load_funding, load_klines, metrics, simulate,
+                             supertrend_sig, tsmom_sig)
 
 MIN_TRADES = 3
 CUT = 0.6                                  # v4 split, used only for the comparison table
@@ -88,6 +88,16 @@ def block_bootstrap_sharpe(rets: List[float], bpy: int, B: int = 1000, L: int = 
     return out[int(.05 * B)], out[int(.5 * B)], out[int(.95 * B)]
 
 
+def _select_train_config(cfgs: List[Cfg], base, train: int, start: int, A, fund_t, fund_r, tf: str):
+    best = None
+    for c in cfgs:
+        r = simulate(base, c.sig, c.risk, max(1, start - train), start, A=A, fund_t=fund_t, fund_r=fund_r)
+        m = metrics(r, tf)
+        if m['n'] >= MIN_TRADES and (best is None or m['sharpe'] > best[1]['sharpe']):
+            best = (c, m)
+    return best
+
+
 def walk_forward(tf: str, base, cfgs: List[Cfg], fund_t, fund_r, train: int, test: int):
     n = len(base)
     A = atr(base, 14)
@@ -98,14 +108,7 @@ def walk_forward(tf: str, base, cfgs: List[Cfg], fund_t, fund_r, train: int, tes
     folds = []
     start = train
     while start + test <= n:
-        best = None
-        for c in cfgs:
-            r = simulate(base, c.sig, c.risk, max(1, start - train), start, A=A, fund_t=fund_t, fund_r=fund_r)
-            m = metrics(r, tf)
-            if m['n'] < MIN_TRADES:
-                continue
-            if best is None or m['sharpe'] > best[1]['sharpe']:
-                best = (c, m)
+        best = _select_train_config(cfgs, base, train, start, A, fund_t, fund_r, tf)
         if best is None:
             r = simulate(base, [0] * n, Risk(), start, start + test, A=A)
             chosen = 'FLAT (no config met MIN_TRADES in train)'
@@ -131,7 +134,7 @@ def stitched_report(tf: str, res: Result):
     return m, (lo, md, hi)
 
 
-BPY = {'15m': 35040, '1h': 8760, '4h': 2190, '1d': 365}
+BPY = BARS_PER_YEAR
 
 
 def fmt(m):

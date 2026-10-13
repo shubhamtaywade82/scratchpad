@@ -97,6 +97,25 @@ def _waiting(n_bars: int) -> dict:
     return out
 
 
+def _format_open_pos(open_t, bars, mark_px):
+    if not open_t:
+        return None
+    t = open_t[-1]
+    return dict(side='long' if t['side'] > 0 else 'short',
+                entry_utc=datetime.fromtimestamp(bars[t['k_in']]['openTime'] / 1000, timezone.utc).isoformat(),
+                entry_px=t['ep'], mark_px=mark_px, unrealised_ret=t['ret'])
+
+
+def _format_closed_trades(closed, bars):
+    return [
+        dict(side='long' if t['side'] > 0 else 'short',
+             entry_utc=datetime.fromtimestamp(bars[t['k_in']]['openTime'] / 1000, timezone.utc).isoformat(),
+             exit_utc=datetime.fromtimestamp(bars[t['k_out']]['openTime'] / 1000, timezone.utc).isoformat(),
+             entry_px=round(t['ep'], 4), exit_px=round(t['px'], 4), reason=t['reason'], ret=t['ret'], r=t['r'])
+        for t in closed
+    ]
+
+
 def replay(bars: list, start_t: int):
     """Causal replay over stored bars from the forward start. Returns the ledger body."""
     if not bars:
@@ -109,28 +128,18 @@ def replay(bars: list, start_t: int):
         out.update(_waiting(n - start))
         out['bars_total'] = n
         return out
-    risk = Risk(**RISK)
-    A = atr(s, 14)
+    risk, A = Risk(**RISK), atr(s, 14)
     sigs = {'signal': vol_adaptive_st_sig(s, 20, 100, 1.5, 4.0),
             'benchmark': supertrend_sig(s, 10, 2.0)}
     res = {}
     for key, sig in sigs.items():
         r = simulate(s, sig, risk, start, n, A=A, fee=0.0005, slip=0.0003)
-        closed = [t for t in r.trades if t['reason'] not in ('eod',)]
+        closed = [t for t in r.trades if t['reason'] != 'eod']
         open_t = [t for t in r.trades if t['reason'] == 'eod']
-        open_pos = None
-        if open_t:
-            t = open_t[-1]
-            open_pos = dict(side='long' if t['side'] > 0 else 'short',
-                            entry_utc=datetime.fromtimestamp(bars[t['k_in']]['openTime'] / 1000, timezone.utc).isoformat(),
-                            entry_px=t['ep'], mark_px=s.c[-1], unrealised_ret=t['ret'])
-        res[key] = dict(equity=r.eq[-1], closed=[
-            dict(side='long' if t['side'] > 0 else 'short',
-                 entry_utc=datetime.fromtimestamp(bars[t['k_in']]['openTime'] / 1000, timezone.utc).isoformat(),
-                 exit_utc=datetime.fromtimestamp(bars[t['k_out']]['openTime'] / 1000, timezone.utc).isoformat(),
-                 entry_px=round(t['ep'], 4), exit_px=round(t['px'], 4), reason=t['reason'], ret=t['ret'], r=t['r'])
-            for t in closed], open_position=open_pos, flat_bars=sum(1 for p in r.pos if p == 0),
-            positions=len(closed) + len(open_t))
+        res[key] = dict(equity=r.eq[-1], closed=_format_closed_trades(closed, bars),
+                        open_position=_format_open_pos(open_t, bars, s.c[-1]),
+                        flat_bars=sum(1 for p in r.pos if p == 0),
+                        positions=len(closed) + len(open_t))
     out.update(status='LIVE', forward_bars=n - start, **{f"{k}_{f}": v for k in res for f, v in res[k].items()})
     return out
 

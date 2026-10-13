@@ -12,9 +12,10 @@ import math
 import statistics as st
 import sys
 
-from research.engine import (Result, Risk, atr, donchian_sig, ema_gate, htf_gate, load_funding, returns_from_levels,
+from research.engine import (Risk, atr, donchian_sig, ema_gate, htf_gate, load_funding, returns_from_levels,
                              load_klines, metrics, simulate)
-from research.search import BPY, WINDOWS, block_bootstrap_sharpe
+from research.ideas import walk
+from research.search import BPY, block_bootstrap_sharpe
 
 HTF_FOR = {'15m': '1h', '1h': '4h'}
 VOTE_LENGTHS = {'15m': [96, 192, 384], '1h': [24, 48, 72, 120], '4h': [20, 40, 60, 80], '1d': [20, 40, 55, 80]}
@@ -50,21 +51,7 @@ def designs(tf, base, fund_loader):
 
 
 def walk_eval(tf, base, sig, risk, fund_t, fund_r):
-    train, test = WINDOWS[tf]
-    n = len(base)
-    A = atr(base, 14)
-    E = 1.0
-    eq_all, pos_all, trades_all, folds = [], [], [], []
-    start = train
-    while start + test <= n:
-        r = simulate(base, sig, risk, start, start + test, A=A, fund_t=fund_t, fund_r=fund_r)
-        eq_all.extend(E * v for v in r.eq)
-        E *= r.eq[-1]
-        pos_all.extend(r.pos)
-        trades_all.extend(r.trades)
-        folds.append(r.eq[-1] - 1)
-        start += test
-    return Result(eq=eq_all, pos=pos_all, trades=trades_all), folds
+    return walk(tf, base, sig, risk, None, fund_t, fund_r)
 
 
 def fmt(m):

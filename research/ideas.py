@@ -156,6 +156,47 @@ def _logn(x: float, mu: float, var: float) -> float:
     return -0.5 * (math.log(2 * math.pi * var) + (x - mu) ** 2 / var)
 
 
+def _hmm_e_step(x: List[float], pi, A, mu, var):
+    T = len(x)
+    b = [[math.exp(_logn(x[t], mu[j], var[j])) + 1e-300 for j in range(2)] for t in range(T)]
+    alpha, c = [[0.0, 0.0] for _ in range(T)], [0.0] * T
+    a0 = [pi[j] * b[0][j] for j in range(2)]
+    c[0] = sum(a0)
+    alpha[0] = [v / c[0] for v in a0]
+    for t in range(1, T):
+        a = [sum(alpha[t - 1][i] * A[i][j] for i in range(2)) * b[t][j] for j in range(2)]
+        c[t] = sum(a)
+        alpha[t] = [v / c[t] for v in a]
+    beta = [[1.0, 1.0] for _ in range(T)]
+    for t in range(T - 2, -1, -1):
+        beta[t] = [sum(A[i][j] * b[t + 1][j] * beta[t + 1][j] for j in range(2)) / c[t + 1] for i in range(2)]
+    gamma = []
+    for t in range(T):
+        g = [alpha[t][j] * beta[t][j] for j in range(2)]
+        z = sum(g)
+        gamma.append([v / z for v in g])
+    return alpha, beta, gamma, b, c
+
+
+def _hmm_m_step(x: List[float], alpha, beta, gamma, b, c, A):
+    T = len(x)
+    xi_sum = [[0.0, 0.0], [0.0, 0.0]]
+    for t in range(T - 1):
+        xi = [[alpha[t][i] * A[i][j] * b[t + 1][j] * beta[t + 1][j] for j in range(2)] for i in range(2)]
+        z = sum(sum(r) for r in xi)
+        for i in range(2):
+            for j in range(2):
+                xi_sum[i][j] += xi[i][j] / z
+    pi = gamma[0][:]
+    A_new = [[xi_sum[i][j] / sum(xi_sum[i]) for j in range(2)] for i in range(2)]
+    mu, var = [0.0, 0.0], [0.0, 0.0]
+    for j in range(2):
+        w = sum(gamma[t][j] for t in range(T))
+        mu[j] = sum(gamma[t][j] * x[t] for t in range(T)) / w
+        var[j] = max(sum(gamma[t][j] * (x[t] - mu[j]) ** 2 for t in range(T)) / w, 1e-8)
+    return pi, A_new, mu, var
+
+
 def hmm_fit(x: List[float], iters: int = 40):
     """Baum-Welch for a 2-state univariate Gaussian HMM with scaled forward-backward."""
     T = len(x)
@@ -164,39 +205,8 @@ def hmm_fit(x: List[float], iters: int = 40):
     pi = [0.5, 0.5]
     A = [[0.95, 0.05], [0.05, 0.95]]
     for _ in range(iters):
-        b = [[math.exp(_logn(x[t], mu[j], var[j])) + 1e-300 for j in range(2)] for t in range(T)]
-        alpha = [[0.0, 0.0] for _ in range(T)]
-        c = [0.0] * T
-        a0 = [pi[j] * b[0][j] for j in range(2)]
-        c[0] = sum(a0)
-        alpha[0] = [v / c[0] for v in a0]
-        for t in range(1, T):
-            a = [sum(alpha[t - 1][i] * A[i][j] for i in range(2)) * b[t][j] for j in range(2)]
-            c[t] = sum(a)
-            alpha[t] = [v / c[t] for v in a]
-        beta = [[1.0, 1.0] for _ in range(T)]
-        for t in range(T - 2, -1, -1):
-            beta[t] = [sum(A[i][j] * b[t + 1][j] * beta[t + 1][j] for j in range(2)) / c[t + 1] for i in range(2)]
-        gamma = []
-        for t in range(T):
-            g = [alpha[t][j] * beta[t][j] for j in range(2)]
-            z = sum(g)
-            gamma.append([v / z for v in g])
-        xi_sum = [[0.0, 0.0], [0.0, 0.0]]
-        for t in range(T - 1):
-            xi = [[alpha[t][i] * A[i][j] * b[t + 1][j] * beta[t + 1][j] for j in range(2)] for i in range(2)]
-            z = sum(sum(r) for r in xi)
-            for i in range(2):
-                for j in range(2):
-                    xi_sum[i][j] += xi[i][j] / z
-        pi = gamma[0][:]
-        for i in range(2):
-            rs = sum(xi_sum[i])
-            A[i] = [xi_sum[i][j] / rs for j in range(2)]
-        for j in range(2):
-            w = sum(gamma[t][j] for t in range(T))
-            mu[j] = sum(gamma[t][j] * x[t] for t in range(T)) / w
-            var[j] = max(sum(gamma[t][j] * (x[t] - mu[j]) ** 2 for t in range(T)) / w, 1e-8)
+        alpha, beta, gamma, b, c = _hmm_e_step(x, pi, A, mu, var)
+        pi, A, mu, var = _hmm_m_step(x, alpha, beta, gamma, b, c, A)
     return pi, A, mu, var
 
 
@@ -233,32 +243,13 @@ def hmm_fold_signal(s: Series, train: int, test: int, thr: float, iters: int = 4
 
 # ----------------------------------------------------------------------------- evaluation
 
+from research.evalwin import walk_w
+
+
 def walk(tf: str, s: Series, sig: List[int], risk: Risk, stop_px, ft, fr):
-    """Fixed signal, fixed windows (same as search.WINDOWS). Fresh capital per fold; ruin is carried forward."""
+    """Fixed signal, fixed windows (same as search.WINDOWS). Fresh capital per fold; ruin carried forward."""
     train, test = WINDOWS[tf]
-    n = len(s)
-    A = atr(s, 14)
-    E = 1.0
-    eq, pos, trades, folds = [], [], [], []
-    skipped = 0
-    ruined = False
-    start = train
-    while start + test <= n:
-        if ruined:
-            eq.extend([0.0] * test)
-            pos.extend([0] * test)
-            folds.append(-1.0)
-        else:
-            r = simulate(s, sig, risk, start, start + test, A=A, fund_t=ft, fund_r=fr, stop_px=stop_px)
-            eq.extend(E * v for v in r.eq)
-            E *= r.eq[-1]
-            pos.extend(r.pos)
-            trades.extend(r.trades)
-            skipped += r.skipped
-            folds.append(r.eq[-1] - 1)
-            ruined = r.ruined or E <= 0
-        start += test
-    return Result(eq=eq, pos=pos, trades=trades, skipped=skipped), folds
+    return walk_w(s, sig, risk, ft, fr, train, test, tf, stop_px=stop_px)
 
 
 def summarize(tf: str, s: Series, sig, stop_px, risk: Risk, ft, fr):
