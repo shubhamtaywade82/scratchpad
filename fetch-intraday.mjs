@@ -28,14 +28,13 @@ async function fetchAllKlines(interval, msPer, limitTotal) {
 
 console.log(`Fetching intraday futures klines for ${SYMBOL} ...`);
 const [k15m, k1h, k4h, k1d] = await Promise.all([
-  fetchAllKlines('15m', 15 * MS.m, 7000),   // ~2 years of quarter-hours
-  fetchAllKlines('1h', MS.h, 2600),         // ~3 months? no: 2600h ~ 108d... use more below
+  fetchAllKlines('15m', 15 * MS.m, 70000),  // ~2 years of quarter-hours (365*2*96 = 70080)
+  fetchAllKlines('1h', MS.h, 26000),        // ~3 years of hours (365*3*24 = 26280)
   fetchAllKlines('4h', 4 * MS.h, 2700),     // ~450 days
   fetchAllKlines('1d', MS.d, 1500),         // ~4.1 years
 ]);
-// re-fetch 1h deeper if needed: Binance caps history depth by count only, so paginate further back
 let k1hFull = k1h;
-if (k1h.length < 2600) console.warn('1h shorter than requested');
+if (k1h.length < 26000) console.warn(`1h shorter than requested: got ${k1h.length} of 26000 bars`);
 console.log(`15m=${k15m.length} 1h=${k1hFull.length} 4h=${k4h.length} 1d=${k1d.length}`);
 console.log(`coverage: 15m ${(k15m.length*15/60/24).toFixed(0)}d | 1h ${(k1hFull.length/24).toFixed(0)}d | 4h ${(k4h.length*4/24).toFixed(0)}d | 1d ${(k1d.length).toFixed(0)}d`);
 
