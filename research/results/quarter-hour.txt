@@ -6,4 +6,6 @@ all 15m bars                 4h    6983         +0.0061   -0.0194 .. +0.0303  (i
 all 15m bars                12h    6951         +0.0086   -0.0159 .. +0.0318  (includes 0)
 
 Part 2: volume and volatility bursts at quarter-hour boundaries (5m bars, OKX; no buy/sell split).
-   5m data not available
+OKX SOL 5m: 56243 bars, 196 days, 18747 boundary bars
+   volume ratio (boundary / other): 1.136   day-block 95% CI 1.117 .. 1.157
+   |return| ratio (boundary / other): 1.137   day-block 95% CI 1.117 .. 1.157

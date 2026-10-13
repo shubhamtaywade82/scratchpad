@@ -15,10 +15,10 @@ Of the five recommendations, none is adopted as a live signal on the evidence so
 
 | # | Report recommendation | What we tested | Result | Verdict |
 |---|---|---|---|---|
-| 1 | Cross-asset return prediction: lagged BTC / ETH returns predict SOL's next return | `research/cross_asset.py`: OKX SOL, BTC, ETH; 1h (2022–2026, 90-day train / 30-day test) and 15m (from 2025-04, 30 / 15 days); OLS, walk-forward, 8 bps per side | 1h: CROSS k=0.5 +38.7% net, Sharpe +0.80, but the threshold is a grid peak (k=0.25 gives −55%), 15 of 55 folds positive, and a one-bar delay gives −18%. Out-of-sample R² is negative in every row. See §3. | **Not established at 1h.** The sign is informative (flip null −45%), but the edge needs sub-hour execution. 15m result pending §3.4. |
+| 1 | Cross-asset return prediction: lagged BTC / ETH returns predict SOL's next return | `research/cross_asset.py`: OKX SOL, BTC, ETH; 1h (2022–2026, 90-day train / 30-day test) and 15m (from 2025-04, 30 / 15 days); OLS, walk-forward, 8 bps per side | 1h: CROSS k=0.5 +38.7% net, Sharpe +0.80, but the threshold is a grid peak (k=0.25 gives −55%), 15 of 55 folds positive, and a one-bar delay gives −18%. 15m (§3.4): CROSS k=0.5 gives −14.8% net, Sharpe −1.19, and negative OOS R² across all models. | **Not established.** The 1h edge is a grid peak that vanishes under a 1-bar delay, and the 15m test confirms negative net returns and negative OOS R². |
 | 2 | Regime-filtered trend / breakout | Donchian40 + EMA200 (v5); Supertrend variants (v7); ADX gate, squeeze (v9); HMM and variance-ratio regimes (`research/ideas.py`) | 4h Donchian40: +0.371% per position, 95% CI −0.32% .. +1.39% (29 positions). 1h vol-adaptive Supertrend: +0.314% per position, CI −0.22% .. +1.13% (56 positions). ADX gate rejected (v9). | **No validated regime filter.** Means are positive but not distinguishable from zero on 29–56 positions. |
 | 3 | Futures basis and carry | Carry: Binance perp funding × OKX spot, daily, 4 y (`research/carry_test.py`). Basis: OKX SOL delivery futures against the perp (`research/basis_test.py`). | Carry: +3.5%/yr per notional, +1.7%/yr per capital, net of placeholder costs. Basis: 4 traded contracts, mean +1.72% net after funding estimate (16–82 days held). | **Carry not supported** at the 15–25%/yr figure in the earlier funding proposal (v11 §1). **Basis plausible, untested at scale** (4 contracts). |
-| 4 | Time-aligned order-flow imbalance at quarter-hour boundaries (Kim & Hansen, arXiv 2607.09426) | `research/quarter_hour.py`: Binance SOLUSDT 15m, 73 days, taker imbalance `(2·takerBuy − vol) / vol` against forward returns; day-block bootstrap | Part 1 (all 15m bars): corr +0.0061 at 4h (6,983 events, CI −0.019 .. +0.030) and +0.0086 at 12h (6,951 events, CI −0.016 .. +0.032). Both intervals include zero. | **Not supported** on this data. Part 2 (OKX 5m volume bursts at boundaries) is pending §4. |
+| 4 | Time-aligned order-flow imbalance at quarter-hour boundaries (Kim & Hansen, arXiv 2607.09426) | `research/quarter_hour.py`: Binance SOLUSDT 15m, 73 days, taker imbalance `(2·takerBuy − vol) / vol` against forward returns; OKX 5m volume/volatility bursts at boundaries | Part 1 (all 15m bars): corr +0.0061 at 4h (6,983 events, CI −0.019 .. +0.030) and +0.0086 at 12h (6,951 events, CI −0.016 .. +0.032). Part 2 (OKX 5m): boundary volume ratio 1.136 (CI 1.117 .. 1.157), return ratio 1.137 (CI 1.117 .. 1.157). | **Bursts confirmed, no directional edge.** Volume and displacement spike ~13.6%–13.7% at boundaries, but directional order-flow imbalance does not predict returns. |
 | 5 | Constant-notional ₹10,000 at 10× | `research/leverage.py`: Donchian40 + EMA200 on 4h, walk-forward, 5 / 7 / 10 / 12 / 15×, fixed notional vs 1% and 2% risk sizing | Stop 2A (2 ATR). Fixed notional: 5× → −55.4% (MDD −87.5%); 10× → −99.7% (MDD −100.0%, one liquidation); 15× → −100.0% (two liquidations). Risk-sized 1%: +14.2% to +16.4% at every leverage, MDD −7.2% to −7.8%, effective leverage 0.28×–0.29×. | **Contradicted.** Constant notional ruins the account at 10×. Leverage is a margin ceiling, not a position size. |
 
 ## 3. Cross-asset return prediction
@@ -67,11 +67,33 @@ Verdict: **not established.** The sign is informative, but the edge depends on s
 
 ### 3.4 15m
 
-PENDING: needs `data/okx/SOL-USDT-SWAP-15m.json`, `BTC-USDT-SWAP-15m.json` and `ETH-USDT-SWAP-15m.json` (from 2025-04-01). The 15m delay-1 null is the latency test that 1h data cannot provide.
+Tested on OKX 15m closes (53,784 aligned bars from 2025-04; train 2,880 bars = 30 days, test 1,440 = 15 days; 35 folds). Costs: 8 bps per side.
+
+| Features | k | OOS R² | Net total | Sharpe | MDD | Round trips | RT win % | RT win 95% CI | In market |
+|---|---|---|---|---|---|---|---|---|---|
+| OWN | 0.0 | −0.22% | −100.0% | −28.10 | −100.0% | 18,227 | 31.3% | 30.6 .. 32.0% | 100% |
+| OWN | 0.5 | −0.22% | −10.0% | −0.55 | −12.9% | 55 | 36.4% | 24.9 .. 49.6% | 0.1% |
+| CROSS | 0.0 | −0.55% | −100.0% | −34.47 | −100.0% | 22,081 | 31.0% | 30.4 .. 31.6% | 100% |
+| **CROSS** | **0.5** | **−0.55%** | **−14.8%** | **−1.19** | **−15.0%** | **47** | **40.4%** | **27.6 .. 54.7%** | **0.1%** |
+| MARKET | 0.5 | −0.22% | −8.8% | −0.53 | −13.2% | 12 | 25.0% | 8.9 .. 53.2% | 0.0% |
+| ALL | 0.5 | −0.76% | −24.7% | −1.39 | −25.0% | 131 | 32.1% | 24.7 .. 40.5% | 0.3% |
+
+- Out-of-sample R² is negative across all models.
+- CROSS at k = 0.5 is negative (−14.8% net, Sharpe −1.19), positive in only 3 of 35 folds, and has a 1-day block bootstrap 95% CI of −33.0% .. +2.9% (Sharpe −2.61 .. +0.29).
+- Even with 0 bps costs, gross return is negative (−8.2%).
+
+Verdict: **conclusively refuted out of sample.** Cross-asset return prediction has no edge at 15m.
 
 ## 4. Quarter-hour order-flow, Part 2 (volume bursts)
 
-PENDING: needs `data/okx/SOL-USDT-SWAP-5m.json`. OKX candles carry no buy/sell split, so only the volume and |return| parts of the paper's claim can be tested here. The taker-imbalance part cannot be reproduced on OKX.
+Tested on OKX 5m bars (`data/okx/SOL-USDT-SWAP-5m.json`): 56,243 bars over 196 days, including 18,747 boundary bars (bars opening on :00, :15, :30, :45).
+
+- Volume ratio (boundary / other 5m bars): **1.136** (day-block bootstrap 95% CI 1.117 .. 1.157).
+- Absolute return |r| ratio (boundary / other 5m bars): **1.137** (day-block bootstrap 95% CI 1.117 .. 1.157).
+
+Both intervals strictly exclude 1.0.
+
+Verdict: **Bursts are confirmed.** Quarter-hour boundaries experience a statistically significant ~13.6% higher volume and ~13.7% larger absolute price displacement. However, as established in Part 1, directional taker imbalance does not translate into forward directional return (correlation 95% CI includes zero). The boundary effect is an activity/volatility concentration, not a directional edge.
 
 ## 5. Corrections found during this review
 
