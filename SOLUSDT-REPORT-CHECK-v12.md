@@ -15,7 +15,7 @@ Of the five recommendations, none is adopted as a live signal on the evidence so
 
 | # | Report recommendation | What we tested | Result | Verdict |
 |---|---|---|---|---|
-| 1 | Cross-asset return prediction: lagged BTC / ETH returns predict SOL's next return | `research/cross_asset.py`: OKX SOL, BTC, ETH; 1h (2022–2026, 90-day train / 30-day test) and 15m (from 2025-04, 30 / 15 days); OLS, walk-forward, 8 bps per side | See §3 | Pending §3 |
+| 1 | Cross-asset return prediction: lagged BTC / ETH returns predict SOL's next return | `research/cross_asset.py`: OKX SOL, BTC, ETH; 1h (2022–2026, 90-day train / 30-day test) and 15m (from 2025-04, 30 / 15 days); OLS, walk-forward, 8 bps per side | 1h: CROSS k=0.5 +38.7% net, Sharpe +0.80, but the threshold is a grid peak (k=0.25 gives −55%), 15 of 55 folds positive, and a one-bar delay gives −18%. Out-of-sample R² is negative in every row. See §3. | **Not established at 1h.** The sign is informative (flip null −45%), but the edge needs sub-hour execution. 15m result pending §3.4. |
 | 2 | Regime-filtered trend / breakout | Donchian40 + EMA200 (v5); Supertrend variants (v7); ADX gate, squeeze (v9); HMM and variance-ratio regimes (`research/ideas.py`) | 4h Donchian40: +0.371% per position, 95% CI −0.32% .. +1.39% (29 positions). 1h vol-adaptive Supertrend: +0.314% per position, CI −0.22% .. +1.13% (56 positions). ADX gate rejected (v9). | **No validated regime filter.** Means are positive but not distinguishable from zero on 29–56 positions. |
 | 3 | Futures basis and carry | Carry: Binance perp funding × OKX spot, daily, 4 y (`research/carry_test.py`). Basis: OKX SOL delivery futures against the perp (`research/basis_test.py`). | Carry: +3.5%/yr per notional, +1.7%/yr per capital, net of placeholder costs. Basis: 4 traded contracts, mean +1.72% net after funding estimate (16–82 days held). | **Carry not supported** at the 15–25%/yr figure in the earlier funding proposal (v11 §1). **Basis plausible, untested at scale** (4 contracts). |
 | 4 | Time-aligned order-flow imbalance at quarter-hour boundaries (Kim & Hansen, arXiv 2607.09426) | `research/quarter_hour.py`: Binance SOLUSDT 15m, 73 days, taker imbalance `(2·takerBuy − vol) / vol` against forward returns; day-block bootstrap | Part 1 (all 15m bars): corr +0.0061 at 4h (6,983 events, CI −0.019 .. +0.030) and +0.0086 at 12h (6,951 events, CI −0.016 .. +0.032). Both intervals include zero. | **Not supported** on this data. Part 2 (OKX 5m volume bursts at boundaries) is pending §4. |
@@ -23,7 +23,51 @@ Of the five recommendations, none is adopted as a live signal on the evidence so
 
 ## 3. Cross-asset return prediction
 
-PENDING: the ETH 1H file is still downloading. Results will be written to `research/results/cross-asset.txt`.
+Walk-forward OLS on OKX 1h closes (41,909 aligned bars, 2022–2026; 90-day train, 30-day test, 55 folds). Features at bar t use the current and lagged interval only; the target is the next interval. Full output: `research/results/cross-asset.txt`.
+
+### 3.1 1h headline
+
+| Features | k | OOS R² | Net total | Sharpe | MDD | Round trips | In market |
+|---|---|---|---|---|---|---|---|
+| OWN | 0.0 | −0.17% | −100.0% | −4.70 | −100.0% | 15,369 changes | 100% |
+| OWN | 0.5 | −0.17% | +3.7% | +0.13 | −27.8% | 51 | 0.1% |
+| CROSS | 0.0 | −0.50% | −100.0% | −5.70 | −100.0% | 17,302 changes | 100% |
+| **CROSS** | **0.5** | **−0.50%** | **+38.7%** | **+0.80** | **−9.6%** | **72** | **0.2%** |
+| MARKET | 0.5 | −0.25% | +22.3% | +0.60 | −6.7% | 38 | 0.1% |
+| ALL | 0.5 | −0.57% | +29.1% | +0.39 | −29.8% | 136 | 0.4% |
+
+The k = 0 rows flip almost every bar and are cost-dominated, so they are not tradable. Out-of-sample R² is negative in every row: the forecasts are worse than the mean. Any edge comes from the sign at a threshold, not from forecast accuracy.
+
+### 3.2 1h robustness, CROSS and MARKET
+
+| Test | CROSS | MARKET |
+|---|---|---|
+| Threshold k = 0.25 / 0.5 / 0.75 / 1.0 (net, Sharpe) | −55.1% / +38.7% / +11.1% / +8.5% | +13.5% / +22.3% / +4.9% / +10.0% |
+| Causal, k = 0.5 | +38.7% (Sh +0.80) | +22.3% (Sh +0.60) |
+| Sign-flipped | −45.1% (Sh −1.31) | −29.7% (Sh −0.92) |
+| Acts one bar late | −18.2% (Sh −0.44) | −12.2% (Sh −0.37) |
+| Acts two bars late | −9.4% (Sh −0.25) | −4.7% (Sh −0.21) |
+| Cost 0 / 4 / 8 / 12 bps per side | +55.6% / +46.9% / +38.7% / +30.9% | +29.9% / +26.1% / +22.3% / +18.6% |
+
+CROSS at k = 0.5, detail:
+
+- 72 round trips, 42 winners (58.3%, Wilson 95% CI 46.8–69.0%). The interval includes 50%.
+- Folds positive: 15 of 55.
+- Block bootstrap (1-day blocks, 2,000 draws): total return −3.8% .. +106.3%, Sharpe −0.04 .. +1.66. Includes zero.
+- Best three folds: +11.7%, +8.4%, +5.4%. Without them, the remaining 52 folds total +8.7%.
+
+### 3.3 Reading
+
+- **The sign carries information.** The flipped rule loses about the same amount as the causal rule gains (−45.1% vs +38.7%). A zero-information rule would lose the same cost in both directions, so the gap is directional content.
+- **The result is not a plateau.** Neighbouring thresholds give −55% and +11%, so k = 0.5 is a grid peak. It is selected in-sample, and the search over 4 feature sets × several thresholds is not corrected for.
+- **The edge lives in one bar.** Average position is about one hour. A one-bar delay removes it (−18.2%). At 1h resolution it is impossible to know whether a fill inside the same minute as the BTC/ETH close is achievable, so the 1h result cannot be traded as stated.
+- **It is concentrated and noisy.** Positive in 15 of 55 folds, and three folds carry most of the total.
+
+Verdict: **not established.** The sign is informative, but the edge depends on sub-hour execution. The 15m test (§3.4) decides whether it survives a 15-minute delay.
+
+### 3.4 15m
+
+PENDING: needs `data/okx/SOL-USDT-SWAP-15m.json`, `BTC-USDT-SWAP-15m.json` and `ETH-USDT-SWAP-15m.json` (from 2025-04-01). The 15m delay-1 null is the latency test that 1h data cannot provide.
 
 ## 4. Quarter-hour order-flow, Part 2 (volume bursts)
 

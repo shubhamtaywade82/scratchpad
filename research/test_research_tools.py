@@ -3,7 +3,7 @@ import unittest
 
 import numpy as np
 
-from research.cross_asset import features
+from research.cross_asset import block_bootstrap, features, round_trips, trade
 from research.expectancy import mean_ci, positions_net, win_rate_note, wilson
 from research.quarter_hour import corr
 
@@ -57,6 +57,54 @@ class Expectancy(unittest.TestCase):
         trades = [dict(side=1, k_in=5, ep=10.0, ret=0.01), dict(side=1, k_in=5, ep=10.0, ret=0.02),
                   dict(side=-1, k_in=5, ep=10.0, ret=-0.01)]
         self.assertEqual(sorted(positions_net(trades)), [-0.01, 0.03])
+
+
+def _wf(p, actual, sig=None, bpy=8760):
+    p = np.asarray(p, dtype=float)
+    return dict(p=p, actual=np.asarray(actual, dtype=float), sig=np.zeros(len(p)) if sig is None else np.asarray(sig, float),
+                fold=np.zeros(len(p), dtype=int), bpy=bpy, oos_r2=0.0)
+
+
+class CrossAssetSimulator(unittest.TestCase):
+    def test_delay_holds_position_for_the_next_target(self):
+        wf = _wf([1, -1, 1, 1], [0.01, -0.02, 0.03, 0.04])
+        causal = trade(wf, k=0.0, cost=0.0)
+        late = trade(wf, k=0.0, delay=1, cost=0.0)
+        self.assertEqual(causal['held'].tolist(), [1, -1, 1, 1])
+        self.assertEqual(late['held'].tolist(), [0, 1, -1, 1])       # decision at row i is earned on row i+1
+        self.assertAlmostEqual(float(late['gross'][1]), -0.02)       # +1 decided on row 0 earns row 1's return (-0.02)
+
+    def test_flip_negates_position(self):
+        wf = _wf([0.5, -0.5, 0.2], [0.01, 0.01, -0.01])
+        self.assertEqual(trade(wf, k=0.0, flip=True)['held'].tolist(), [-1, 1, -1])
+
+    def test_threshold_keeps_flat_inside_band(self):
+        wf = _wf([0.1, 0.9, -0.9], [0.0, 0.0, 0.0], sig=[1.0, 1.0, 1.0])
+        self.assertEqual(trade(wf, k=0.5)['held'].tolist(), [0, 1, -1])
+
+    def test_costs_charged_on_each_change_including_exit_to_flat(self):
+        wf = _wf([1, 1, -1, 0], [0.0, 0.0, 0.0, 0.0])
+        out = trade(wf, k=0.0, cost=0.001)
+        self.assertEqual(out['turns'].tolist(), [1, 0, 2, 1])        # enter, hold, flip, exit to flat
+        self.assertAlmostEqual(float(np.sum(out['net'])), -0.004)
+
+    def test_round_trips_are_runs_of_constant_position(self):
+        held = np.array([0, 1, 1, 0, -1, 0, 1])
+        gross = np.array([0.0, 0.01, 0.01, 0.0, -0.005, 0.0, 0.02])
+        runs = round_trips(held, gross, cost=0.001)
+        self.assertEqual(len(runs), 3)
+        self.assertAlmostEqual(runs[0], 0.02 - 0.002)
+        self.assertAlmostEqual(runs[1], -0.005 - 0.002)
+        self.assertAlmostEqual(runs[2], 0.02 - 0.002)
+
+    def test_block_bootstrap_interval_brackets_point_estimate(self):
+        rng = np.random.default_rng(7)
+        net = rng.normal(0.0005, 0.01, 2000)
+        (tlo, thi), (slo, shi) = block_bootstrap(net, 8760, block=24, B=400)
+        point_tot = float(np.prod(1 + net) - 1)
+        self.assertLess(tlo, point_tot)
+        self.assertGreater(thi, point_tot)
+        self.assertLess(slo, shi)
 
 
 class Corr(unittest.TestCase):
