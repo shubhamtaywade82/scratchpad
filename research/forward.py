@@ -202,4 +202,4 @@ def cmd_status():
 
 if __name__ == '__main__':
     cmd = sys.argv[1] if len(sys.argv) > 1 else 'status'
-    {'deploy': cmd_deploy, 'update': cmd_update, 'status': cmd_status}[cmd]()
+    {'deploy': cmd_deploy, 'update': cmd_update, 'step': cmd_update, 'status': cmd_status}[cmd]()
