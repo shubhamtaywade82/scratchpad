@@ -1,0 +1,51 @@
+
+==================== 4h: 2700 bars (450 d), 200 configs ====================
+[WF OOS] 5 folds x 360 bars  tot   -13.9%  CAGR  -16.7%  Sh -0.38  MDD  -35.0%  Calmar -0.48  n  28  WR 28.6%  PF 0.86  exp -0.22%/tr  expo   27%  L 13(-2.23%) S 15(+1.53%)
+         block-bootstrap OOS Sharpe 5/50/95: -2.72 / -0.40 / +1.80
+         fold   720-1080  train_Sh +2.98  oos  -17.6% Sh -3.62 n  6  DON30/half/none/slNone/tr3.0
+         fold  1080-1440  train_Sh +1.54  oos   +6.0% Sh +1.09 n  7  DON40/half/ema100/slNone/tr3.0
+         fold  1440-1800  train_Sh +2.11  oos  -12.8% Sh -2.35 n  5  DON60/mid/ema200/sl3.0/trNone
+         fold  1800-2160  train_Sh +1.43  oos   +3.3% Sh +0.80 n  5  DON40/mid/ema200/sl2.0/tr3.0
+         fold  2160-2520  train_Sh +1.17  oos   +9.2% Sh +1.87 n  5  DON40/mid/none/slNone/tr3.0
+[IS best, full sample, OPTIMISTIC] DON40/mid/ema200/slNone/tr3.0: tot   +58.0%  CAGR  +44.9%  Sh +1.28  MDD  -25.4%  Calmar +1.77  n  37  WR 37.8%  PF 1.72  exp +1.54%/tr  expo   24%  L 16(+1.48%) S 21(+1.58%)
+[v4 baseline full] tot   +45.5%  CAGR  +35.6%  Sh +0.95  MDD  -31.5%  Calmar +1.13  n  37  WR 37.8%  PF 1.56  exp +1.40%/tr  expo   39%  L 16(+1.90%) S 21(+1.01%)
+[v4 baseline OOS ] tot   +35.9%  CAGR  +86.3%  Sh +1.80  MDD  -14.6%  Calmar +5.90  n  14  WR 35.7%  PF 2.36  exp +2.70%/tr  expo   46%  L 6(+6.43%) S 8(-0.09%)
+[gross, zero cost, IS best] n 37  exp/tr +1.697%  total +70.4%  Sh +1.46
+
+==================== 1d: 1500 bars (1500 d), 200 configs ====================
+[WF OOS] 6 folds x 182 bars  tot  +104.2%  CAGR  +27.0%  Sh +0.69  MDD  -82.4%  Calmar +0.33  n  51  WR 31.4%  PF 2.65  exp +9.47%/tr  expo   87%  L 25(+20.97%) S 26(-1.60%)
+         block-bootstrap OOS Sharpe 5/50/95: -0.28 / +0.67 / +1.66
+         fold   365-547   train_Sh +1.67  oos +415.3% Sh +3.83 n  4  TSMOM120/slNone
+         fold   547-729   train_Sh +3.34  oos  -61.5% Sh -1.56 n 10  TSMOM120/slNone
+         fold   729-911   train_Sh +2.33  oos  +36.3% Sh +1.17 n 15  TSMOM20/slNone
+         fold   911-1093  train_Sh +1.33  oos  -25.8% Sh -0.43 n 16  TSMOM20/slNone
+         fold  1093-1275  train_Sh +0.25  oos   -2.4% Sh +0.27 n  2  DON120/half/none/slNone/trNone
+         fold  1275-1457  train_Sh +1.31  oos   +4.3% Sh +0.42 n  4  DON40/half/none/slNone/tr3.0
+[IS best, full sample, OPTIMISTIC] TSMOM120/slNone: tot  +174.1%  CAGR  +27.8%  Sh +0.91  MDD  -98.2%  Calmar +0.28  n  38  WR 39.5%  PF 1.41  exp +12.95%/tr  expo   92%  L 19(+28.16%) S 19(-2.26%)
+[v4 baseline full] tot  +103.9%  CAGR  +18.9%  Sh +0.58  MDD  -63.6%  Calmar +0.30  n  21  WR 33.3%  PF 1.76  exp +10.29%/tr  expo   41%  L 13(+16.95%) S 8(-0.55%)
+[v4 baseline OOS ] tot   +20.3%  CAGR  +11.9%  Sh +0.48  MDD  -35.5%  Calmar +0.34  n   9  WR 44.4%  PF 2.01  exp +2.74%/tr  expo   49%  L 4(+1.08%) S 5(+4.07%)
+[gross, zero cost, IS best] n 38  exp/tr +13.125%  total +253.3%  Sh +0.95
+
+==================== 1h: 2600 bars (108 d), 210 configs ====================
+[WF OOS] 5 folds x 360 bars  tot   +13.7%  CAGR  +86.5%  Sh +1.84  MDD  -15.8%  Calmar +5.46  n  24  WR 37.5%  PF 1.62  exp +0.69%/tr  expo   35%  L 18(+1.48%) S 6(-1.68%)
+         block-bootstrap OOS Sharpe 5/50/95: -1.48 / +1.68 / +5.33
+         fold   720-1080  train_Sh +3.68  oos   -3.8% Sh -7.50 n  4  DON120/mid/none/slNone/tr3.0
+         fold  1080-1440  train_Sh +1.93  oos  +14.5% Sh +5.34 n  6  ST10x3.0/slNone
+         fold  1440-1800  train_Sh +5.30  oos   -4.7% Sh -5.88 n  2  DON120/mid/mtf-4h-ema200/sl2.0/trNone
+         fold  1800-2160  train_Sh +6.35  oos  +16.0% Sh +9.69 n  5  DON24/mid/mtf-4h-ema200/sl3.0/trNone
+         fold  2160-2520  train_Sh +7.90  oos   -6.8% Sh -6.07 n  7  DON24/half/mtf-4h-ema200/slNone/tr3.0
+[IS best, full sample, OPTIMISTIC] DON24/mid/none/sl2.0/trNone: tot   +40.8%  CAGR +217.2%  Sh +2.98  MDD  -11.5%  Calmar +18.85  n  66  WR 34.8%  PF 1.70  exp +0.60%/tr  expo   52%  L 33(+1.23%) S 33(-0.04%)
+[gross, zero cost, IS best] n 66  exp/tr +0.752%  total +56.7%  Sh +3.85
+
+==================== 15m: 7000 bars (73 d), 210 configs ====================
+[WF OOS] 7 folds x 720 bars  tot    +2.6%  CAGR  +19.1%  Sh +0.59  MDD  -24.7%  Calmar +0.77  n  74  WR 20.3%  PF 1.14  exp +0.09%/tr  expo   70%  L 36(+0.69%) S 38(-0.48%)
+         block-bootstrap OOS Sharpe 5/50/95: -3.86 / +0.62 / +4.71
+         fold  1440-2160  train_Sh -0.79  oos  +17.3% Sh +9.37 n 15  TSMOM672/slNone
+         fold  2160-2880  train_Sh +8.20  oos   -3.0% Sh -3.36 n  2  DON384/mid/none/sl2.0/trNone
+         fold  2880-3600  train_Sh +11.20  oos  -10.0% Sh -9.17 n 22  TSMOM288/sl3.0
+         fold  3600-4320  train_Sh +5.06  oos   -4.2% Sh -6.59 n  9  DON48/half/mtf-1h-ema200/sl2.0/trNone
+         fold  4320-5040  train_Sh +2.19  oos  +17.3% Sh +13.14 n  7  ST10x4.0/slNone
+         fold  5040-5760  train_Sh +8.98  oos   -9.8% Sh -8.03 n 13  ST20x4.0/slNone
+         fold  5760-6480  train_Sh +8.34  oos   -1.2% Sh -2.15 n  6  DON96/mid/mtf-1h-ema200/slNone/trNone
+[IS best, full sample, OPTIMISTIC] DON96/mid/mtf-1h-ema200/slNone/trNone: tot   +44.2%  CAGR +524.7%  Sh +4.52  MDD  -12.1%  Calmar +43.52  n  38  WR 39.5%  PF 2.74  exp +1.06%/tr  expo   42%  L 21(+1.84%) S 17(+0.10%)
+[gross, zero cost, IS best] n 38  exp/tr +1.221%  total +53.9%  Sh +5.30
