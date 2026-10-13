@@ -9,6 +9,7 @@ Reported with breadth (how many variants beat the baseline) so a single winning 
 
 Usage:  python3 -m research.scaleout
 """
+import itertools
 import statistics as st
 
 from research.engine import donchian_sig, ema_gate, load_funding, load_klines
@@ -52,19 +53,16 @@ def main():
           f"{base_folds_pos:>3}/{len(base['folds'])}")
 
     rows = []
-    for tp in TP_R:
-        for frac in FRACS:
-            for be in BE:
-                for trail in TRAIL:
-                    act = 1.0 if trail else 0.0
-                    name = (f"scale {int(frac * 100)}% at {tp:g}R"
-                            f"{', BE 1R' if be else ''}{', trail 3 after 1R' if trail else ''}")
-                    r = run_cell('4h', sig, name, trail, act, be, tp, frac, ft, fr)
-                    rows.append((name, r))
-                    fp = sum(f > 0 for f in r['folds'])
-                    print(f"{name:<46} {r['m']['total'] * 100:>+7.1f}% {r['m']['sharpe']:>+6.2f} {r['m']['mdd'] * 100:>6.1f}% "
-                          f"{r['cal']:>+7.2f} {r['m']['positions']:>4} {r['pos_wr'] * 100:>4.0f}% {r['pos_r']:>+6.2f} "
-                          f"{fp:>3}/{len(r['folds'])}")
+    for tp, frac, be, trail in itertools.product(TP_R, FRACS, BE, TRAIL):
+        act = 1.0 if trail else 0.0
+        name = (f"scale {int(frac * 100)}% at {tp:g}R"
+                f"{', BE 1R' if be else ''}{', trail 3 after 1R' if trail else ''}")
+        r = run_cell('4h', sig, name, trail, act, be, tp, frac, ft, fr)
+        rows.append((name, r))
+        fp = sum(f > 0 for f in r['folds'])
+        print(f"{name:<46} {r['m']['total'] * 100:>+7.1f}% {r['m']['sharpe']:>+6.2f} {r['m']['mdd'] * 100:>6.1f}% "
+              f"{r['cal']:>+7.2f} {r['m']['positions']:>4} {r['pos_wr'] * 100:>4.0f}% {r['pos_r']:>+6.2f} "
+              f"{fp:>3}/{len(r['folds'])}")
 
     _print_breadth(rows, base, bm)
 

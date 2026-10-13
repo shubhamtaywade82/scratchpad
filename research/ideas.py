@@ -16,6 +16,7 @@ Families
 
 Usage:  python3 -m research.ideas 4h 1d 1h 15m
 """
+import itertools
 import math
 import statistics as st
 import sys
@@ -23,6 +24,7 @@ from typing import List, Optional, Tuple
 
 from research.engine import (Result, Risk, Series, atr, load_funding, load_klines, metrics, prior_max,
                              prior_min, returns_from_levels, simulate, BARS_PER_YEAR)
+from research.evalwin import walk_w
 from research.search import WINDOWS, block_bootstrap_sharpe
 
 SCREEN_LEV = 5.0          # screening leverage: 5x keeps 3-ATR stops inside the liquidation buffer
@@ -35,8 +37,7 @@ def sweep_fade(s: Series, N: int, T: int, buf: float = 0.1) -> Tuple[List[int], 
     n = len(s)
     A = atr(s, 14)
     hi, lo = prior_max(s.h, N), prior_min(s.l, N)
-    sig = [0] * n
-    stop: List[Optional[float]] = [None] * n
+    sig, stop = [0] * n, [None] * n
     dirn, timer = 0, 0
     for k in range(n):
         ev, sx = 0, None
@@ -46,11 +47,9 @@ def sweep_fade(s: Series, N: int, T: int, buf: float = 0.1) -> Tuple[List[int], 
             elif s.l[k] < lo[k] and s.c[k] > lo[k]:        # pierced the low, closed back over: bullish sweep
                 ev, sx = 1, s.l[k] - buf * A[k]
         if ev:
-            dirn, timer = ev, T
-            stop[k] = sx
+            dirn, timer, stop[k] = ev, T, sx
         if timer > 0:
-            sig[k] = dirn
-            timer -= 1
+            sig[k], timer = dirn, timer - 1
         else:
             dirn = 0
     return sig, stop
@@ -96,9 +95,7 @@ def taker_cont(s: Series, m: int, theta: float) -> List[int]:
             st_ = 1
         elif z[k] < -theta:
             st_ = -1
-        elif st_ == 1 and z[k] < 0:
-            st_ = 0
-        elif st_ == -1 and z[k] > 0:
+        elif (st_ == 1 and z[k] < 0) or (st_ == -1 and z[k] > 0):
             st_ = 0
         sig[k] = st_
     return sig
@@ -111,16 +108,11 @@ def taker_absorb(s: Series, m: int, theta: float, T: int) -> List[int]:
     for k in range(len(s)):
         if z[k] is None:
             continue
-        ev = 0
-        if z[k] < -theta and s.c[k] > s.o[k]:         # aggressive sellers absorbed, bar closes up
-            ev = 1
-        elif z[k] > theta and s.c[k] < s.o[k]:        # aggressive buyers absorbed, bar closes down
-            ev = -1
+        ev = 1 if (z[k] < -theta and s.c[k] > s.o[k]) else (-1 if (z[k] > theta and s.c[k] < s.o[k]) else 0)
         if ev:
             dirn, timer = ev, T
         if timer > 0:
-            sig[k] = dirn
-            timer -= 1
+            sig[k], timer = dirn, timer - 1
         else:
             dirn = 0
     return sig
@@ -143,10 +135,7 @@ def vr_regime(s: Series, W: int, q: int, thr: float) -> List[int]:
         vr = vq / (q * v1)
         mom = lc[k] - lc[k - q]
         d = 1 if mom > 0 else (-1 if mom < 0 else 0)
-        if vr > 1 + thr:
-            sig[k] = d
-        elif vr < 1 - thr:
-            sig[k] = -d
+        sig[k] = d if vr > 1 + thr else (-d if vr < 1 - thr else 0)
     return sig
 
 
@@ -243,9 +232,6 @@ def hmm_fold_signal(s: Series, train: int, test: int, thr: float, iters: int = 4
 
 # ----------------------------------------------------------------------------- evaluation
 
-from research.evalwin import walk_w
-
-
 def walk(tf: str, s: Series, sig: List[int], risk: Risk, stop_px, ft, fr):
     """Fixed signal, fixed windows (same as search.WINDOWS). Fresh capital per fold; ruin carried forward."""
     train, test = WINDOWS[tf]
@@ -268,23 +254,17 @@ def cells_for(tf: str, s: Series):
         '4h': dict(sweepN=[20, 50], m=[6, 18], W=[120, 240], trainH=720),
         '1d': dict(sweepN=[10, 20], m=[3, 10], W=[120, 240], trainH=365),
     }[tf]
-    out = []
-    for N in G['sweepN']:
-        for T in (4, 8, 16):
-            sig, sp = sweep_fade(s, N, T)
-            out.append((f"sweep N{N} T{T}", 'sweep', sig, sp))
-    for m in G['m']:
-        for th in (1.0, 2.0):
-            out.append((f"taker-cont m{m} z{th}", 'taker', taker_cont(s, m, th), None))
-            for T in (4, 8):
-                out.append((f"taker-absorb m{m} z{th} T{T}", 'taker', taker_absorb(s, m, th, T), None))
-    for W in G['W']:
-        for q in (4, 8):
-            for thr in (0.1, 0.25):
-                out.append((f"VR W{W} q{q} thr{thr}", 'vr', vr_regime(s, W, q, thr), None))
+    out = [(f"sweep N{N} T{T}", 'sweep', *sweep_fade(s, N, T))
+           for N, T in itertools.product(G['sweepN'], (4, 8, 16))]
+    for m, th in itertools.product(G['m'], (1.0, 2.0)):
+        out.append((f"taker-cont m{m} z{th}", 'taker', taker_cont(s, m, th), None))
+        for T in (4, 8):
+            out.append((f"taker-absorb m{m} z{th} T{T}", 'taker', taker_absorb(s, m, th, T), None))
+    for W, q, thr in itertools.product(G['W'], (4, 8), (0.1, 0.25)):
+        out.append((f"VR W{W} q{q} thr{thr}", 'vr', vr_regime(s, W, q, thr), None))
     for thr in (0.6, 0.8):
-        out.append((f"HMM train{G['trainH']} thr{thr}", 'hmm',
-                    hmm_fold_signal(s, G['trainH'], WINDOWS[tf][1], thr), None))
+        sig = hmm_fold_signal(s, G['trainH'], WINDOWS[tf][1], thr)
+        out.append((f"HMM train{G['trainH']} thr{thr}", 'hmm', sig, None))
     return out
 
 

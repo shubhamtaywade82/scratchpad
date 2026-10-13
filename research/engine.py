@@ -359,13 +359,10 @@ def simulate(s: Series, sig: List[int], risk: Risk, start: int, end: int,
     risk.validate()
     if start < 1 or end > len(s) or start >= end:
         raise ValueError(f"bad window [{start},{end}) for {len(s)} bars")
-    if A is None and (risk.sl_mult or risk.trail_mult):
-        A = atr(s, 14)
+    A = A if A is not None or not (risk.sl_mult or risk.trail_mult) else atr(s, 14)
     fund_t, fund_r = fund_t or [], fund_r or []
-    fi = bisect.bisect_right(fund_t, s.t[start])
-    bk = _Book(fee=fee, slip=slip)
-    block, skipped = 0, 0
-    eq, pos_hist = [], []
+    fi, bk = bisect.bisect_right(fund_t, s.t[start]), _Book(fee=fee, slip=slip)
+    block, skipped, eq, pos_hist = 0, 0, [], []
 
     for k in range(start, end):
         O, H, L, C = s.o[k], s.h[k], s.l[k], s.c[k]
@@ -392,10 +389,7 @@ def returns_from_levels(levels: List[float], start: float = 1.0) -> List[float]:
     return [eq[i] / eq[i - 1] - 1 if eq[i - 1] > 0 else 0.0 for i in range(1, len(eq))]
 
 
-def metrics(res: Result, tf: str) -> dict:
-    eq = [1.0] + res.eq
-    rets = returns_from_levels(res.eq)
-    bpy = BARS_PER_YEAR[tf]
+def _equity_metrics(eq: List[float], rets: List[float], bpy: int) -> dict:
     mu = st.fmean(rets)
     sd = st.pstdev(rets) or 1e-12
     peak, mdd = 1.0, 0.0
@@ -405,29 +399,39 @@ def metrics(res: Result, tf: str) -> dict:
     years = len(rets) / bpy
     total = eq[-1] - 1
     cagr = (eq[-1] ** (1 / years) - 1) if years > 0 and eq[-1] > 0 else -1.0
-    tr = res.trades
+    return dict(total=total, cagr=cagr, sharpe=mu / sd * math.sqrt(bpy), mdd=mdd,
+                calmar=(cagr / abs(mdd)) if mdd < 0 else 0.0)
+
+
+def _trade_metrics(tr: list) -> dict:
     wins = [t['pnl'] for t in tr if t['pnl'] > 0]
     losses = [t['pnl'] for t in tr if t['pnl'] <= 0]
     gp, gl = sum(wins), -sum(losses)
     longs = [t['ret'] for t in tr if t['side'] > 0]
     shorts = [t['ret'] for t in tr if t['side'] < 0]
     return dict(
-        total=total, cagr=cagr, sharpe=mu / sd * math.sqrt(bpy), mdd=mdd,
-        calmar=(cagr / abs(mdd)) if mdd < 0 else 0.0,
         n=len(tr), wr=len(wins) / len(tr) if tr else 0.0,
         pf=(gp / gl) if gl > 0 else (math.inf if gp > 0 else 0.0),
         exp=st.fmean([t['ret'] for t in tr]) if tr else 0.0,
         hold=st.fmean([t['bars'] for t in tr]) if tr else 0.0,
         eff_lev=st.fmean([t['eff_lev'] for t in tr]) if tr else 0.0,
-        exposure=sum(1 for p in res.pos if p) / len(res.pos) if res.pos else 0.0,
         nl=len(longs), el=st.fmean(longs) if longs else 0.0,
         ns=len(shorts), es=st.fmean(shorts) if shorts else 0.0,
         stops=sum(1 for t in tr if t['reason'] in ('stop', 'gap_stop')),
         liqs=sum(1 for t in tr if t['reason'] == 'liq'),
         tps=sum(1 for t in tr if t['reason'] in ('tp', 'tp_gap')),
         positions=sum(1 for t in tr if t['reason'] != 'tp_partial'),
-        skipped=res.skipped,
     )
+
+
+def metrics(res: Result, tf: str) -> dict:
+    eq = [1.0] + res.eq
+    rets = returns_from_levels(res.eq)
+    out = _equity_metrics(eq, rets, BARS_PER_YEAR[tf])
+    out.update(_trade_metrics(res.trades))
+    out['exposure'] = sum(1 for p in res.pos if p) / len(res.pos) if res.pos else 0.0
+    out['skipped'] = res.skipped
+    return out
 
 
 # ----------------------------------------------------------------------------- gates
@@ -497,14 +501,15 @@ def supertrend_dyn(s: Series, A: List[Optional[float]], mult) -> List[int]:
         bu, bl = hl2 + m_k * A[k], hl2 - m_k * A[k]
         if fu is None:
             fu, fl, d = bu, bl, 1
-        else:
-            pc = s.c[k - 1]
-            fu = bu if (bu < fu or pc > fu) else fu
-            fl = bl if (bl > fl or pc < fl) else fl
-            if d == -1 and s.c[k] > fu:
-                d = 1
-            elif d == 1 and s.c[k] < fl:
-                d = -1
+            out[k] = d
+            continue
+        pc = s.c[k - 1]
+        fu = bu if (bu < fu or pc > fu) else fu
+        fl = bl if (bl > fl or pc < fl) else fl
+        if d == -1 and s.c[k] > fu:
+            d = 1
+        elif d == 1 and s.c[k] < fl:
+            d = -1
         out[k] = d
     return out
 

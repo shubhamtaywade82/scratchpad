@@ -6,6 +6,7 @@ Prices: Hyperliquid candles (1d from 2023-05, 4h from 2024-07), so the walk-forw
 
 Usage: python3 -m research.fundmr_xvenue
 """
+import itertools
 import json
 import statistics as st
 
@@ -26,6 +27,24 @@ def load_hl():
     return ft, fr, candles
 
 
+def _evaluate_cells(s, ft, fr, itv, lev, train, test):
+    rows = []
+    grid = itertools.product((False, True), (720, 2160), (2.0, 2.5))
+    for robust, N, thr in grid:
+        z = z_at_bars(s, ft, fr, N, robust)
+        sig = mr_signal(z, thr, 0.5)
+        risk = Risk(sizing='risk', risk_pct=0.01, lev=lev, sl_mult=3.0)
+        r = summarize_w(s, sig, risk, ft, fr, train, test, itv)
+        f = summarize_w(s, [-x for x in sig], risk, ft, fr, train, test, itv)
+        m = r['m']
+        tag = ('robust' if robust else 'stdev') + f" z N{N} thr{thr:g}"
+        rows.append((tag, r, f))
+        print(f"{tag:<26} {m['total'] * 100:>+7.1f}% {m['sharpe']:>+6.2f} {m['mdd'] * 100:>6.1f}% {m['n']:>4} "
+              f"{m['nl']}/{m['ns']:<5} {sum(x > 0 for x in r['folds'])}/{len(r['folds']):<4} "
+              f"{f['m']['total'] * 100:>+7.1f}%")
+    return rows
+
+
 def main():
     ft, fr, candles = load_hl()
     print("==================== funding mean reversion, Hyperliquid SOL (hourly settlements) ====================")
@@ -33,21 +52,7 @@ def main():
         s = candles[itv]
         print(f"\n{itv}: {len(s)} bars, lev {lev:g}x, WF train {train} / test {test} bars")
         print(f"{'cell':<26} {'WF tot':>8} {'Sh':>6} {'MDD':>7} {'n':>4} {'L/S':>7} {'folds+':>6} {'flipped':>8}")
-        rows = []
-        for robust in (False, True):
-            for N in (720, 2160):
-                z = z_at_bars(s, ft, fr, N, robust)
-                for thr in (2.0, 2.5):
-                    sig = mr_signal(z, thr, 0.5)
-                    risk = Risk(sizing='risk', risk_pct=0.01, lev=lev, sl_mult=3.0)
-                    r = summarize_w(s, sig, risk, ft, fr, train, test, itv)
-                    f = summarize_w(s, [-x for x in sig], risk, ft, fr, train, test, itv)
-                    m = r['m']
-                    tag = ('robust' if robust else 'stdev') + f" z N{N} thr{thr:g}"
-                    rows.append((tag, r, f))
-                    print(f"{tag:<26} {m['total'] * 100:>+7.1f}% {m['sharpe']:>+6.2f} {m['mdd'] * 100:>6.1f}% {m['n']:>4} "
-                          f"{m['nl']}/{m['ns']:<5} {sum(x > 0 for x in r['folds'])}/{len(r['folds']):<4} "
-                          f"{f['m']['total'] * 100:>+7.1f}%")
+        rows = _evaluate_cells(s, ft, fr, itv, lev, train, test)
         pos = sum(1 for _, r, _ in rows if r['m']['total'] > 0)
         fpos = sum(1 for _, _, f in rows if f['m']['total'] > 0)
         print(f"-- {pos}/{len(rows)} cells positive WF OOS; flipped positive {fpos}/{len(rows)}")
@@ -55,3 +60,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

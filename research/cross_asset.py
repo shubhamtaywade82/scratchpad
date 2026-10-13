@@ -199,7 +199,7 @@ def headline(tf: str):
                   f"{m['mdd'] * 100:>7.1f}% {m['round_trips']:>5d} {win:>7.1f}% {lo * 100:>6.1f} .. {hi * 100:>5.1f}% {m['in_mkt'] * 100:>6.1f}%")
 
 
-def robustness(tf: str, kinds=('CROSS', 'MARKET')):
+def _report_thresholds(tf: str, kinds):
     print(f"\n--- {tf}: threshold sweep (k), total net return and Sharpe")
     print(f"{'features':<8} " + "  ".join(f"k={k:<4}" for k in (0.25, 0.5, 0.75, 1.0)))
     for kind in kinds:
@@ -210,6 +210,8 @@ def robustness(tf: str, kinds=('CROSS', 'MARKET')):
             cells.append(f"{m['net_tot'] * 100:+6.1f}% {m['sharpe']:+5.2f}")
         print(f"{kind:<8} " + "  ".join(cells))
 
+
+def _report_nulls_and_costs(tf: str, kinds):
     print(f"\n--- {tf}: nulls and costs at k=0.5 (net total return / Sharpe)")
     print(f"{'features':<8} {'causal':>16} {'flip sign':>16} {'delay 1':>16} {'delay 2':>16}")
     for kind in kinds:
@@ -229,7 +231,8 @@ def robustness(tf: str, kinds=('CROSS', 'MARKET')):
             row.append(f"{c * 1e4:>2.0f} bps: {m['net_tot'] * 100:+6.1f}% {m['sharpe']:+5.2f}")
         print(f"{kind:<8} " + "   ".join(row))
 
-    kind = kinds[0]
+
+def _report_detail(tf: str, kind: str):
     wf = walk_forward(tf, kind)
     m = metrics(wf, trade(wf, k=0.5))
     (tlo, thi), (slo, shi) = block_bootstrap(trade(wf, k=0.5)['net'], wf['bpy'])
@@ -241,6 +244,12 @@ def robustness(tf: str, kinds=('CROSS', 'MARKET')):
     ranked = sorted(m['fold_rets'], reverse=True)
     ex_top3 = float(np.prod(1 + np.array(ranked[3:])) - 1)
     print(f"   best 3 folds: {' '.join(f'{r * 100:+.1f}%' for r in ranked[:3])}; total without them: {ex_top3 * 100:+.1f}%")
+
+
+def robustness(tf: str, kinds=('CROSS', 'MARKET')):
+    _report_thresholds(tf, kinds)
+    _report_nulls_and_costs(tf, kinds)
+    _report_detail(tf, kinds[0])
 
 
 def main():

@@ -67,12 +67,50 @@ def eg_t(e):
     return g / se
 
 
+def _simulate_pair_fold(ls, la, beta, alpha, mu, sigma, coint, start, test):
+    pos, blocked, fold_eq, fold_trades = 0, False, 1.0, 0
+    fold_eqs = []
+    for k in range(start, start + test):
+        if coint and pos != 0:
+            fold_eq *= 1 + pos * ((ls[k] - ls[k - 1]) - beta * (la[k] - la[k - 1])) / (1 + beta)
+        e = ls[k] - alpha - beta * la[k]
+        z = (e - mu) / sigma if sigma > 0 else 0.0
+        if not coint:
+            fold_eqs.append(fold_eq)
+            continue
+        new = pos
+        if pos == 0 and not blocked:
+            new = 1 if z < -ENTRY else (-1 if z > ENTRY else 0)
+        elif pos != 0 and abs(z) < EXIT:
+            new = 0
+        elif pos != 0 and abs(z) > STOP:
+            new, blocked = 0, True
+        if abs(z) < EXIT:
+            blocked = False
+        if new != pos:
+            fold_eq *= 1 - COST_RT / 2
+            if new != 0:
+                fold_trades += 1
+            pos = new
+        fold_eqs.append(fold_eq)
+    return fold_eq, fold_trades, fold_eqs
+
+
+def _calc_pair_stats(eq_all, bpy):
+    rets = [eq_all[0] - 1.0] + [eq_all[i] / eq_all[i - 1] - 1 for i in range(1, len(eq_all))] if eq_all else []
+    peak, mdd, lvl = 1.0, 0.0, 1.0
+    for r in rets:
+        lvl *= 1 + r
+        peak = max(peak, lvl)
+        mdd = min(mdd, lvl / peak - 1)
+    sh = st.fmean(rets) / st.pstdev(rets) * math.sqrt(bpy) if rets and st.pstdev(rets) > 0 else float('nan')
+    return sh, mdd
+
+
 def run(times, sc, ac, train, test, bpy, label):
     ls, la = [math.log(v) for v in sc], [math.log(v) for v in ac]
-    n = len(times)
-    E = 1.0
+    n, E = len(times), 1.0
     eq_all, folds_out, trades = [], [], 0
-    fold_pos = 0
     start = train
     while start + test <= n:
         y, x = ls[start - train:start], la[start - train:start]
@@ -81,53 +119,15 @@ def run(times, sc, ac, train, test, bpy, label):
         t_eg = eg_t(e_tr)
         coint = t_eg < EG_CRIT
         mu, sigma = st.fmean(e_tr), st.pstdev(e_tr)
-        pos = 0
-        blocked = False
-        fold_eq = 1.0
-        fold_trades = 0
-        for k in range(start, start + test):
-            dlog_s = ls[k] - ls[k - 1]
-            dlog_a = la[k] - la[k - 1]
-            if coint and pos != 0:
-                fold_eq *= 1 + pos * (dlog_s - beta * dlog_a) / (1 + beta)
-            e = ls[k] - alpha - beta * la[k]
-            z = (e - mu) / sigma if sigma > 0 else 0.0
-            if not coint:
-                eq_all.append(E * fold_eq)
-                continue
-            new = pos
-            if pos == 0 and not blocked:
-                if z < -ENTRY:
-                    new = 1
-                elif z > ENTRY:
-                    new = -1
-            elif pos != 0 and abs(z) < EXIT:
-                new = 0
-            elif pos != 0 and abs(z) > STOP:
-                new = 0
-                blocked = True
-            if abs(z) < EXIT:
-                blocked = False
-            if new != pos:
-                fold_eq *= 1 - COST_RT / 2              # half a round trip per entry or exit
-                if new != 0:
-                    fold_trades += 1
-                pos = new
-            eq_all.append(E * fold_eq)
+        fold_eq, fold_trades, fold_eqs = _simulate_pair_fold(ls, la, beta, alpha, mu, sigma, coint, start, test)
+        eq_all.extend(E * fe for fe in fold_eqs)
         if coint:
             trades += fold_trades
         folds_out.append(dict(start=datetime.fromtimestamp(times[start] / 1000, timezone.utc).strftime('%Y-%m-%d'),
                               coint=coint, t_eg=t_eg, beta=beta, fold_ret=fold_eq - 1, trades=fold_trades))
         E = E * fold_eq
         start += test
-    rets = [eq_all[0] - 1.0] + [eq_all[i] / eq_all[i - 1] - 1 for i in range(1, len(eq_all))] if eq_all else []
-    peak, mdd = 1.0, 0.0
-    lvl = 1.0
-    for r in rets:
-        lvl *= 1 + r
-        peak = max(peak, lvl)
-        mdd = min(mdd, lvl / peak - 1)
-    sh = st.fmean(rets) / st.pstdev(rets) * math.sqrt(bpy) if rets and st.pstdev(rets) > 0 else float('nan')
+    sh, mdd = _calc_pair_stats(eq_all, bpy)
     n_coint = sum(1 for f in folds_out if f['coint'])
     print(f"\n{label}: train {train} / test {test} bars, {len(folds_out)} folds, cointegrated in {n_coint}")
     print(f"   WF total {(E - 1) * 100:+.2f}%   Sharpe {sh:+.2f}   MDD {mdd * 100:.2f}%   trades {trades}")

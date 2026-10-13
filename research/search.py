@@ -12,6 +12,7 @@ Protocol (no parameter ever sees the bars it is scored on):
 
 Usage:  python3 -m research.search 4h 1d 1h 15m
 """
+import itertools
 import math
 import random
 import statistics as st
@@ -44,32 +45,44 @@ class Cfg:
     family: str
 
 
+def _build_don_configs(base, tf: str, gates: dict) -> List[Cfg]:
+    cfgs = []
+    for n, exit_kind, (gname, g) in itertools.product(DON_N[tf], ('mid', 'half'), gates.items()):
+        exit_n = None if exit_kind == 'mid' else max(2, n // 2)
+        sig = donchian_sig(base, n, exit_n=exit_n, gate=g)
+        for sl, tr in itertools.product((None, 2.0, 3.0), (None, 3.0)):
+            nm = f"DON{n}/{exit_kind}/{gname}/sl{sl}/tr{tr}"
+            cfgs.append(Cfg(nm, sig, Risk(sl_mult=sl, trail_mult=tr), 'DON'))
+    return cfgs
+
+
+def _build_st_configs(base) -> List[Cfg]:
+    cfgs = []
+    for (p, m), sl in itertools.product(itertools.product((10, 20), (2.0, 3.0, 4.0)), (None, 3.0)):
+        sig = supertrend_sig(base, p, m)
+        cfgs.append(Cfg(f"ST{p}x{m}/sl{sl}", sig, Risk(sl_mult=sl), 'ST'))
+    return cfgs
+
+
+def _build_tsmom_configs(base, tf: str) -> List[Cfg]:
+    cfgs = []
+    for L, sl in itertools.product(TSMOM_L[tf], (None, 3.0)):
+        sig = tsmom_sig(base, L)
+        cfgs.append(Cfg(f"TSMOM{L}/sl{sl}", sig, Risk(sl_mult=sl), 'TSMOM'))
+    return cfgs
+
+
 def build_configs(tf: str, base, load: Callable[[str], object]) -> List[Cfg]:
     gates = {'none': None}
     for L in (100, 200):
         gates[f'ema{L}'] = ema_gate(base, L)
     if tf in HTF_FOR:
         gates[f'mtf-{HTF_FOR[tf]}-ema200'] = htf_gate(base, load(HTF_FOR[tf]), 200)
-    cfgs: List[Cfg] = []
-    for n in DON_N[tf]:
-        for exit_kind in ('mid', 'half'):
-            exit_n = None if exit_kind == 'mid' else max(2, n // 2)
-            for gname, g in gates.items():
-                sig = donchian_sig(base, n, exit_n=exit_n, gate=g)
-                for sl in (None, 2.0, 3.0):
-                    for tr in (None, 3.0):
-                        nm = f"DON{n}/{exit_kind}/{gname}/sl{sl}/tr{tr}"
-                        cfgs.append(Cfg(nm, sig, Risk(sl_mult=sl, trail_mult=tr), 'DON'))
-    for p in (10, 20):
-        for m in (2.0, 3.0, 4.0):
-            sig = supertrend_sig(base, p, m)
-            for sl in (None, 3.0):
-                cfgs.append(Cfg(f"ST{p}x{m}/sl{sl}", sig, Risk(sl_mult=sl), 'ST'))
-    for L in TSMOM_L[tf]:
-        sig = tsmom_sig(base, L)
-        for sl in (None, 3.0):
-            cfgs.append(Cfg(f"TSMOM{L}/sl{sl}", sig, Risk(sl_mult=sl), 'TSMOM'))
-    return cfgs
+    return (
+        _build_don_configs(base, tf, gates) +
+        _build_st_configs(base) +
+        _build_tsmom_configs(base, tf)
+    )
 
 
 def block_bootstrap_sharpe(rets: List[float], bpy: int, B: int = 1000, L: int = 20, seed: int = 7):

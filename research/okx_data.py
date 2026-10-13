@@ -115,6 +115,25 @@ def save(name: str, payload: dict) -> str:
     return path
 
 
+def _probe_expiry(inst: str):
+    data = _get('market/history-candles', dict(instId=inst, bar='1D', limit=1))
+    if isinstance(data, tuple):
+        return (inst, 'settled') if 'settled' in str(data[2]) else None
+    return (inst, 'live') if data else None
+
+
+def _probe_date_instruments(uly: str, ymd: str):
+    out = []
+    for inst in (f"{uly}_UM-{ymd}", f"{uly}-{ymd}"):
+        res = _probe_expiry(inst)
+        if not res:
+            continue
+        out.append(res)
+        if res[1] == 'live':
+            break
+    return out
+
+
 def expiries(uly: str, start: str, end: str):
     """Probe every date in [start, end] as a candidate delivery ID '<UL>_UM-YYMMDD' (also the plain '<UL>-YYMMDD' form).
     Returns the IDs that exist in the candle endpoint (live or settled)."""
@@ -122,24 +141,23 @@ def expiries(uly: str, start: str, end: str):
     d0, d1 = datetime.strptime(start, '%Y-%m-%d'), datetime.strptime(end, '%Y-%m-%d')
     d = d0
     while d <= d1:
-        if d.weekday() == 4:                                    # OKX delivery is on a Friday
-            ymd = d.strftime('%y%m%d')
-            for inst in (f"{uly}_UM-{ymd}", f"{uly}-{ymd}"):
-                data = _get('market/history-candles', dict(instId=inst, bar='1D', limit=1))
-                if isinstance(data, tuple):
-                    if 'settled' in str(data[2]):
-                        found.append((inst, 'settled'))
-                    continue
-                if data:
-                    found.append((inst, 'live'))
-                    break
+        if d.weekday() == 4:
+            found.extend(_probe_date_instruments(uly, d.strftime('%y%m%d')))
             time.sleep(0.1)
         d += timedelta(days=1)
     return found
 
 
+def _handle_expiries(argv):
+    found = expiries(argv[1], argv[2], argv[3])
+    path = save(f"expiries-{argv[1]}.json", dict(uly=argv[1], found=found))
+    print(f"{len(found)} delivery IDs -> {path}")
+    for f in found:
+        print('  ', f)
+
+
 def main(argv):
-    cmd = argv[0]
+    cmd = argv[0] if argv else None
     if cmd == 'candles':
         inst, bar, since = argv[1], argv[2], argv[3]
         rows = fetch_candles(inst, bar, since)
@@ -157,11 +175,7 @@ def main(argv):
                                                     note='rubik window only; oi/vol as returned by OKX (USD)'))
         print(f"{ccy} OI {period}: {len(rows)} points -> {path}")
     elif cmd == 'expiries':
-        found = expiries(argv[1], argv[2], argv[3])
-        path = save(f"expiries-{argv[1]}.json", dict(uly=argv[1], found=found))
-        print(f"{len(found)} delivery IDs -> {path}")
-        for f in found:
-            print('  ', f)
+        _handle_expiries(argv)
     else:
         raise SystemExit(__doc__)
 
