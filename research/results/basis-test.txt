@@ -1,0 +1,16 @@
+==================== basis trade: short OKX SOL delivery future, long OKX SOL-USDT perp ====================
+rule: enter when annualised premium >= 15% with >= 7 days left; hold to settlement
+contract               result     entry (UTC)        ann prem   dte   held    gross      net  fund est  net+fund  basis@exp
+SOL-USD_UM-260619      no candles
+SOL-USD_UM-260626      no candles
+SOL-USD_UM-260703      no candles
+SOL-USD_UM-260710      no candles
+SOL-USD_UM-260717      no candles
+SOL-USD_UM-260724      no candles
+SOL-USD_UM-260731      no candles
+SOL-USD_UM-260807      traded     2026-06-30 00:00     +16.4%    38  38.3d   +1.36%   +1.16%    -0.30%    +0.86%     +0.31%
+SOL-USD_UM-260814      traded     2026-06-23 04:00     +15.9%    52  52.2d   +1.15%   +0.95%    -0.39%    +0.56%     +1.16%
+SOL-USD_UM-260828      traded     2026-08-12 14:00     +38.1%    16  15.8d   +1.40%   +1.20%    -0.23%    +0.97%     +0.63%
+SOL-USD_UM-260925      traded     2026-07-05 09:00     +15.1%    82  82.0d   +5.42%   +5.22%    -0.76%    +4.47%     -0.43%
+
+4 traded contracts: mean net +2.13% per contract, mean net after funding estimate +1.72%, mean annualised premium at entry 21.4%, basis at settlement |mean| 0.633%

@@ -1,0 +1,11 @@
+tracking: 1500 common days, daily return correlation perp(Binance) vs spot(OKX) = 0.9902, annualised tracking error = 13.29%
+carry window: 2022-09-05 -> 2026-10-13  (1500 days)
+always-short-perp, long-spot (no filter):
+   net -39.0% per notional (-9.5%/yr), funding -23.4%, basis -15.5%, cost -0.1%
+conditional carry (enter when funding > enter, exit when funding < exit):
+   enter > 0.010%/8h, exit < 0.000%/8h: net +14.3% per notional, +3.5%/yr per notional, +1.7%/yr per capital, cycles 6, in market 18%
+      funding +15.1%  basis +0.4%  costs -1.2%   by year (per notional): 2023: +3.6%, 2024: +10.7%
+   enter > 0.030%/8h, exit < 0.010%/8h: net +11.8% per notional, +2.9%/yr per notional, +1.4%/yr per capital, cycles 3, in market 11%
+      funding +12.1%  basis +0.3%  costs -0.6%   by year (per notional): 2023: +2.8%, 2024: +8.9%
+   enter > 0.050%/8h, exit < 0.010%/8h: net +9.1% per notional, +2.2%/yr per notional, +1.1%/yr per capital, cycles 2, in market 8%
+      funding +9.4%  basis +0.2%  costs -0.4%   by year (per notional): 2023: +2.8%, 2024: +6.3%
