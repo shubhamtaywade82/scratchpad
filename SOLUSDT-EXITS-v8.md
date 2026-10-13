@@ -61,6 +61,26 @@ Columns: WF total, Sharpe, MDD, Calmar (return / |MDD|), positions, win rate per
 
 The immediate 3-ATR trail gives a slightly better Calmar (1.84 against 1.67). Its neighbours do not: trail after 1R is 1.28, and the trail-2 variant is negative. This matches the trail-sensitivity surface in v5: the trail distance is fragile, not a plateau.
 
+### 3b-2. 4h Donchian scale-out grid (48 variants, `research/scaleout.py`)
+
+Grid: target 1R / 1.5R / 2R / 3R, fraction closed 25% / 50% / 75%, breakeven at 1R off / on, 3-ATR trail after 1R off / on.
+
+| Breadth vs baseline (stop + signal flip: Sh +1.28, Calmar +1.67, WF +10.1%, MDD −6.1%) | Result |
+|---|---|
+| Beat baseline on Sharpe | **0 of 48** (median variant +0.75) |
+| Beat baseline on Calmar | **0 of 48** (median variant +0.81) |
+| Beat baseline on WF total return | **0 of 48** |
+| Smaller MDD | 48 of 48, but only to −4.2% … −5.7% |
+| Positive folds | 3 of 5 in every variant, same as baseline |
+
+Patterns:
+- **Larger fraction closed loses more.** 25% closed costs about 2 points of return. 75% closed costs about 9 points. The return loss scales with the fraction, and the drawdown benefit barely does.
+- **Earlier target loses more.** At 75% closed, 1R reaches +0.8% and 3R reaches +4.6%.
+- **Breakeven and trail add a little more cost.** Both are neutral to slightly negative on top of scale-out.
+- **Best Calmar in the grid is 25% at 3R (1.47)**, which is still below the baseline's 1.67. It was selected in-sample from 48 cells and is not a finding.
+
+Why the 4h Donchian differs from the 1h adaptive entry: its edge is a few large trend winners held for weeks (baseline mean R +0.39, against +0.05 to +0.32 across the grid). Partial exits cap exactly those winners. On the 1h adaptive entry the same cut reduced MDD by about 37% with Sharpe unchanged, so scale-out is entry-specific, not a general exit rule.
+
 ### 3c. 1h taker-absorb (m6 z2 T4), 22 positions
 
 Each exit changes at most two of the 22 positions. 95% of closes are signal flips, because the entry holds for four bars and rarely reaches 1R. Take-profit at 2R and 2R with breakeven give Calmar 3.63 against 3.03, but that is one trade's difference in 22 and does not qualify as an improvement.
@@ -98,4 +118,4 @@ Expected: the 1h adaptive table shows `E0 stop only +16.7% +2.88 -9.1%` and `E10
 
 1. **Forward-test one exit change at a time.** Start with the baseline exit on the 1h adaptive lead. Run the scale-out (E10) in parallel for at least 60 positions, and compare MDD and Sharpe.
 2. **If drawdown is the constraint, prefer scale-out over trailing.** On the 1h lead, scale-out cuts MDD by about 37% (−9.1% to −5.7%) with Sharpe unchanged. The trail cuts MDD by about 35% but halves Sharpe (2.88 to 1.92).
-3. **Do not add a fixed take-profit to the 4h Donchian or the taker entries.** Both lose return without a drawdown benefit that justifies it.
+3. **Do not add a fixed take-profit or scale-out to the 4h Donchian.** The 48-variant grid (section 3b-2) shows no variant beats the baseline on Sharpe, Calmar or return. The taker entries show no benefit either.
