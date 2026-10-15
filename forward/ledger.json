@@ -13,11 +13,11 @@
  "costs": "taker 5 bps + slippage 3 bps per side; no funding (spot)",
  "data": "kraken SOLUSD 60m",
  "status": "LIVE",
- "forward_bars": 19,
+ "forward_bars": 43,
  "equity": 1.0,
- "bars_total": 319,
- "last_bar_utc": "2026-10-13T23:00:00+00:00",
- "signal_equity": 0.9941063273617388,
+ "bars_total": 343,
+ "last_bar_utc": "2026-10-14T23:00:00+00:00",
+ "signal_equity": 0.9880723140835692,
  "signal_closed": [
   {
    "side": "short",
@@ -28,28 +28,49 @@
    "reason": "signal",
    "ret": -0.001369052342138437,
    "r": -0.11013265472992122
+  },
+  {
+   "side": "long",
+   "entry_utc": "2026-10-13T06:00:00+00:00",
+   "exit_utc": "2026-10-14T14:00:00+00:00",
+   "entry_px": 108.3725,
+   "exit_px": 104.408,
+   "reason": "stop",
+   "ret": -0.010350154052708305,
+   "r": -1.0079660126793464
   }
  ],
  "signal_open_position": {
-  "side": "long",
-  "entry_utc": "2026-10-13T06:00:00+00:00",
-  "entry_px": 108.372502,
-  "mark_px": 106.73,
-  "unrealised_ret": -0.004530823230278044
+  "side": "short",
+  "entry_utc": "2026-10-14T15:00:00+00:00",
+  "entry_px": 104.228722,
+  "mark_px": 104.17,
+  "unrealised_ret": -0.00022528640988030407
  },
- "signal_flat_bars": 1,
- "signal_positions": 2,
- "benchmark_equity": 0.996529958206468,
- "benchmark_closed": [],
+ "signal_flat_bars": 2,
+ "signal_positions": 3,
+ "benchmark_equity": 0.9965837119061989,
+ "benchmark_closed": [
+  {
+   "side": "long",
+   "entry_utc": "2026-10-13T05:00:00+00:00",
+   "exit_utc": "2026-10-14T13:00:00+00:00",
+   "entry_px": 107.9924,
+   "exit_px": 105.3584,
+   "reason": "signal",
+   "ret": -0.0067845626249485695,
+   "r": -0.6520487383890045
+  }
+ ],
  "benchmark_open_position": {
-  "side": "long",
-  "entry_utc": "2026-10-13T05:00:00+00:00",
-  "entry_px": 107.99238799999999,
-  "mark_px": 106.73,
-  "unrealised_ret": -0.0034700417935320783
+  "side": "short",
+  "entry_utc": "2026-10-14T13:00:00+00:00",
+  "entry_px": 105.358383,
+  "mark_px": 104.17,
+  "unrealised_ret": 0.003391282902377501
  },
  "benchmark_flat_bars": 1,
- "benchmark_positions": 1,
- "last_update_utc": "2026-10-14T00:13:07.068356+00:00",
- "new_bars_this_run": 20
+ "benchmark_positions": 2,
+ "last_update_utc": "2026-10-15T00:11:51.316765+00:00",
+ "new_bars_this_run": 24
 }
