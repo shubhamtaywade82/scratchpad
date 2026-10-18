@@ -110,6 +110,37 @@ def block_bootstrap_sharpe(rets: List[float], bpy: int, B: int = 1000, L: int = 
     return out[int(.05 * B)], out[int(.5 * B)], out[int(.95 * B)]
 
 
+_EULER_GAMMA = 0.57721566490153286
+
+
+def expected_max_sr(n_trials: int, sr_std: float) -> float:
+    """Expected maximum Sharpe ratio under the null hypothesis (Bailey & Lopez de Prado, 2014)."""
+    if n_trials <= 1 or sr_std <= 0:
+        return 0.0
+    nd = st.NormalDist()
+    z1 = nd.inv_cdf(1.0 - 1.0 / n_trials)
+    z2 = nd.inv_cdf(1.0 - 1.0 / (n_trials * math.e))
+    return sr_std * ((1.0 - _EULER_GAMMA) * z1 + _EULER_GAMMA * z2)
+
+
+def deflated_sharpe_ratio(rets: List[float], bpy: int, n_trials: int = 1, sr_std: float = 0.5) -> dict:
+    """Probabilistic and Deflated Sharpe Ratios accounting for non-normality and selection bias."""
+    T = len(rets)
+    if T < 3:
+        return dict(psr=0.5, dsr=0.5, sr_ann=0.0, sr_star=0.0)
+    mu, sigma = st.fmean(rets), st.stdev(rets) or 1e-12
+    sr = mu / sigma
+    m3 = sum((x - mu) ** 3 for x in rets) / T
+    m4 = sum((x - mu) ** 4 for x in rets) / T
+    skew, kurt = m3 / (sigma ** 3), m4 / (sigma ** 4)
+    se_sr = math.sqrt(max(1e-12, (1.0 - skew * sr + (kurt - 1.0) / 4.0 * (sr ** 2)) / T))
+    nd = st.NormalDist()
+    psr = nd.cdf(sr / se_sr)
+    sr_star_ann = expected_max_sr(n_trials, sr_std)
+    dsr = nd.cdf((sr - sr_star_ann / math.sqrt(bpy)) / se_sr)
+    return dict(sr_ann=sr * math.sqrt(bpy), psr=psr, dsr=dsr, sr_star=sr_star_ann, skew=skew, kurt=kurt)
+
+
 def _select_train_config(cfgs: List[Cfg], base, train: int, start: int, A, fund_t, fund_r, tf: str):
     min_n = MIN_TRADES_BY_TF.get(tf, 6)
     best, best_score = None, -math.inf
@@ -152,11 +183,12 @@ def walk_forward(tf: str, base, cfgs: List[Cfg], fund_t, fund_r, train: int, tes
     return Result(eq=eq_all, pos=pos_all, trades=trades_all), folds
 
 
-def stitched_report(tf: str, res: Result):
+def stitched_report(tf: str, res: Result, n_trials: int = 1, sr_std: float = 0.5):
     m = metrics(res, tf)
     rets = returns_from_levels(res.eq)
     lo, md, hi = block_bootstrap_sharpe(rets, BPY[tf], L=10 if tf == '1d' else 20)
-    return m, (lo, md, hi)
+    dsr_stat = deflated_sharpe_ratio(rets, BPY[tf], n_trials=n_trials, sr_std=sr_std)
+    return m, (lo, md, hi), dsr_stat
 
 
 BPY = BARS_PER_YEAR
@@ -203,9 +235,10 @@ def run(tf: str, fund_t, fund_r):
     n = len(base)
     print(f"\n==================== {tf}: {n} bars ({n / BPY[tf] * 365:.0f} d), {len(cfgs)} configs ====================")
     res, folds = walk_forward(tf, base, cfgs, fund_t, fund_r, train, test)
-    m, (lo, md, hi) = stitched_report(tf, res)
+    m, (lo, md, hi), dsr_stat = stitched_report(tf, res, n_trials=len(cfgs))
     print(f"[WF OOS] {len(folds)} folds x {test} bars  {fmt(m)}")
     print(f"         block-bootstrap OOS Sharpe 5/50/95: {lo:+.2f} / {md:+.2f} / {hi:+.2f}")
+    print(f"         PSR (vs 0): {dsr_stat['psr'] * 100:5.1f}%  |  DSR (vs {len(cfgs)} trials): {dsr_stat['dsr'] * 100:5.1f}%")
     for f in folds:
         print(f"         fold {f['start']:>5}-{f['end']:<5} train_Sh {f['train_sharpe']:+5.2f}  "
               f"oos {f['oos_total'] * 100:+6.1f}% Sh {f['oos_sharpe']:+5.2f} n {f['oos_n']:2d}  {f['chosen']}")

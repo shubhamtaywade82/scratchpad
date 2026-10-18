@@ -154,5 +154,24 @@ class EnsemblePortfolio(unittest.TestCase):
             self.assertLessEqual(s.l[i], min(s.o[i], s.c[i]))
 
 
+class DeflatedSharpeRatio(unittest.TestCase):
+    def test_expected_max_sr_monotonic_with_trials(self):
+        from research.search import expected_max_sr
+        self.assertEqual(expected_max_sr(1, 0.5), 0.0)
+        e10 = expected_max_sr(10, 0.5)
+        e100 = expected_max_sr(100, 0.5)
+        self.assertGreater(e10, 0.0)
+        self.assertGreater(e100, e10)
+
+    def test_dsr_deflates_as_trials_increase(self):
+        from research.search import deflated_sharpe_ratio
+        # Positive return stream with positive Sharpe
+        rets = [0.01, -0.005, 0.02, 0.015, -0.008, 0.03, -0.01, 0.025] * 20
+        d1 = deflated_sharpe_ratio(rets, 2190, n_trials=1, sr_std=0.5)
+        d50 = deflated_sharpe_ratio(rets, 2190, n_trials=50, sr_std=0.5)
+        self.assertGreater(d1['psr'], 0.5)
+        self.assertGreater(d1['dsr'], d50['dsr'])
+
+
 if __name__ == '__main__':
     unittest.main()
