@@ -1,8 +1,11 @@
 {
   "name": "workspace",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "type": "module",
   "scripts": {
+    "build": "tsc",
+    "search": "tsc && node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,5 +14,8 @@
   "description": "",
   "dependencies": {
     "@nemesis-oss/binance-sdk": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5"
   }
 }
