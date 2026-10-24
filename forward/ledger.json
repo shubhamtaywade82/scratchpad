@@ -13,11 +13,11 @@
  "costs": "taker 5 bps + slippage 3 bps per side; no funding (spot)",
  "data": "kraken SOLUSD 60m",
  "status": "LIVE",
- "forward_bars": 235,
+ "forward_bars": 259,
  "equity": 1.0,
- "bars_total": 535,
- "last_bar_utc": "2026-10-22T23:00:00+00:00",
- "signal_equity": 0.9383746217175901,
+ "bars_total": 559,
+ "last_bar_utc": "2026-10-23T23:00:00+00:00",
+ "signal_equity": 0.9412080774534594,
  "signal_closed": [
   {
    "side": "short",
@@ -124,12 +124,12 @@
   "side": "short",
   "entry_utc": "2026-10-22T03:00:00+00:00",
   "entry_px": 105.408368,
-  "mark_px": 103.54,
-  "unrealised_ret": 0.006338864827787307
+  "mark_px": 102.71,
+  "unrealised_ret": 0.009377541026803899
  },
  "signal_flat_bars": 40,
  "signal_positions": 11,
- "benchmark_equity": 0.9593913615292843,
+ "benchmark_equity": 0.9418403631776424,
  "benchmark_closed": [
   {
    "side": "long",
@@ -220,17 +220,37 @@
    "reason": "stop",
    "ret": -0.010494475237393008,
    "r": -1.01129688588821
+  },
+  {
+   "side": "short",
+   "entry_utc": "2026-10-22T02:00:00+00:00",
+   "exit_utc": "2026-10-23T14:00:00+00:00",
+   "entry_px": 106.0682,
+   "exit_px": 104.9315,
+   "reason": "signal",
+   "ret": 0.0038565138069942963,
+   "r": 0.42510652436178004
+  },
+  {
+   "side": "long",
+   "entry_utc": "2026-10-23T14:00:00+00:00",
+   "exit_utc": "2026-10-23T22:00:00+00:00",
+   "entry_px": 104.9315,
+   "exit_px": 102.7285,
+   "reason": "stop",
+   "ret": -0.01061992030725639,
+   "r": -1.0141921061797072
   }
  ],
  "benchmark_open_position": {
   "side": "short",
-  "entry_utc": "2026-10-22T02:00:00+00:00",
-  "entry_px": 106.06817,
-  "mark_px": 103.54,
-  "unrealised_ret": 0.008946752882847778
+  "entry_utc": "2026-10-23T23:00:00+00:00",
+  "entry_px": 102.179337,
+  "mark_px": 102.71,
+  "unrealised_ret": -0.002724985680651567
  },
- "benchmark_flat_bars": 38,
- "benchmark_positions": 10,
- "last_update_utc": "2026-10-23T00:12:07.580762+00:00",
- "new_bars_this_run": 120
+ "benchmark_flat_bars": 39,
+ "benchmark_positions": 12,
+ "last_update_utc": "2026-10-24T00:11:07.896700+00:00",
+ "new_bars_this_run": 24
 }
