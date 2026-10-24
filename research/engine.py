@@ -12,6 +12,8 @@ Invariants (each one is covered by research/test_engine.py):
   9. Isolated margin at leverage `lev`: margin = notional / lev, liquidation at 1/lev - mmr adverse move from entry.
      An entry is skipped when its stop sits beyond liq_buffer * liquidation distance (stop unreachable before liquidation),
      or when risk sizing has no stop distance.
+ 10. Trailing rule order per bar: gaps, liquidation, stop, partial TP, then ratchets from this bar's extreme
+     (breakeven, chandelier trail tightened past trail_tight_r, giveback lock), then the time stop at the close.
 """
 import bisect
 import json
@@ -22,7 +24,7 @@ from typing import List, Optional
 
 FEE = 0.0005    # Binance USD-M taker, per side
 SLIP = 0.0003   # adverse slippage, per side
-BARS_PER_YEAR = {'15m': 35040, '1h': 8760, '4h': 2190, '1d': 365}
+BARS_PER_YEAR = {'1m': 525600, '5m': 105120, '15m': 35040, '30m': 17520, '1h': 8760, '2h': 4380, '4h': 2190, '1d': 365}
 DATA_PATH = 'data/SOLUSDT-intraday.json'
 FUNDING_PATH = 'data/SOLUSDT-futures.json'
 
@@ -44,7 +46,8 @@ class Series:
         return len(self.t)
 
 
-_INTERVAL_MS = {'15m': 900_000, '1h': 3_600_000, '4h': 14_400_000, '1d': 86_400_000}
+_INTERVAL_MS = {'1m': 60_000, '5m': 300_000, '15m': 900_000, '30m': 1_800_000, '1h': 3_600_000,
+                '2h': 7_200_000, '4h': 14_400_000, '1d': 86_400_000}
 
 
 def to_series(tf: str, rows: list) -> Series:
@@ -136,6 +139,12 @@ class Risk:
     be_r: Optional[float] = None        # move stop to entry once the trade has run be_r x initial stop distance
     trail_act_r: float = 0.0            # chandelier trail starts only after trail_act_r x initial stop distance
     tp_frac: float = 1.0                # fraction closed at the take-profit; < 1 scales out and the rest keeps running
+    trail_tight_r: Optional[float] = None   # past this R of favourable excursion the trail uses trail_tight_mult
+    trail_tight_mult: Optional[float] = None
+    giveback: Optional[float] = None    # once excursion >= trail_act_r, stop locks (1 - giveback) of the peak open move
+    max_bars: Optional[int] = None      # close at bar close if the trade has not reached +1R within max_bars
+    lock_steps: tuple = ()              # ((trigger_r, lock_r), ...): past trigger_r excursion the stop locks lock_r
+                                        # (crypto-trading-agent TrailingStopManager tiers: (1,0),(1.5,.5),(2,1),(3,2))
     mmr: float = 0.005                  # maintenance margin rate. ASSUMPTION: confirm via exchange leverage brackets
     liq_buffer: float = 0.8             # stop must sit within this fraction of the liquidation distance
 
@@ -162,6 +171,16 @@ class Risk:
             raise ValueError("trail_act_r must be >= 0")
         if not (0 < self.tp_frac <= 1):
             raise ValueError("tp_frac must be in (0, 1]")
+        if (self.trail_tight_r is None) != (self.trail_tight_mult is None):
+            raise ValueError("trail_tight_r and trail_tight_mult must be set together")
+        if self.trail_tight_mult is not None and self.trail_tight_mult <= 0:
+            raise ValueError("trail_tight_mult must be positive")
+        if self.giveback is not None and not (0 < self.giveback < 1):
+            raise ValueError("giveback must be in (0, 1)")
+        if self.max_bars is not None and self.max_bars < 1:
+            raise ValueError("max_bars must be >= 1")
+        if any(lock >= trig for trig, lock in self.lock_steps):
+            raise ValueError("each lock_steps lock_r must be below its trigger_r")
 
     @property
     def liq_frac(self) -> float:
@@ -320,10 +339,22 @@ class _Book:
         mfe = (self.side * (self.ext - self.ep) / self.d) if self.d else None
         if risk.be_r is not None and mfe is not None and mfe >= risk.be_r:
             self.ratchet(self.ep, 'be')
-        if risk.trail_mult and A is not None and k < len(A) and A[k] is not None:
-            active = (not risk.trail_act_r) or mfe is None or mfe >= risk.trail_act_r
-            if active:
-                self.ratchet(self.ext - self.side * risk.trail_mult * A[k], 'trail')
+        active = (not risk.trail_act_r) or mfe is None or mfe >= risk.trail_act_r
+        if risk.trail_mult and active and A is not None and k < len(A) and A[k] is not None:
+            tight = risk.trail_tight_r is not None and mfe is not None and mfe >= risk.trail_tight_r
+            mult = risk.trail_tight_mult if tight else risk.trail_mult
+            self.ratchet(self.ext - self.side * mult * A[k], 'trail')
+        for trig, lock in risk.lock_steps:
+            if mfe is not None and mfe >= trig:
+                self.ratchet(self.ep + self.side * lock * self.d, 'lock')
+        if risk.giveback and active and self.side * (self.ext - self.ep) > 0:
+            self.ratchet(self.ep + (self.ext - self.ep) * (1 - risk.giveback), 'giveback')
+
+    def time_stop_due(self, k: int, risk: Risk) -> bool:
+        """True when max_bars have elapsed and the trade never reached +1R."""
+        if not (self.side and risk.max_bars and self.d) or k - self.k_in + 1 < risk.max_bars:
+            return False
+        return self.side * (self.ext - self.ep) < self.d
 
 
 def _calc_stop_geometry(desired: int, px: float, a: Optional[float], sp: Optional[float], sl_mult: Optional[float]):
@@ -382,6 +413,9 @@ def simulate(s: Series, sig: List[int], risk: Risk, start: int, end: int,
         block, skipped = _process_signal(bk, sig[k - 1], block, skipped, O, k, risk, a_prev, sp_prev)
         block = bk.check_intrabar(H, L, k, risk) or block
         bk.update_ratchets(H, L, risk, A, k)
+        if bk.time_stop_due(k, risk):
+            block = bk.side
+            bk.close(C, k, 'time')
         if k == end - 1 and bk.side:
             bk.close(C, k, 'eod')
         eq.append(bk.mtm(C))

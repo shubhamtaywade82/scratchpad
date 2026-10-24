@@ -1,0 +1,171 @@
+v13 screen 4h: walk-forward OOS, risk 1%/trade, isolated lev 3x, fee 0.0005 + slip 0.0003/side, funding charged
+
+--- SOLUSDT 4h DONENS  (288 configs, 21 folds)  PASS
+  [WF OOS] tot    +6.7%  CAGR   +1.3%  Sh +0.23  MDD  -12.6%  Calmar +0.10  n 183  WR 48.1%  PF 1.10  exp +0.04%/tr  expo   23%  L 81(+0.10%) S 102(-0.00%)
+    bootstrap Sh 5/50/95 -0.48/+0.27/+0.99  DSR 0.3%  flip tot -5.7%  delay1 tot +19.9%
+    positions 151  win 38%  winners in 1-10%: 38/57  >10%: 15
+    unlevered move  winners p25/50/75 +3.64/+6.57/+10.04%  losers p25/50/75 -6.02/-4.21/-2.59%  mean +0.31%
+    return on margin per trade (net of costs): 5x +0.73%  10x +1.47%
+    equity per trade (1% risk sizing): mean +0.05%  best +3.35%  worst -1.15%
+    most chosen: DONENS:ens/sl1.5/tr3.0/act1.0/tight3.0/gbNone/tp2.0 x3; DONENS:ens+btc/sl2.0/tr2.0/act1.0/tight3.0/gbNone/tp2.0 x2; DONENS:ens/sl1.5/tr3.0/act2.0/tight3.0/gbNone/tp2.0 x2
+
+--- ETHUSDT 4h DONENS  (288 configs, 21 folds)  fail
+  [WF OOS] tot    -0.6%  CAGR   -0.1%  Sh +0.02  MDD  -15.3%  Calmar -0.01  n 176  WR 42.0%  PF 1.00  exp +0.00%/tr  expo   20%  L 79(+0.14%) S 97(-0.11%)
+    bootstrap Sh 5/50/95 -0.74/+0.02/+0.74  DSR 0.1%  flip tot -12.0%  delay1 tot -0.0%
+    positions 163  win 38%  winners in 1-10%: 41/62  >10%: 12
+    unlevered move  winners p25/50/75 +1.96/+3.74/+7.19%  losers p25/50/75 -3.69/-2.64/-1.83%  mean +0.19%
+    return on margin per trade (net of costs): 5x +0.17%  10x +0.34%
+    equity per trade (1% risk sizing): mean +0.00%  best +4.98%  worst -1.17%
+    most chosen: DONENS:ens/sl1.5/tr2.0/act1.0/tight3.0/gb0.4/tp2.0 x3; DONENS:ens/sl1.5/tr2.0/act1.0/tight3.0/gbNone/tp2.0 x2; DONENS:ens/sl3.0/tr3.0/act2.0/tightNone/gb0.4/tpNone x2
+
+--- XRPUSDT 4h DONENS  (288 configs, 21 folds)  fail
+  [WF OOS] tot   -11.1%  CAGR   -2.3%  Sh -0.35  MDD  -15.5%  Calmar -0.14  n 173  WR 41.6%  PF 0.85  exp -0.06%/tr  expo   15%  L 64(-0.15%) S 109(-0.01%)
+    bootstrap Sh 5/50/95 -1.08/-0.32/+0.36  DSR 0.0%  flip tot -18.2%  delay1 tot -23.4%
+    positions 148  win 34%  winners in 1-10%: 39/51  >10%: 7
+    unlevered move  winners p25/50/75 +2.41/+4.40/+6.03%  losers p25/50/75 -4.79/-2.97/-1.98%  mean -0.51%
+    return on margin per trade (net of costs): 5x -3.37%  10x -6.75%
+    equity per trade (1% risk sizing): mean -0.07%  best +3.27%  worst -1.11%
+    most chosen: DONENS:ens+btc/sl1.5/tr4.0/act1.0/tight3.0/gbNone/tp2.0 x2; FLAT (no config met MIN_TRADES in train) x2; DONENS:ens+btc/sl3.0/tr2.0/act1.0/tightNone/gb0.4/tpNone x2
+
+--- SOLUSDT 4h TSMOM  (1152 configs, 21 folds)  PASS
+  [WF OOS] tot   +35.0%  CAGR   +6.0%  Sh +0.74  MDD  -14.6%  Calmar +0.41  n 598  WR 38.5%  PF 1.24  exp +0.05%/tr  expo   41%  L 298(+0.11%) S 300(-0.00%)
+    bootstrap Sh 5/50/95 -0.05/+0.76/+1.55  DSR 1.8%  flip tot -27.4%  delay1 tot +50.4%
+    positions 557  win 35%  winners in 1-10%: 112/196  >10%: 34
+    unlevered move  winners p25/50/75 +0.97/+2.97/+6.95%  losers p25/50/75 -3.33/-1.75/-0.81%  mean +0.28%
+    return on margin per trade (net of costs): 5x +0.58%  10x +1.16%
+    equity per trade (1% risk sizing): mean +0.06%  best +7.17%  worst -1.09%
+    most chosen: TSMOM:L5d+btc/sl3.0/tr4.0/act2.0/tight3.0/gbNone/tpNone x2; TSMOM:L10d/sl3.0/tr2.0/act1.0/tight3.0/gbNone/tp2.0 x2; TSMOM:L20d+btc/sl1.5/tr2.0/act1.0/tight3.0/gbNone/tp2.0 x1
+
+--- ETHUSDT 4h TSMOM  (1152 configs, 21 folds)  PASS
+  [WF OOS] tot    +9.0%  CAGR   +1.7%  Sh +0.23  MDD  -17.9%  Calmar +0.09  n 582  WR 36.6%  PF 1.07  exp +0.02%/tr  expo   41%  L 249(+0.08%) S 333(-0.02%)
+    bootstrap Sh 5/50/95 -0.51/+0.23/+1.01  DSR 0.1%  flip tot -43.2%  delay1 tot -5.0%
+    positions 553  win 35%  winners in 1-10%: 110/193  >10%: 18
+    unlevered move  winners p25/50/75 +0.54/+2.22/+4.74%  losers p25/50/75 -2.63/-1.28/-0.63%  mean +0.13%
+    return on margin per trade (net of costs): 5x -0.17%  10x -0.33%
+    equity per trade (1% risk sizing): mean +0.02%  best +10.43%  worst -1.13%
+    most chosen: TSMOM:L20d+btc/sl3.0/tr2.0/act2.0/tight3.0/gbNone/tp2.0 x1; TSMOM:L10d+btc/sl3.0/tr3.0/act2.0/tight3.0/gbNone/tp2.0 x1; TSMOM:L5d+btc/sl1.5/tr2.0/act2.0/tightNone/gbNone/tp2.0 x1
+
+--- XRPUSDT 4h TSMOM  (1152 configs, 21 folds)  fail
+  [WF OOS] tot   -13.8%  CAGR   -2.8%  Sh -0.20  MDD  -27.5%  Calmar -0.10  n 844  WR 34.7%  PF 0.95  exp -0.01%/tr  expo   45%  L 418(-0.02%) S 426(-0.01%)
+    bootstrap Sh 5/50/95 -1.04/-0.18/+0.54  DSR 0.0%  flip tot -48.5%  delay1 tot -36.0%
+    positions 804  win 33%  winners in 1-10%: 141/266  >10%: 25
+    unlevered move  winners p25/50/75 +0.44/+2.06/+4.52%  losers p25/50/75 -2.73/-1.28/-0.61%  mean -0.10%
+    return on margin per trade (net of costs): 5x -1.31%  10x -2.62%
+    equity per trade (1% risk sizing): mean -0.01%  best +11.18%  worst -1.08%
+    most chosen: TSMOM:L3d/sl1.5/tr4.0/act2.0/tightNone/gbNone/tp2.0 x1; TSMOM:L5d+btc/sl3.0/tr2.0/act2.0/tight3.0/gbNone/tpNone x1; TSMOM:L5d+btc/sl3.0/tr2.0/act2.0/tight3.0/gbNone/tp2.0 x1
+
+--- SOLUSDT 4h AST  (288 configs, 21 folds)  fail
+  [WF OOS] tot    -8.8%  CAGR   -1.8%  Sh -0.14  MDD  -20.5%  Calmar -0.09  n 366  WR 38.0%  PF 0.95  exp -0.02%/tr  expo   41%  L 177(+0.02%) S 189(-0.05%)
+    bootstrap Sh 5/50/95 -0.83/-0.11/+0.64  DSR 0.0%  flip tot -9.5%  delay1 tot +54.0%
+    positions 347  win 36%  winners in 1-10%: 79/125  >10%: 27
+    unlevered move  winners p25/50/75 +2.15/+4.86/+8.45%  losers p25/50/75 -5.45/-3.45/-1.65%  mean -0.08%
+    return on margin per trade (net of costs): 5x -1.18%  10x -2.35%
+    equity per trade (1% risk sizing): mean -0.02%  best +7.17%  worst -1.12%
+    most chosen: AST:p20L100+btc/sl1.5/tr3.0/act1.0/tight3.0/gbNone/tpNone x2; AST:p20L100/sl3.0/tr4.0/act1.0/tight3.0/gbNone/tpNone x2; AST:p20L100/sl1.5/tr2.0/act1.0/tight3.0/gb0.4/tp2.0 x1
+
+--- ETHUSDT 4h AST  (288 configs, 21 folds)  PASS
+  [WF OOS] tot   +14.0%  CAGR   +2.6%  Sh +0.32  MDD  -13.5%  Calmar +0.19  n 363  WR 40.5%  PF 1.10  exp +0.04%/tr  expo   42%  L 172(+0.08%) S 191(+0.01%)
+    bootstrap Sh 5/50/95 -0.45/+0.34/+1.10  DSR 0.5%  flip tot -12.9%  delay1 tot +26.4%
+    positions 340  win 37%  winners in 1-10%: 92/127  >10%: 15
+    unlevered move  winners p25/50/75 +2.02/+4.29/+6.37%  losers p25/50/75 -3.89/-2.51/-1.14%  mean +0.19%
+    return on margin per trade (net of costs): 5x +0.15%  10x +0.31%
+    equity per trade (1% risk sizing): mean +0.05%  best +11.02%  worst -1.12%
+    most chosen: AST:p20L100+btc/sl3.0/tr2.0/act1.0/tight3.0/gb0.4/tp2.0 x2; AST:p20L100/sl3.0/tr2.0/act1.0/tight3.0/gb0.4/tpNone x2; AST:p20L100+btc/sl2.0/tr4.0/act2.0/tight3.0/gbNone/tpNone x1
+
+--- XRPUSDT 4h AST  (288 configs, 21 folds)  fail
+  [WF OOS] tot   -14.1%  CAGR   -2.9%  Sh -0.27  MDD  -27.2%  Calmar -0.11  n 350  WR 42.3%  PF 0.91  exp -0.04%/tr  expo   31%  L 163(-0.12%) S 187(+0.03%)
+    bootstrap Sh 5/50/95 -0.99/-0.24/+0.43  DSR 0.0%  flip tot -22.7%  delay1 tot -6.7%
+    positions 323  win 38%  winners in 1-10%: 91/123  >10%: 12
+    unlevered move  winners p25/50/75 +1.45/+3.20/+5.93%  losers p25/50/75 -3.82/-2.67/-1.65%  mean -0.11%
+    return on margin per trade (net of costs): 5x -1.33%  10x -2.65%
+    equity per trade (1% risk sizing): mean -0.04%  best +5.25%  worst -1.17%
+    most chosen: AST:p20L100/sl1.5/tr2.0/act1.0/tightNone/gb0.4/tp2.0 x2; AST:p20L100/sl1.5/tr4.0/act1.0/tightNone/gbNone/tpNone x1; AST:p20L100+btc/sl2.0/tr2.0/act1.0/tight3.0/gb0.4/tp2.0 x1
+
+--- SOLUSDT 4h ABSORB  (288 configs, 21 folds)  fail
+  [WF OOS] tot    -2.0%  CAGR   -0.4%  Sh -0.16  MDD   -6.5%  Calmar -0.06  n  61  WR 44.3%  PF 0.90  exp -0.03%/tr  expo    3%  L 29(+0.07%) S 32(-0.12%)
+    bootstrap Sh 5/50/95 -1.11/-0.19/+0.69  DSR 0.0%  flip tot -0.0%  delay1 tot -7.6%
+    positions 60  win 45%  winners in 1-10%: 19/27  >10%: 1
+    unlevered move  winners p25/50/75 +0.84/+1.84/+3.56%  losers p25/50/75 -4.51/-2.69/-0.99%  mean -0.76%
+    return on margin per trade (net of costs): 5x -4.62%  10x -9.25%
+    equity per trade (1% risk sizing): mean -0.03%  best +3.74%  worst -1.06%
+    most chosen: FLAT (no config met MIN_TRADES in train) x10; ABSORB:m18z2T4/sl3.0/tr2.0/act1.0/tightNone/gbNone/tpNone x3; ABSORB:m18z2T4+btc/sl1.5/tr2.0/act1.0/tightNone/gb0.4/tp2.0 x2
+
+--- ETHUSDT 4h ABSORB  (288 configs, 21 folds)  fail
+  [WF OOS] tot    -4.9%  CAGR   -1.0%  Sh -0.40  MDD  -10.0%  Calmar -0.10  n  57  WR 47.4%  PF 0.74  exp -0.09%/tr  expo    2%  L 34(-0.03%) S 23(-0.16%)
+    bootstrap Sh 5/50/95 -1.09/-0.38/+0.35  DSR 0.0%  flip tot +4.6%  delay1 tot +0.7%
+    positions 56  win 46%  winners in 1-10%: 23/26  >10%: 0
+    unlevered move  winners p25/50/75 +1.51/+1.99/+2.54%  losers p25/50/75 -2.85/-1.97/-0.82%  mean -0.03%
+    return on margin per trade (net of costs): 5x -0.96%  10x -1.93%
+    equity per trade (1% risk sizing): mean -0.09%  best +2.15%  worst -1.09%
+    most chosen: FLAT (no config met MIN_TRADES in train) x8; ABSORB:m18z2T4+btc/sl3.0/tr2.0/act1.0/tightNone/gbNone/tpNone x2; ABSORB:m18z2T4+btc/sl1.5/tr2.0/act1.0/tightNone/gb0.4/tpNone x2
+
+--- XRPUSDT 4h ABSORB  (288 configs, 21 folds)  fail
+  [WF OOS] tot    -5.1%  CAGR   -1.0%  Sh -0.42  MDD   -7.4%  Calmar -0.14  n  58  WR 48.3%  PF 0.70  exp -0.09%/tr  expo    3%  L 30(-0.16%) S 28(-0.01%)
+    bootstrap Sh 5/50/95 -1.10/-0.42/+0.25  DSR 0.0%  flip tot +5.3%  delay1 tot -3.7%
+    positions 57  win 49%  winners in 1-10%: 22/28  >10%: 0
+    unlevered move  winners p25/50/75 +1.13/+1.82/+4.40%  losers p25/50/75 -3.87/-2.34/-0.99%  mean -0.43%
+    return on margin per trade (net of costs): 5x -2.94%  10x -5.89%
+    equity per trade (1% risk sizing): mean -0.09%  best +1.67%  worst -1.07%
+    most chosen: FLAT (no config met MIN_TRADES in train) x9; ABSORB:m18z2T4/sl3.0/tr2.0/act1.0/tightNone/gbNone/tpNone x2; ABSORB:m18z2T4+btc/sl3.0/tr2.0/act1.0/tightNone/gbNone/tpNone x2
+
+--- SOLUSDT 4h BTCBRK  (144 configs, 21 folds)  PASS
+  [WF OOS] tot   +25.0%  CAGR   +4.4%  Sh +0.62  MDD   -7.0%  Calmar +0.63  n 308  WR 49.7%  PF 1.24  exp +0.08%/tr  expo   21%  L 157(+0.07%) S 151(+0.08%)
+    bootstrap Sh 5/50/95 -0.07/+0.63/+1.31  DSR 5.0%  flip tot +0.5%  delay1 tot +19.0%
+    positions 263  win 41%  winners in 1-10%: 85/109  >10%: 14
+    unlevered move  winners p25/50/75 +2.89/+5.51/+7.95%  losers p25/50/75 -4.93/-3.35/-2.08%  mean +0.41%
+    return on margin per trade (net of costs): 5x +1.27%  10x +2.53%
+    equity per trade (1% risk sizing): mean +0.09%  best +3.58%  worst -1.12%
+    most chosen: FLAT (no config met MIN_TRADES in train) x4; BTCBRK:n18/sl1.5/tr2.0/act1.0/tight3.0/gb0.4/tpNone x2; BTCBRK:n18/sl3.0/tr2.0/act1.0/tightNone/gbNone/tp2.0 x1
+
+--- ETHUSDT 4h BTCBRK  (144 configs, 21 folds)  fail
+  [WF OOS] tot    -7.0%  CAGR   -1.4%  Sh -0.12  MDD  -19.7%  Calmar -0.07  n 321  WR 42.4%  PF 0.96  exp -0.02%/tr  expo   24%  L 161(-0.04%) S 160(+0.01%)
+    bootstrap Sh 5/50/95 -0.81/-0.11/+0.58  DSR 0.1%  flip tot -13.7%  delay1 tot -16.0%
+    positions 296  win 39%  winners in 1-10%: 76/115  >10%: 10
+    unlevered move  winners p25/50/75 +0.99/+2.65/+5.42%  losers p25/50/75 -3.29/-2.61/-1.50%  mean -0.13%
+    return on margin per trade (net of costs): 5x -1.46%  10x -2.92%
+    equity per trade (1% risk sizing): mean -0.02%  best +4.56%  worst -1.10%
+    most chosen: FLAT (no config met MIN_TRADES in train) x3; BTCBRK:n18/sl1.5/tr4.0/act1.0/tightNone/gbNone/tpNone x3; BTCBRK:n18/sl1.5/tr2.0/act1.0/tight3.0/gb0.4/tp2.0 x2
+
+--- XRPUSDT 4h BTCBRK  (144 configs, 21 folds)  fail
+  [WF OOS] tot   -23.6%  CAGR   -5.1%  Sh -0.71  MDD  -25.4%  Calmar -0.20  n 249  WR 36.5%  PF 0.74  exp -0.10%/tr  expo   15%  L 113(-0.17%) S 136(-0.05%)
+    bootstrap Sh 5/50/95 -1.39/-0.70/-0.06  DSR 0.0%  flip tot +2.4%  delay1 tot -17.8%
+    positions 234  win 35%  winners in 1-10%: 52/81  >10%: 11
+    unlevered move  winners p25/50/75 +1.17/+2.90/+6.35%  losers p25/50/75 -3.64/-2.64/-1.80%  mean -0.27%
+    return on margin per trade (net of costs): 5x -2.14%  10x -4.28%
+    equity per trade (1% risk sizing): mean -0.11%  best +4.11%  worst -1.10%
+    most chosen: FLAT (no config met MIN_TRADES in train) x6; BTCBRK:n18/sl1.5/tr2.0/act1.0/tightNone/gb0.4/tp2.0 x2; BTCBRK:n18/sl3.0/tr4.0/act1.0/tight3.0/gbNone/tp2.0 x2
+
+--- SOLUSDT 4h RATIO  (144 configs, 21 folds)  PASS
+  [WF OOS] tot    +6.8%  CAGR   +1.3%  Sh +0.17  MDD  -19.9%  Calmar +0.06  n 528  WR 43.9%  PF 1.04  exp +0.02%/tr  expo   43%  L 239(+0.02%) S 289(+0.02%)
+    bootstrap Sh 5/50/95 -0.50/+0.16/+0.89  DSR 0.4%  flip tot -17.0%  delay1 tot +4.8%
+    positions 489  win 41%  winners in 1-10%: 140/199  >10%: 28
+    unlevered move  winners p25/50/75 +1.66/+4.46/+7.91%  losers p25/50/75 -4.47/-2.97/-1.98%  mean +0.28%
+    return on margin per trade (net of costs): 5x +0.61%  10x +1.22%
+    equity per trade (1% risk sizing): mean +0.02%  best +5.84%  worst -1.18%
+    most chosen: FLAT (no config met MIN_TRADES in train) x3; RATIO:n18/sl3.0/tr2.0/act1.0/tightNone/gb0.4/tpNone x1; RATIO:n18/sl2.0/tr2.0/act2.0/tight3.0/gb0.4/tpNone x1
+
+--- ETHUSDT 4h RATIO  (144 configs, 21 folds)  fail
+  [WF OOS] tot   -11.3%  CAGR   -2.3%  Sh -0.19  MDD  -17.9%  Calmar -0.13  n 523  WR 42.3%  PF 0.95  exp -0.02%/tr  expo   41%  L 242(-0.05%) S 281(+0.01%)
+    bootstrap Sh 5/50/95 -0.92/-0.20/+0.59  DSR 0.0%  flip tot -25.4%  delay1 tot -21.9%
+    positions 503  win 42%  winners in 1-10%: 147/209  >10%: 10
+    unlevered move  winners p25/50/75 +1.00/+2.85/+4.48%  losers p25/50/75 -3.79/-2.43/-1.29%  mean -0.13%
+    return on margin per trade (net of costs): 5x -1.43%  10x -2.85%
+    equity per trade (1% risk sizing): mean -0.02%  best +8.96%  worst -1.16%
+    most chosen: FLAT (no config met MIN_TRADES in train) x3; RATIO:n18/sl3.0/tr4.0/act1.0/tightNone/gbNone/tpNone x2; RATIO:n18/sl2.0/tr2.0/act1.0/tight3.0/gbNone/tp2.0 x2
+
+--- XRPUSDT 4h RATIO  (144 configs, 21 folds)  fail
+  [WF OOS] tot   -12.4%  CAGR   -2.5%  Sh -0.25  MDD  -22.3%  Calmar -0.11  n 371  WR 41.5%  PF 0.92  exp -0.03%/tr  expo   30%  L 171(-0.04%) S 200(-0.03%)
+    bootstrap Sh 5/50/95 -1.01/-0.26/+0.46  DSR 0.0%  flip tot -22.6%  delay1 tot -21.0%
+    positions 356  win 40%  winners in 1-10%: 91/143  >10%: 20
+    unlevered move  winners p25/50/75 +1.18/+2.83/+5.39%  losers p25/50/75 -4.29/-2.64/-1.52%  mean -0.01%
+    return on margin per trade (net of costs): 5x -0.86%  10x -1.73%
+    equity per trade (1% risk sizing): mean -0.03%  best +4.71%  worst -1.10%
+    most chosen: FLAT (no config met MIN_TRADES in train) x8; RATIO:n18/sl2.0/tr4.0/act1.0/tightNone/gbNone/tpNone x2; RATIO:n18/sl1.5/tr2.0/act2.0/tightNone/gbNone/tpNone x2
+
+Cross-asset verdict (PASS on >= 2 of 3 alts):
+  DONENS: 1/3 
+  TSMOM: 2/3 SURVIVES
+  AST: 1/3 
+  ABSORB: 0/3 
+  BTCBRK: 1/3 
+  RATIO: 1/3 

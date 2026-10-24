@@ -527,5 +527,60 @@ class LedgerReconciliation(unittest.TestCase):
         self.assertAlmostEqual(1.0 + sum(t['pnl'] for t in r.trades), r.eq[-1], 12)
 
 
+class TrailingRules(unittest.TestCase):
+    """Entry at open of bar 3 = 100, ATR 1, 2-ATR initial stop -> 1R = 2."""
+    A = [1.0] * 12
+
+    def _run(self, ohlc, risk):
+        s = bars(ohlc)
+        sig = [0] * len(s); sig[2:] = [1] * (len(s) - 2)
+        return simulate(s, sig, risk, 1, len(s), A=self.A, fee=0, slip=0)
+
+    def test_trail_tightens_past_threshold(self):
+        # bar 3 runs to 107 (3.5R); loose 3-ATR trail = 104, tight 1-ATR trail = 106; bar 4 low 105.5
+        ohlc = flat(3) + [(100, 107, 99.5, 106.5), (106.5, 106.5, 105.5, 106)] + flat(5, 106)
+        loose = self._run(ohlc, Risk(sl_mult=2.0, trail_mult=3.0))
+        tight = self._run(ohlc, Risk(sl_mult=2.0, trail_mult=3.0, trail_tight_r=3.0, trail_tight_mult=1.0))
+        self.assertEqual(loose.trades[0]['reason'], 'eod')
+        self.assertEqual(tight.trades[0]['kind'], 'trail')
+        self.assertAlmostEqual(tight.trades[0]['px'], 106.0)
+
+    def test_giveback_locks_share_of_peak_move(self):
+        # peak 110 -> 40% giveback stop at 106; bar 4 trades down to 105
+        ohlc = flat(3) + [(100, 110, 99.5, 109), (109, 109, 105, 105.5)] + flat(5, 105.5)
+        r = self._run(ohlc, Risk(sl_mult=2.0, giveback=0.4, trail_act_r=1.0))
+        self.assertEqual(r.trades[0]['kind'], 'giveback')
+        self.assertAlmostEqual(r.trades[0]['px'], 106.0)
+
+    def test_giveback_waits_for_activation(self):
+        ohlc = flat(3) + [(100, 101, 99.5, 100.5), (100.5, 100.6, 99.2, 99.5)] + flat(5, 99.5)
+        r = self._run(ohlc, Risk(sl_mult=2.0, giveback=0.4, trail_act_r=1.0))
+        self.assertEqual(r.trades[0]['reason'], 'eod')
+
+    def test_time_stop_closes_trade_that_never_reached_one_r(self):
+        ohlc = flat(3) + [(100, 101, 99.5, 100.5)] * 3 + flat(5, 100.5)
+        r = self._run(ohlc, Risk(sl_mult=2.0, max_bars=3))
+        t = r.trades[0]
+        self.assertEqual((t['reason'], t['k_out']), ('time', 5))
+        self.assertEqual(len(r.trades), 1)  # no re-entry while the signal persists
+
+    def test_time_stop_skipped_once_one_r_reached(self):
+        ohlc = flat(3) + [(100, 102.5, 99.5, 102)] * 3 + flat(5, 102)
+        r = self._run(ohlc, Risk(sl_mult=2.0, max_bars=3))
+        self.assertEqual(r.trades[0]['reason'], 'eod')
+
+    def test_lock_ladder_locks_profit_tiers(self):
+        # 1R = 2; bar 3 runs to +2.5R (105) -> highest tier hit is (2R, lock 1R) -> stop 102; bar 4 dips to 101
+        ohlc = flat(3) + [(100, 105, 99.5, 104.5), (104.5, 104.5, 101, 101.5)] + flat(5, 101.5)
+        r = self._run(ohlc, Risk(sl_mult=2.0, lock_steps=((1.0, 0.0), (1.5, 0.5), (2.0, 1.0), (3.0, 2.0))))
+        self.assertEqual(r.trades[0]['kind'], 'lock')
+        self.assertAlmostEqual(r.trades[0]['px'], 102.0)
+
+    def test_validate_rejects_bad_trailing_rules(self):
+        for bad in (Risk(trail_tight_r=2.0), Risk(giveback=1.0), Risk(max_bars=0), Risk(lock_steps=((1.0, 1.0),))):
+            with self.assertRaises(ValueError):
+                bad.validate()
+
+
 if __name__ == '__main__':
     unittest.main()

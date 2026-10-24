@@ -35,6 +35,9 @@ export interface TradeRecord {
   readonly exitPrice: number;
   readonly netReturnPct: number;
   readonly isWin: boolean;
+  readonly stopPrice?: number;
+  readonly targetPrice?: number;
+  readonly exitReason?: 'STOP_LOSS' | 'TAKE_PROFIT';
 }
 
 export interface BacktestSummary {

@@ -86,13 +86,13 @@ function evaluateSignal(
 function resolveExit(
   trade: ActiveTrade,
   bar: Kline
-): { isExited: boolean; exitPrice: number } {
+): { isExited: boolean; exitPrice: number; reason?: 'STOP_LOSS' | 'TAKE_PROFIT' } {
   if (trade.side === 'LONG') {
-    if (bar.low <= trade.stopPrice) return { isExited: true, exitPrice: trade.stopPrice };
-    if (bar.high >= trade.targetPrice) return { isExited: true, exitPrice: trade.targetPrice };
+    if (bar.low <= trade.stopPrice) return { isExited: true, exitPrice: trade.stopPrice, reason: 'STOP_LOSS' };
+    if (bar.high >= trade.targetPrice) return { isExited: true, exitPrice: trade.targetPrice, reason: 'TAKE_PROFIT' };
   } else {
-    if (bar.high >= trade.stopPrice) return { isExited: true, exitPrice: trade.stopPrice };
-    if (bar.low <= trade.targetPrice) return { isExited: true, exitPrice: trade.targetPrice };
+    if (bar.high >= trade.stopPrice) return { isExited: true, exitPrice: trade.stopPrice, reason: 'STOP_LOSS' };
+    if (bar.low <= trade.targetPrice) return { isExited: true, exitPrice: trade.targetPrice, reason: 'TAKE_PROFIT' };
   }
   return { isExited: false, exitPrice: 0 };
 }
@@ -149,6 +149,9 @@ function executeTradeExit(trade: ActiveTrade, bar: Kline): TradeRecord | null {
     side: trade.side,
     entryPrice: trade.entryPrice,
     exitPrice: exitResult.exitPrice,
+    stopPrice: trade.stopPrice,
+    targetPrice: trade.targetPrice,
+    exitReason: exitResult.reason,
     netReturnPct: netReturn,
     isWin: netReturn > 0,
   };
