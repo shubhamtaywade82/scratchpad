@@ -32,6 +32,8 @@ LEV = 10.0
 BE_MOVE = 0.0025
 TIERS = ((1.0, 0.0), (1.5, 0.5), (2.0, 1.0), (3.0, 2.0))
 RESULTS = Path(__file__).resolve().parent / 'results'
+# Prompts are ~600 tokens; minicpm5-analyst's 32k Modelfile context alone held ~8 GB and got the run killed
+NUM_CTX = 4096
 TRADE_CONSTRAINTS = """### TRADE OBJECTIVES & MANDATORY CONSTRAINTS:
 1. Minimum Profit Target: At 10x leverage, Take Profit (TP) requires at least 0.5% price distance.
    - For LONG: takeProfit >= currentPrice * 1.005
@@ -103,7 +105,7 @@ def parse_and_validate(raw: str, price: float):
 
 
 def generate(model: str, text: str) -> str:
-    body = dict(model=model, prompt=text, format='json', stream=False, options=dict(temperature=0.2, top_p=0.9))
+    body = dict(model=model, prompt=text, format='json', stream=False, options=dict(temperature=0.2, top_p=0.9, num_ctx=NUM_CTX))
     req = urllib.request.Request(f'{OLLAMA}/api/generate', json.dumps(body).encode(), {'Content-Type': 'application/json'})
     for attempt in range(3):
         try:
