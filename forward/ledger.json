@@ -13,11 +13,11 @@
  "costs": "taker 5 bps + slippage 3 bps per side; no funding (spot)",
  "data": "kraken SOLUSD 60m",
  "status": "LIVE",
- "forward_bars": 331,
+ "forward_bars": 451,
  "equity": 1.0,
- "bars_total": 631,
- "last_bar_utc": "2026-10-26T23:00:00+00:00",
- "signal_equity": 0.9166288589660088,
+ "bars_total": 751,
+ "last_bar_utc": "2026-10-31T23:00:00+00:00",
+ "signal_equity": 0.8814963122530546,
  "signal_closed": [
   {
    "side": "short",
@@ -168,12 +168,68 @@
    "reason": "stop",
    "ret": -0.010627184487984219,
    "r": -1.0145871896623693
+  },
+  {
+   "side": "long",
+   "entry_utc": "2026-10-27T22:00:00+00:00",
+   "exit_utc": "2026-10-28T13:00:00+00:00",
+   "entry_px": 101.2704,
+   "exit_px": 101.3796,
+   "reason": "signal",
+   "ret": 3.760738280281896e-05,
+   "r": 0.05211803234622089
+  },
+  {
+   "side": "short",
+   "entry_utc": "2026-10-28T13:00:00+00:00",
+   "exit_utc": "2026-10-28T20:00:00+00:00",
+   "entry_px": 101.3796,
+   "exit_px": 103.0009,
+   "reason": "signal",
+   "ret": -0.008935718992092603,
+   "r": -0.8405901196031309
+  },
+  {
+   "side": "long",
+   "entry_utc": "2026-10-28T20:00:00+00:00",
+   "exit_utc": "2026-10-29T01:00:00+00:00",
+   "entry_px": 103.0009,
+   "exit_px": 100.6947,
+   "reason": "stop",
+   "ret": -0.010580256080313257,
+   "r": -1.0132766722386413
+  },
+  {
+   "side": "short",
+   "entry_utc": "2026-10-29T02:00:00+00:00",
+   "exit_utc": "2026-10-29T15:00:00+00:00",
+   "entry_px": 99.7201,
+   "exit_px": 102.374,
+   "reason": "stop",
+   "ret": -0.01050223821560766,
+   "r": -1.011704146804779
+  },
+  {
+   "side": "long",
+   "entry_utc": "2026-10-29T16:00:00+00:00",
+   "exit_utc": "2026-10-29T19:00:00+00:00",
+   "entry_px": 102.6208,
+   "exit_px": 100.1524,
+   "reason": "stop",
+   "ret": -0.010539075680031021,
+   "r": -1.0123262456444433
   }
  ],
- "signal_open_position": null,
- "signal_flat_bars": 48,
- "signal_positions": 15,
- "benchmark_equity": 0.9335629434259536,
+ "signal_open_position": {
+  "side": "short",
+  "entry_utc": "2026-10-29T21:00:00+00:00",
+  "entry_px": 96.021185,
+  "mark_px": 95.31,
+  "unrealised_ret": 0.001647198289595047
+ },
+ "signal_flat_bars": 75,
+ "signal_positions": 21,
+ "benchmark_equity": 0.8953967826475512,
  "benchmark_closed": [
   {
    "side": "long",
@@ -324,17 +380,107 @@
    "reason": "signal",
    "ret": -0.007332740449355265,
    "r": -0.6930185994719533
+  },
+  {
+   "side": "short",
+   "entry_utc": "2026-10-26T19:00:00+00:00",
+   "exit_utc": "2026-10-27T17:00:00+00:00",
+   "entry_px": 100.2399,
+   "exit_px": 100.9703,
+   "reason": "signal",
+   "ret": -0.003173342040778585,
+   "r": -0.278914631203604
+  },
+  {
+   "side": "long",
+   "entry_utc": "2026-10-27T17:00:00+00:00",
+   "exit_utc": "2026-10-28T13:00:00+00:00",
+   "entry_px": 100.9703,
+   "exit_px": 101.3796,
+   "reason": "signal",
+   "ret": 0.0013651900978604412,
+   "r": 0.18134666793924067
+  },
+  {
+   "side": "short",
+   "entry_utc": "2026-10-28T13:00:00+00:00",
+   "exit_utc": "2026-10-28T20:00:00+00:00",
+   "entry_px": 101.3796,
+   "exit_px": 103.0009,
+   "reason": "signal",
+   "ret": -0.008935718992092603,
+   "r": -0.8405901196031309
+  },
+  {
+   "side": "long",
+   "entry_utc": "2026-10-28T20:00:00+00:00",
+   "exit_utc": "2026-10-29T01:00:00+00:00",
+   "entry_px": 103.0009,
+   "exit_px": 100.6947,
+   "reason": "stop",
+   "ret": -0.010580256080313256,
+   "r": -1.0132766722386413
+  },
+  {
+   "side": "short",
+   "entry_utc": "2026-10-29T02:00:00+00:00",
+   "exit_utc": "2026-10-29T15:00:00+00:00",
+   "entry_px": 99.7201,
+   "exit_px": 101.7005,
+   "reason": "signal",
+   "ret": -0.0079334021590261,
+   "r": -0.7549489187606448
+  },
+  {
+   "side": "long",
+   "entry_utc": "2026-10-29T15:00:00+00:00",
+   "exit_utc": "2026-10-29T19:00:00+00:00",
+   "entry_px": 101.7005,
+   "exit_px": 100.4699,
+   "reason": "signal",
+   "ret": -0.005560338423557743,
+   "r": -0.5138282016496711
+  },
+  {
+   "side": "short",
+   "entry_utc": "2026-10-29T19:00:00+00:00",
+   "exit_utc": "2026-10-30T06:00:00+00:00",
+   "entry_px": 100.4699,
+   "exit_px": 97.8293,
+   "reason": "signal",
+   "ret": 0.009632274646320084,
+   "r": 1.000807184857145
+  },
+  {
+   "side": "long",
+   "entry_utc": "2026-10-30T06:00:00+00:00",
+   "exit_utc": "2026-10-30T15:00:00+00:00",
+   "entry_px": 97.8293,
+   "exit_px": 94.3117,
+   "reason": "signal",
+   "ret": -0.00811192987445552,
+   "r": -0.7896274282309468
+  },
+  {
+   "side": "short",
+   "entry_utc": "2026-10-30T15:00:00+00:00",
+   "exit_utc": "2026-10-31T01:00:00+00:00",
+   "entry_px": 94.3117,
+   "exit_px": 96.619,
+   "reason": "signal",
+   "ret": -0.006096928809404962,
+   "r": -0.5854686904005686
   }
  ],
  "benchmark_open_position": {
-  "side": "short",
-  "entry_utc": "2026-10-26T19:00:00+00:00",
-  "entry_px": 100.239919,
-  "mark_px": 100.76,
-  "unrealised_ret": -0.0024853991294559023
+  "side": "long",
+  "entry_utc": "2026-10-31T01:00:00+00:00",
+  "entry_px": 96.618977,
+  "mark_px": 95.31,
+  "unrealised_ret": -0.0045774688228193755
  },
- "benchmark_flat_bars": 39,
- "benchmark_positions": 16,
- "last_update_utc": "2026-10-27T00:12:40.905664+00:00",
- "new_bars_this_run": 24
+ "benchmark_flat_bars": 40,
+ "benchmark_positions": 25,
+ "last_update_utc": "2026-11-01T00:11:29.393919+00:00",
+ "new_bars_this_run": 120
 }
