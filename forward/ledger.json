@@ -13,11 +13,11 @@
  "costs": "taker 5 bps + slippage 3 bps per side; no funding (spot)",
  "data": "kraken SOLUSD 60m",
  "status": "LIVE",
- "forward_bars": 451,
+ "forward_bars": 475,
  "equity": 1.0,
- "bars_total": 751,
- "last_bar_utc": "2026-10-31T23:00:00+00:00",
- "signal_equity": 0.8814963122530546,
+ "bars_total": 775,
+ "last_bar_utc": "2026-11-01T23:00:00+00:00",
+ "signal_equity": 0.8837209966134324,
  "signal_closed": [
   {
    "side": "short",
@@ -224,12 +224,12 @@
   "side": "short",
   "entry_utc": "2026-10-29T21:00:00+00:00",
   "entry_px": 96.021185,
-  "mark_px": 95.31,
-  "unrealised_ret": 0.001647198289595047
+  "mark_px": 94.41,
+  "unrealised_ret": 0.00417511454480388
  },
  "signal_flat_bars": 75,
  "signal_positions": 21,
- "benchmark_equity": 0.8953967826475512,
+ "benchmark_equity": 0.894778090988836,
  "benchmark_closed": [
   {
    "side": "long",
@@ -470,17 +470,27 @@
    "reason": "signal",
    "ret": -0.006096928809404962,
    "r": -0.5854686904005686
+  },
+  {
+   "side": "long",
+   "entry_utc": "2026-10-31T01:00:00+00:00",
+   "exit_utc": "2026-11-01T13:00:00+00:00",
+   "entry_px": 96.619,
+   "exit_px": 94.7116,
+   "reason": "signal",
+   "ret": -0.006396117983917078,
+   "r": -0.6090642813336004
   }
  ],
  "benchmark_open_position": {
-  "side": "long",
-  "entry_utc": "2026-10-31T01:00:00+00:00",
-  "entry_px": 96.618977,
-  "mark_px": 95.31,
-  "unrealised_ret": -0.0045774688228193755
+  "side": "short",
+  "entry_utc": "2026-11-01T13:00:00+00:00",
+  "entry_px": 94.711578,
+  "mark_px": 94.41,
+  "unrealised_ret": 0.0011381223490494097
  },
  "benchmark_flat_bars": 40,
- "benchmark_positions": 25,
- "last_update_utc": "2026-11-01T00:11:29.393919+00:00",
- "new_bars_this_run": 120
+ "benchmark_positions": 26,
+ "last_update_utc": "2026-11-02T00:13:46.013037+00:00",
+ "new_bars_this_run": 24
 }
