@@ -13,11 +13,11 @@
  "costs": "taker 5 bps + slippage 3 bps per side; no funding (spot)",
  "data": "kraken SOLUSD 60m",
  "status": "LIVE",
- "forward_bars": 523,
+ "forward_bars": 547,
  "equity": 1.0,
- "bars_total": 823,
- "last_bar_utc": "2026-11-03T23:00:00+00:00",
- "signal_equity": 0.8752075460372772,
+ "bars_total": 847,
+ "last_bar_utc": "2026-11-04T23:00:00+00:00",
+ "signal_equity": 0.8793056443467374,
  "signal_closed": [
   {
    "side": "short",
@@ -238,18 +238,28 @@
    "reason": "stop",
    "ret": -0.010621639161375807,
    "r": -1.0142317766213573
+  },
+  {
+   "side": "short",
+   "entry_utc": "2026-11-02T16:00:00+00:00",
+   "exit_utc": "2026-11-04T11:00:00+00:00",
+   "entry_px": 93.382,
+   "exit_px": 93.488,
+   "reason": "signal",
+   "ret": -0.0008384835555541046,
+   "r": -0.044577535911648286
   }
  ],
  "signal_open_position": {
-  "side": "short",
-  "entry_utc": "2026-11-02T16:00:00+00:00",
-  "entry_px": 93.381977,
-  "mark_px": 92.71,
-  "unrealised_ret": 0.002316295625319307
+  "side": "long",
+  "entry_utc": "2026-11-04T11:00:00+00:00",
+  "entry_px": 93.48803799999999,
+  "mark_px": 95.53,
+  "unrealised_ret": 0.007854641335069128
  },
  "signal_flat_bars": 76,
- "signal_positions": 23,
- "benchmark_equity": 0.8811175886306561,
+ "signal_positions": 24,
+ "benchmark_equity": 0.886370701166269,
  "benchmark_closed": [
   {
    "side": "long",
@@ -530,17 +540,37 @@
    "reason": "signal",
    "ret": 0.0006337467288534833,
    "r": 0.10257191780225355
+  },
+  {
+   "side": "long",
+   "entry_utc": "2026-11-03T14:00:00+00:00",
+   "exit_utc": "2026-11-04T02:00:00+00:00",
+   "entry_px": 93.1379,
+   "exit_px": 91.8324,
+   "reason": "signal",
+   "ret": -0.005961851362212053,
+   "r": -0.5567436245551621
+  },
+  {
+   "side": "short",
+   "entry_utc": "2026-11-04T02:00:00+00:00",
+   "exit_utc": "2026-11-04T05:00:00+00:00",
+   "entry_px": 91.8324,
+   "exit_px": 92.2377,
+   "reason": "signal",
+   "ret": -0.002201597901493478,
+   "r": -0.17941133119562935
   }
  ],
  "benchmark_open_position": {
   "side": "long",
-  "entry_utc": "2026-11-03T14:00:00+00:00",
-  "entry_px": 93.13793299999999,
-  "mark_px": 92.71,
-  "unrealised_ret": -0.002339815161334332
+  "entry_utc": "2026-11-04T05:00:00+00:00",
+  "entry_px": 92.237663,
+  "mark_px": 95.53,
+  "unrealised_ret": 0.01185505592078268
  },
  "benchmark_flat_bars": 41,
- "benchmark_positions": 29,
- "last_update_utc": "2026-11-04T00:11:06.302506+00:00",
+ "benchmark_positions": 31,
+ "last_update_utc": "2026-11-05T00:11:00.515434+00:00",
  "new_bars_this_run": 24
 }
