@@ -13,11 +13,11 @@
  "costs": "taker 5 bps + slippage 3 bps per side; no funding (spot)",
  "data": "kraken SOLUSD 60m",
  "status": "LIVE",
- "forward_bars": 547,
+ "forward_bars": 571,
  "equity": 1.0,
- "bars_total": 847,
- "last_bar_utc": "2026-11-04T23:00:00+00:00",
- "signal_equity": 0.8793056443467374,
+ "bars_total": 871,
+ "last_bar_utc": "2026-11-05T23:00:00+00:00",
+ "signal_equity": 0.8800755374288078,
  "signal_closed": [
   {
    "side": "short",
@@ -248,18 +248,28 @@
    "reason": "signal",
    "ret": -0.0008384835555541046,
    "r": -0.044577535911648286
+  },
+  {
+   "side": "long",
+   "entry_utc": "2026-11-04T11:00:00+00:00",
+   "exit_utc": "2026-11-05T15:00:00+00:00",
+   "entry_px": 93.488,
+   "exit_px": 92.8921,
+   "reason": "signal",
+   "ret": -0.0028208473817672676,
+   "r": -0.24393738086982125
   }
  ],
  "signal_open_position": {
-  "side": "long",
-  "entry_utc": "2026-11-04T11:00:00+00:00",
-  "entry_px": 93.48803799999999,
-  "mark_px": 95.53,
-  "unrealised_ret": 0.007854641335069128
+  "side": "short",
+  "entry_utc": "2026-11-05T15:00:00+00:00",
+  "entry_px": 92.89212400000001,
+  "mark_px": 89.22,
+  "unrealised_ret": 0.0115906307626323
  },
  "signal_flat_bars": 76,
- "signal_positions": 24,
- "benchmark_equity": 0.886370701166269,
+ "signal_positions": 25,
+ "benchmark_equity": 0.8880012777609613,
  "benchmark_closed": [
   {
    "side": "long",
@@ -560,17 +570,27 @@
    "reason": "signal",
    "ret": -0.002201597901493478,
    "r": -0.17941133119562935
+  },
+  {
+   "side": "long",
+   "entry_utc": "2026-11-04T05:00:00+00:00",
+   "exit_utc": "2026-11-05T15:00:00+00:00",
+   "entry_px": 92.2377,
+   "exit_px": 92.8921,
+   "reason": "signal",
+   "ret": 0.0021014864993991428,
+   "r": 0.24476783874694075
   }
  ],
  "benchmark_open_position": {
-  "side": "long",
-  "entry_utc": "2026-11-04T05:00:00+00:00",
-  "entry_px": 92.237663,
-  "mark_px": 95.53,
-  "unrealised_ret": 0.01185505592078268
+  "side": "short",
+  "entry_utc": "2026-11-05T15:00:00+00:00",
+  "entry_px": 92.89212400000001,
+  "mark_px": 89.22,
+  "unrealised_ret": 0.0115906307626323
  },
  "benchmark_flat_bars": 41,
- "benchmark_positions": 31,
- "last_update_utc": "2026-11-05T00:11:00.515434+00:00",
+ "benchmark_positions": 32,
+ "last_update_utc": "2026-11-06T00:11:07.797422+00:00",
  "new_bars_this_run": 24
 }
