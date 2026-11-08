@@ -8,17 +8,18 @@ Of the five recommendations, none is adopted as a live signal on the evidence so
 
 - The **constant-notional ₹10,000 at 10× plan is contradicted** by our leverage study and must not be used. Size by risk, not by notional.
 - **Expectancy from the surviving candidates is not statistically established.** Both positive means have 95% CIs that include zero.
-- **Cross-asset return prediction** and **order-flow imbalance at quarter-hour boundaries** are being tested (sections 3 and 4). The quarter-hour all-bar test is already done and shows nothing.
+- **Cross-asset return prediction** is not established at 1h or 15m (§3). At 1h the sign is informative, but the edge disappears when execution is one bar late. At 15m the causal rule loses at every cost level.
+- **Order-flow imbalance at quarter-hour boundaries** shows nothing on all 15m bars (§2). OKX 5m data shows quarter-hour marks carry about 14% more volume and larger moves than other 5m bars; a placebo grid sits near 1.0 on that basis (§4). That is a seasonality, not a directional signal, and it matters for execution risk on stops.
 - **Futures basis** is the only idea with a plausible mechanism. It rests on four contracts.
 
 ## 2. Verdicts
 
 | # | Report recommendation | What we tested | Result | Verdict |
 |---|---|---|---|---|
-| 1 | Cross-asset return prediction: lagged BTC / ETH returns predict SOL's next return | `research/cross_asset.py`: OKX SOL, BTC, ETH; 1h (2022–2026, 90-day train / 30-day test) and 15m (from 2025-04, 30 / 15 days); OLS, walk-forward, 8 bps per side | 1h: CROSS k=0.5 +38.7% net, Sharpe +0.80, but the threshold is a grid peak (k=0.25 gives −55%), 15 of 55 folds positive, and a one-bar delay gives −18%. 15m (§3.4): CROSS k=0.5 gives −14.8% net, Sharpe −1.19, and negative OOS R² across all models. | **Not established.** The 1h edge is a grid peak that vanishes under a 1-bar delay, and the 15m test confirms negative net returns and negative OOS R². |
-| 2 | Regime-filtered trend / breakout | Donchian40 + EMA200 (v5); Supertrend variants (v7); ADX gate, squeeze (v9); HMM and variance-ratio regimes (`research/ideas.py`) | 4h Donchian40: +0.359% per position, 95% block CI −0.33% .. +0.68% (29 positions). 1h vol-adaptive Supertrend: +0.308% per position, block CI −0.24% .. +0.97% (56 positions). ADX gate rejected (v9). | **No validated regime filter.** Means are positive but not distinguishable from zero on 29–56 positions. |
+| 1 | Cross-asset return prediction: lagged BTC / ETH returns predict SOL's next return | `research/cross_asset.py`: OKX SOL, BTC, ETH; 1h (2022–2026, 90-day train / 30-day test) and 15m (from 2025-04, 30 / 15 days); OLS, walk-forward, 8 bps per side | 1h: CROSS k=0.5 +38.7% net, Sharpe +0.80, but the threshold is a grid peak (k=0.25 gives −55%), 15 of 55 folds positive, and a one-bar delay gives −18%. Out-of-sample R² is negative in every row. See §3. | **Not established at 1h or 15m.** 1h: the sign is informative (flip null −45%), but the edge needs sub-hour execution. 15m: causal −14.8%, loses at every cost level; the mirror rule is breakeven after 8 bps per side. See §3.4. |
+| 2 | Regime-filtered trend / breakout | Donchian40 + EMA200 (v5); Supertrend variants (v7); ADX gate, squeeze (v9); HMM and variance-ratio regimes (`research/ideas.py`) | 4h Donchian40: +0.359% per position, block-bootstrap 95% CI −0.33% .. +0.68% (29 positions). 1h vol-adaptive Supertrend: +0.308% per position, block CI −0.24% .. +0.97% (56 positions). Both CIs include zero. ADX gate rejected (v9). | **No validated regime filter.** Means are positive but not distinguishable from zero on 29–56 positions. |
 | 3 | Futures basis and carry | Carry: Binance perp funding × OKX spot, daily, 4 y (`research/carry_test.py`). Basis: OKX SOL delivery futures against the perp (`research/basis_test.py`). | Carry: +3.5%/yr per notional, +1.7%/yr per capital, net of placeholder costs. Basis: 4 traded contracts, mean +1.72% net after funding estimate (16–82 days held). | **Carry not supported** at the 15–25%/yr figure in the earlier funding proposal (v11 §1). **Basis plausible, untested at scale** (4 contracts). |
-| 4 | Time-aligned order-flow imbalance at quarter-hour boundaries (Kim & Hansen, arXiv 2607.09426) | `research/quarter_hour.py`: Binance SOLUSDT 15m, 73 days, taker imbalance `(2·takerBuy − vol) / vol` against forward returns; OKX 5m volume/volatility bursts at boundaries | Part 1 (all 15m bars): corr +0.0061 at 4h (6,983 events, CI −0.019 .. +0.030) and +0.0086 at 12h (6,951 events, CI −0.016 .. +0.032). Part 2 (OKX 5m): boundary volume ratio 1.136 (CI 1.117 .. 1.157), return ratio 1.137 (CI 1.117 .. 1.157). | **Bursts confirmed, no directional edge.** Volume and displacement spike ~13.6%–13.7% at boundaries, but directional order-flow imbalance does not predict returns. |
+| 4 | Time-aligned order-flow imbalance at quarter-hour boundaries (Kim & Hansen, arXiv 2607.09426) | `research/quarter_hour.py`: Binance SOLUSDT 15m, 73 days, taker imbalance `(2·takerBuy − vol) / vol` against forward returns; OKX 5m volume and \|return\| bursts at quarter-hour marks against a placebo grid | Part 1 (all 15m bars): corr +0.0061 at 4h (6,983 events, CI −0.019 .. +0.030) and +0.0086 at 12h (6,951 events, CI −0.016 .. +0.032). Part 2 (OKX 5m, 56,222 bars): marked-bar volume ratio 1.136 (CI 1.117 .. 1.157), \|return\| ratio 1.137 (CI 1.117 .. 1.157); placebo grid at :05 gives 1.009 and 1.019. | **Bursts specific to quarter-hour marks; no directional edge.** Imbalance does not predict returns (Part 1). The burst is a volatility and volume seasonality, not a direction signal. |
 | 5 | Constant-notional ₹10,000 at 10× | `research/leverage.py`: Donchian40 + EMA200 on 4h, walk-forward, 5 / 7 / 10 / 12 / 15×, fixed notional vs 1% and 2% risk sizing | Stop 2A (2 ATR). Fixed notional: 5× → −55.4% (MDD −87.5%); 10× → −99.7% (MDD −100.0%, one liquidation); 15× → −100.0% (two liquidations). Risk-sized 1%: +14.2% to +16.4% at every leverage, MDD −7.2% to −7.8%, effective leverage 0.28×–0.29×. | **Contradicted.** Constant notional ruins the account at 10×. Leverage is a margin ceiling, not a position size. |
 
 ## 3. Cross-asset return prediction
@@ -67,38 +68,64 @@ Verdict: **not established.** The sign is informative, but the edge depends on s
 
 ### 3.4 15m
 
-Tested on OKX 15m closes (53,784 aligned bars from 2025-04; train 2,880 bars = 30 days, test 1,440 = 15 days; 35 folds). Costs: 8 bps per side.
+OKX SOL, BTC and ETH 15m closes from 2025-04-01 (53,780 aligned bars). 30-day train, 15-day test, 35 folds.
 
-| Features | k | OOS R² | Net total | Sharpe | MDD | Round trips | RT win % | RT win 95% CI | In market |
-|---|---|---|---|---|---|---|---|---|---|
-| OWN | 0.0 | −0.22% | −100.0% | −28.10 | −100.0% | 18,227 | 31.3% | 30.6 .. 32.0% | 100% |
-| OWN | 0.5 | −0.22% | −10.0% | −0.55 | −12.9% | 55 | 36.4% | 24.9 .. 49.6% | 0.1% |
-| CROSS | 0.0 | −0.55% | −100.0% | −34.47 | −100.0% | 22,081 | 31.0% | 30.4 .. 31.6% | 100% |
-| **CROSS** | **0.5** | **−0.55%** | **−14.8%** | **−1.19** | **−15.0%** | **47** | **40.4%** | **27.6 .. 54.7%** | **0.1%** |
-| MARKET | 0.5 | −0.22% | −8.8% | −0.53 | −13.2% | 12 | 25.0% | 8.9 .. 53.2% | 0.0% |
-| ALL | 0.5 | −0.76% | −24.7% | −1.39 | −25.0% | 131 | 32.1% | 24.7 .. 40.5% | 0.3% |
+| Features | k | OOS R² | Net total | Sharpe | MDD | Round trips | Round-trip win | In market |
+|---|---|---|---|---|---|---|---|---|
+| OWN | 0.5 | −0.22% | −10.0% | −0.55 | −12.9% | 55 | 36.4% | 0.1% |
+| **CROSS** | **0.5** | **−0.55%** | **−14.8%** | **−1.19** | **−15.0%** | **47** | **40.4%** | **0.1%** |
+| MARKET | 0.5 | −0.22% | −8.8% | −0.53 | −13.2% | 12 | 25.0% | 0.0% |
+| ALL | 0.5 | −0.76% | −24.7% | −1.39 | −25.0% | 131 | 32.1% | 0.3% |
 
-- Out-of-sample R² is negative across all models.
-- CROSS at k = 0.5 is negative (−14.8% net, Sharpe −1.19), positive in only 3 of 35 folds, and has a 1-day block bootstrap 95% CI of −33.0% .. +2.9% (Sharpe −2.61 .. +0.29).
-- Even with 0 bps costs, gross return is negative (−8.2%).
+CROSS and MARKET robustness at k = 0.5:
 
-Verdict: **conclusively refuted out of sample.** Cross-asset return prediction has no edge at 15m.
+| Test | CROSS | MARKET |
+|---|---|---|
+| Threshold k = 0.25 / 0.5 / 0.75 / 1.0 (net, Sharpe) | −66.8% (−4.36) / −14.8% (−1.19) / −10.0% (−0.84) / +0.2% (+0.05) | −23.2% (−1.14) / −8.8% (−0.53) / +0.2% (+0.06) / +8.4% (+0.83) |
+| Causal | −14.8% (Sh −1.19) | −8.8% (Sh −0.53) |
+| Sign-flipped (8 bps) | −0.1% (Sh +0.03) | +3.7% (Sh +0.29) |
+| Acts one bar late (15 min) | +2.2% (Sh +0.22) | +5.7% (Sh +0.41) |
+| Acts two bars late | −7.0% (Sh −1.21) | +2.5% (Sh +0.27) |
+| Cost 0 / 4 / 8 / 12 bps per side | −8.2% / −11.6% / −14.8% / −18.0% | −7.0% / −7.9% / −8.8% / −9.7% |
+
+CROSS at k = 0.5, detail:
+
+- 47 round trips, 19 winners (40.4%, Wilson 95% CI 27.6–54.7%).
+- Folds positive: 3 of 35.
+- Block bootstrap (1-day blocks, 2,000 draws): total return −33.0% .. +2.9%, Sharpe −2.61 .. +0.29.
+- Best three folds: +3.9%, +1.9%, 0.0%. Without them, the remaining folds total −19.6%.
+
+Reading:
+
+- **The causal rule loses at every cost level, including zero.** Its gross return is negative, so the 15m sign points the wrong way for the 1h pattern.
+- **The flipped rule is the mirror image before costs, and it is breakeven after them.** At 8 bps per side it is −0.1%. This is a post hoc finding from the flip null, not a pre-declared rule. It would need a fresh out-of-sample period and a lower execution cost (maker fills are a new, unverified assumption) before it could be called a candidate.
+- **The one-bar-late result (+2.2%) is noise at this scale.** It does not show the edge persists under latency.
+- **The 1h and 15m signs differ.** At 1h the prediction carries continuation (the sign is informative, though latency-dependent). At 15m it carries reversal, and that reversal does not clear costs. Two different effects, neither tradable as stated.
+
+Verdict for §3 overall: **cross-asset return prediction is not established at 1h or 15m.** The 1h continuation result depends on sub-hour execution. The 15m reversal is breakeven at taker costs.
 
 ## 4. Quarter-hour order-flow, Part 2 (volume bursts)
 
-Tested on OKX 5m bars (`data/okx/SOL-USDT-SWAP-5m.json`): 56,243 bars over 196 days, including 18,747 boundary bars (bars opening on :00, :15, :30, :45).
+OKX SOL-USDT-SWAP 5m (56,222 bars, 196 days, 2026-04-01 onward). Marked bars open at :00, :15, :30, :45 (18,740). A placebo grid opens at :05, :20, :35, :50, with the same spacing and count. Day-block bootstrap, 2,000 draws. OKX candles carry no buy/sell split, so the imbalance part of the claim cannot be tested here.
 
-- Volume ratio (boundary / other 5m bars): **1.136** (day-block bootstrap 95% CI 1.117 .. 1.157).
-- Absolute return |r| ratio (boundary / other 5m bars): **1.137** (day-block bootstrap 95% CI 1.117 .. 1.157).
+| Grid | Volume ratio (marked / other) | 95% CI | \|Return\| ratio | 95% CI |
+|---|---|---|---|---|
+| Quarter-hour (:00, :15, :30, :45) | 1.136 | 1.117 .. 1.157 | 1.137 | 1.117 .. 1.157 |
+| Placebo (:05, :20, :35, :50) | 1.009 | 0.993 .. 1.025 | 1.019 | 1.004 .. 1.036 |
 
-Both intervals strictly exclude 1.0.
+Reading:
 
-Verdict: **Bursts are confirmed.** Quarter-hour boundaries experience a statistically significant ~13.6% higher volume and ~13.7% larger absolute price displacement. However, as established in Part 1, directional taker imbalance does not translate into forward directional return (correlation 95% CI includes zero). The boundary effect is an activity/volatility concentration, not a directional edge.
+- **The quarter-hour marks carry about 14% more volume and about 14% larger absolute moves than other bars.** The placebo grid is near 1.0 on volume, so the excess is specific to the quarter-hour marks, not to every 5m grid. The |return| placebo interval only just excludes 1.
+- **This is a volatility and volume seasonality, not a direction signal.** Larger moves do not tell you which way price goes, so this part of the claim does not support a directional trade.
+- **Execution implication.** Bars that open on quarter-hour marks have wider ranges. Stops and market orders placed on those bars face more slippage. This is an execution-protection risk, not an entry signal.
+- **Not separated.** The marked set includes the hourly :00 bars, which carry their own seasonality. Splitting :00 from :15, :30, :45 is the next step if this is pursued.
+
+Verdict for §4: the volume and volatility part is **supported as a seasonality**, specific to the quarter-hour grid. The directional imbalance claim is **not testable on OKX** and was **not supported** on Binance 15m (§2).
 
 ## 5. Corrections found during this review
 
 - **`research/expectancy.py` printed the wrong win-rate verdict.** The test `hi < 0.5 < lo` is a chained comparison that can never hold, so both cells printed "CI includes 50%". Both intervals lie entirely below 50% (1h: 22.9–47.0%; 4h: 17.3–49.2%). The verdict is now computed by `win_rate_note`, and the output is regenerated in `research/results/expectancy.txt`. The correct reading is that the hit rate is significantly below 50%, so any edge comes from payoff size (average win about 4× average loss), not from hit rate.
-- **Positive expectancy is not established.** The per-position expectancy has a bootstrap 95% CI that includes zero in both cells (1h: −0.22% .. +1.13%; 4h: −0.32% .. +1.39%). The earlier wording "positive expectancy" must not be repeated without the CI.
+- **Positive expectancy is not established.** After the funding-attribution fix on `main` (engine change), the per-position expectancy is +0.308% (1h) and +0.359% (4h). Both bootstrap 95% CIs include zero: IID 1h −0.22% .. +1.12%, 4h −0.33% .. +1.37%; block (4-trade blocks) 1h −0.24% .. +0.97%, 4h −0.33% .. +0.68%. The earlier wording "positive expectancy" must not be repeated without the CI.
 - **The test for the report's expectancy example checked arithmetic only.** It is replaced by tests on `win_rate_note`, `mean_ci` and `positions_net`, which exercise the code.
 
 ## 6. Critical risks and invariants
@@ -115,7 +142,7 @@ python3 -m unittest research.test_research_tools -v   # 9 tests, OK
 python3 -m unittest research.test_engine research.test_forward research.test_webstrats -v
 python3 -m research.expectancy                        # regenerates research/results/expectancy.txt
 python3 -m research.quarter_hour                     # Part 1 regenerates research/results/quarter-hour.txt
-python3 -m research.cross_asset                      # PENDING §3
+python3 -m research.cross_asset                      # §3 (1h and 15m), writes research/results/cross-asset.txt
 ```
 
 ## 8. Reproduce data
