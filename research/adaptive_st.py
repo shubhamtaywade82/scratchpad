@@ -18,38 +18,13 @@ import statistics as st
 import sys
 from typing import List, Optional
 
-from research.engine import (Risk, Series, atr, delay_sig, load_funding, load_klines, supertrend_sig)
+from research.engine import (Risk, Series, atr, delay_sig, load_funding, load_klines, supertrend_sig, supertrend_dyn)
 from research.ideas import summarize
 
 SCREEN_LEV = 5.0
 RISK_PCT = 0.01
 STOP_ATR = 3.0
 PERF_MULTS = (2.0, 3.0, 4.0)
-
-
-def supertrend_dyn(s: Series, A: List[Optional[float]], mult: List[Optional[float]]) -> List[int]:
-    """Supertrend with a per-bar multiplier. Same band/flip rules as engine.supertrend_sig."""
-    n = len(s)
-    fu = fl = None
-    d = 0
-    out = [0] * n
-    for k in range(n):
-        if A[k] is None or mult[k] is None:
-            continue
-        hl2 = (s.h[k] + s.l[k]) / 2
-        bu, bl = hl2 + mult[k] * A[k], hl2 - mult[k] * A[k]
-        if fu is None:
-            fu, fl, d = bu, bl, 1
-        else:
-            pc = s.c[k - 1]
-            fu = bu if (bu < fu or pc > fu) else fu
-            fl = bl if (bl > fl or pc < fl) else fl
-            if d == -1 and s.c[k] > fu:
-                d = 1
-            elif d == 1 and s.c[k] < fl:
-                d = -1
-        out[k] = d
-    return out
 
 
 def vol_adaptive_st_sig(s: Series, period: int, L: int, m_lo: float, m_hi: float) -> List[int]:
@@ -102,6 +77,24 @@ def cells(tf: str, s: Series):
     return out
 
 
+def _print_summaries(rows, tf, s, lev, ft, fr):
+    print("-- family summary (WF OOS)")
+    for fam in ('fixed', 'vol', 'perf'):
+        sub = [r for _, f, _, r in rows if f == fam]
+        print(f"   {fam:<6} positive {sum(r['m']['total'] > 0 for r in sub)}/{len(sub)}  "
+              f"median Sh {st.median(r['m']['sharpe'] for r in sub):+.2f}  "
+              f"median tot {st.median(r['m']['total'] for r in sub) * 100:+.1f}%")
+    print("-- direction-flip null (adaptive cells)")
+    for fam in ('vol', 'perf'):
+        flipped = []
+        for _, f, sig, _ in rows:
+            if f == fam:
+                risk = Risk(sizing='risk', risk_pct=RISK_PCT, lev=lev, sl_mult=STOP_ATR)
+                rr = summarize(tf, s, [-x for x in sig], None, risk, ft, fr)
+                flipped.append(rr['m']['total'])
+        print(f"   {fam:<6} flipped positive {sum(t > 0 for t in flipped)}/{len(flipped)}  median tot {st.median(flipped) * 100:+.1f}%")
+
+
 def screen(tf: str, ft, fr, lev: float = SCREEN_LEV):
     s = load_klines(tf)
     print(f"\n==================== {tf}: {len(s)} bars, adaptive Supertrend vs fixed, {lev:g}x, risk {RISK_PCT * 100:.0f}%, stop {STOP_ATR:.0f} ATR ====================")
@@ -116,23 +109,7 @@ def screen(tf: str, ft, fr, lev: float = SCREEN_LEV):
               f"stops {m['stops']:2d} liq {m['liqs']} skip {m['skipped']:3d}  "
               f"boot {r['boot'][0]:+.2f}/{r['boot'][1]:+.2f}/{r['boot'][2]:+.2f}  "
               f"folds+ {sum(f > 0 for f in r['folds'])}/{len(r['folds'])}" + ("  RUIN" if r['ruined'] else ""))
-    print("-- family summary (WF OOS)")
-    for fam in ('fixed', 'vol', 'perf'):
-        sub = [r for _, f, _, r in rows if f == fam]
-        print(f"   {fam:<6} positive {sum(r['m']['total'] > 0 for r in sub)}/{len(sub)}  "
-              f"median Sh {st.median(r['m']['sharpe'] for r in sub):+.2f}  "
-              f"median tot {st.median(r['m']['total'] for r in sub) * 100:+.1f}%")
-    # direction-flip null for each adaptive cell: a real directional signal should lose when inverted
-    print("-- direction-flip null (adaptive cells)")
-    for fam in ('vol', 'perf'):
-        flipped = []
-        for name, f, sig, _ in rows:
-            if f != fam:
-                continue
-            risk = Risk(sizing='risk', risk_pct=RISK_PCT, lev=lev, sl_mult=STOP_ATR)
-            rr = summarize(tf, s, [-x for x in sig], None, risk, ft, fr)
-            flipped.append(rr['m']['total'])
-        print(f"   {fam:<6} flipped positive {sum(t > 0 for t in flipped)}/{len(flipped)}  median tot {st.median(flipped) * 100:+.1f}%")
+    _print_summaries(rows, tf, s, lev, ft, fr)
     return rows
 
 

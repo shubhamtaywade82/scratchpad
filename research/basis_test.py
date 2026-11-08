@@ -41,12 +41,41 @@ def load_or_fetch(inst: str):
     return rows
 
 
+def _find_basis_entry(fut, perp_c, exp):
+    for t in sorted(fut):
+        if t not in perp_c or t >= exp:
+            continue
+        dte = (exp - t) / DAY
+        if dte < MIN_DTE:
+            break
+        ann = (fut[t] / perp_c[t] - 1) * 365 / dte
+        if ann >= ENTRY_ANN:
+            return (t, fut[t], perp_c[t], ann, dte)
+    return None
+
+
+def _calc_basis_outcome(entry, times, fut, perp_c, exp, ft, fr, status):
+    t0, f0, p0, ann0, dte0 = entry
+    last_t = max(t for t in times if t <= exp)
+    f1, p1 = fut[last_t], perp_c.get(last_t)
+    if p1 is None:
+        return 'missing perp at exit', None
+    gross = -(f1 / f0 - 1) + (p1 / p0 - 1)
+    net = gross - COST
+    i0 = bisect.bisect_left(ft, t0)
+    i1 = bisect.bisect_right(ft, last_t)
+    fund_est = -sum(fr[i0:i1]) if i1 > i0 else 0.0
+    return 'traded', dict(
+        entry=datetime.fromtimestamp(t0 / 1000, timezone.utc).strftime('%Y-%m-%d %H:%M'),
+        exit=datetime.fromtimestamp(last_t / 1000, timezone.utc).strftime('%Y-%m-%d %H:%M'),
+        ann_entry=ann0, dte=dte0, held=(last_t - t0) / DAY, gross=gross, net=net,
+        fund_est=fund_est, net_after_funding=net + fund_est,
+        final_basis=f1 / p1 - 1, status=status)
+
+
 def run():
     perp = json.load(open('data/okx/SOL-USDT-SWAP-1H.json'))['rows']
-    perp_t = [r['t'] for r in perp]
     perp_c = {r['t']: r['c'] for r in perp}
-    fund = json.load(open('data/okx/SOL-USDT-SWAP-funding.json'))['rows']
-    # Funding estimate: Binance SOL funding (repo) averaged over each window, applied to a long perp.
     from research.engine import load_funding
     ft, fr = load_funding()
     expiries = json.load(open('data/okx/expiries-SOL-USD.json'))['found']
@@ -58,40 +87,12 @@ def run():
             continue
         exp = expiry_ms(inst)
         fut = {r['t']: r['c'] for r in rows}
-        times = sorted(fut)
-        entry = None
-        for t in times:
-            if t not in perp_c or t >= exp:
-                continue
-            dte = (exp - t) / DAY
-            if dte < MIN_DTE:
-                break
-            ann = (fut[t] / perp_c[t] - 1) * 365 / dte
-            if ann >= ENTRY_ANN:
-                entry = (t, fut[t], perp_c[t], ann, dte)
-                break
+        entry = _find_basis_entry(fut, perp_c, exp)
         if entry is None:
             results.append((inst, 'no entry (premium never >= 15% with 7+ days left)', None))
             continue
-        t0, f0, p0, ann0, dte0 = entry
-        last_t = max(t for t in times if t <= exp)
-        f1, p1 = fut[last_t], perp_c.get(last_t)
-        if p1 is None:
-            results.append((inst, 'missing perp at exit', None))
-            continue
-        gross = -(f1 / f0 - 1) + (p1 / p0 - 1)
-        net = gross - COST
-        held_days = (last_t - t0) / DAY
-        i0 = bisect.bisect_left(ft, t0)
-        i1 = bisect.bisect_right(ft, last_t)
-        fund_est = -sum(fr[i0:i1]) if i1 > i0 else 0.0           # long perp PAYS positive funding: a cost
-        final_basis = f1 / p1 - 1
-        results.append((inst, 'traded', dict(
-            entry=datetime.fromtimestamp(t0 / 1000, timezone.utc).strftime('%Y-%m-%d %H:%M'),
-            exit=datetime.fromtimestamp(last_t / 1000, timezone.utc).strftime('%Y-%m-%d %H:%M'),
-            ann_entry=ann0, dte=dte0, held=held_days, gross=gross, net=net, fund_est=fund_est,
-            net_after_funding=net + fund_est,
-            final_basis=final_basis, status=status)))
+        outcome, d = _calc_basis_outcome(entry, sorted(fut), fut, perp_c, exp, ft, fr, status)
+        results.append((inst, outcome, d))
     return results
 
 

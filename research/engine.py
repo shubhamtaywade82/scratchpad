@@ -12,6 +12,8 @@ Invariants (each one is covered by research/test_engine.py):
   9. Isolated margin at leverage `lev`: margin = notional / lev, liquidation at 1/lev - mmr adverse move from entry.
      An entry is skipped when its stop sits beyond liq_buffer * liquidation distance (stop unreachable before liquidation),
      or when risk sizing has no stop distance.
+ 10. Trailing rule order per bar: gaps, liquidation, stop, partial TP, then ratchets from this bar's extreme
+     (breakeven, chandelier trail tightened past trail_tight_r, giveback lock), then the time stop at the close.
 """
 import bisect
 import json
@@ -22,7 +24,7 @@ from typing import List, Optional
 
 FEE = 0.0005    # Binance USD-M taker, per side
 SLIP = 0.0003   # adverse slippage, per side
-BARS_PER_YEAR = {'15m': 35040, '1h': 8760, '4h': 2190, '1d': 365}
+BARS_PER_YEAR = {'1m': 525600, '5m': 105120, '15m': 35040, '30m': 17520, '1h': 8760, '2h': 4380, '4h': 2190, '1d': 365}
 DATA_PATH = 'data/SOLUSDT-intraday.json'
 FUNDING_PATH = 'data/SOLUSDT-futures.json'
 
@@ -44,7 +46,8 @@ class Series:
         return len(self.t)
 
 
-_INTERVAL_MS = {'15m': 900_000, '1h': 3_600_000, '4h': 14_400_000, '1d': 86_400_000}
+_INTERVAL_MS = {'1m': 60_000, '5m': 300_000, '15m': 900_000, '30m': 1_800_000, '1h': 3_600_000,
+                '2h': 7_200_000, '4h': 14_400_000, '1d': 86_400_000}
 
 
 def to_series(tf: str, rows: list) -> Series:
@@ -136,6 +139,12 @@ class Risk:
     be_r: Optional[float] = None        # move stop to entry once the trade has run be_r x initial stop distance
     trail_act_r: float = 0.0            # chandelier trail starts only after trail_act_r x initial stop distance
     tp_frac: float = 1.0                # fraction closed at the take-profit; < 1 scales out and the rest keeps running
+    trail_tight_r: Optional[float] = None   # past this R of favourable excursion the trail uses trail_tight_mult
+    trail_tight_mult: Optional[float] = None
+    giveback: Optional[float] = None    # once excursion >= trail_act_r, stop locks (1 - giveback) of the peak open move
+    max_bars: Optional[int] = None      # close at bar close if the trade has not reached +1R within max_bars
+    lock_steps: tuple = ()              # ((trigger_r, lock_r), ...): past trigger_r excursion the stop locks lock_r
+                                        # (crypto-trading-agent TrailingStopManager tiers: (1,0),(1.5,.5),(2,1),(3,2))
     mmr: float = 0.005                  # maintenance margin rate. ASSUMPTION: confirm via exchange leverage brackets
     liq_buffer: float = 0.8             # stop must sit within this fraction of the liquidation distance
 
@@ -162,6 +171,16 @@ class Risk:
             raise ValueError("trail_act_r must be >= 0")
         if not (0 < self.tp_frac <= 1):
             raise ValueError("tp_frac must be in (0, 1]")
+        if (self.trail_tight_r is None) != (self.trail_tight_mult is None):
+            raise ValueError("trail_tight_r and trail_tight_mult must be set together")
+        if self.trail_tight_mult is not None and self.trail_tight_mult <= 0:
+            raise ValueError("trail_tight_mult must be positive")
+        if self.giveback is not None and not (0 < self.giveback < 1):
+            raise ValueError("giveback must be in (0, 1)")
+        if self.max_bars is not None and self.max_bars < 1:
+            raise ValueError("max_bars must be >= 1")
+        if any(lock >= trig for trig, lock in self.lock_steps):
+            raise ValueError("each lock_steps lock_r must be below its trigger_r")
 
     @property
     def liq_frac(self) -> float:
@@ -179,7 +198,9 @@ class Result:
 
 
 class _Book:
-    def __init__(self):
+    def __init__(self, fee: float = FEE, slip: float = SLIP):
+        self.fee = fee
+        self.slip = slip
         self.E = 1.0            # realised equity
         self.side = 0
         self.qty = 0.0
@@ -195,17 +216,20 @@ class _Book:
         self.d: Optional[float] = None      # initial stop distance in price units (defines 1R)
         self.tp: Optional[float] = None     # take-profit level
         self.stop_kind = 'init'             # 'init' | 'be' | 'trail': what set the current stop
+        self.funding_pnl = 0.0
 
-    def open(self, side, k, o, qty, stop, liq_frac, slip, fee, d=None, tp_r=None):
-        px = o * (1 + slip) if side > 0 else o * (1 - slip)
-        self.entry_fee = fee * qty * px
+    def open(self, side, k, o, qty, stop, liq_frac, slip=None, fee=None, d=None, tp_r=None):
+        s = self.slip if slip is None else slip
+        f = self.fee if fee is None else fee
+        px = o * (1 + s) if side > 0 else o * (1 - s)
+        self.entry_fee = f * qty * px
         self.E -= self.entry_fee
         self.side, self.qty, self.ep = side, qty, px
         self.stop, self.ext = stop, px
         self.liq = px * (1 - liq_frac) if side > 0 else px * (1 + liq_frac)
         self.d = d
         self.tp = px + side * tp_r * d if (tp_r and d) else None
-        self.stop_kind = 'init'
+        self.stop_kind, self.funding_pnl = 'init', 0.0
         self.k_in, self.E_in = k, self.E + self.entry_fee  # equity before this trade's fees
 
     def ratchet(self, cand, kind):
@@ -213,156 +237,190 @@ class _Book:
         if self.stop is None or (cand > self.stop if self.side > 0 else cand < self.stop):
             self.stop, self.stop_kind = cand, kind
 
-    def take_partial(self, px_raw, k, frac, fee):
-        """Scale out: close a fraction of the position at a limit price. The position stays open."""
-        q = self.qty * frac
-        gross = self.side * q * (px_raw - self.ep)
-        exit_fee = fee * q * px_raw
-        entry_part = self.entry_fee * frac
-        pnl = gross - exit_fee - entry_part
+    def _record_trade(self, k: int, px: float, q: float, reason: str, kind: str,
+                      exit_fee: float, entry_part: float, fund_part: float = 0.0):
+        gross = self.side * q * (px - self.ep)
+        pnl = gross - exit_fee - entry_part + fund_part
         self.E += gross - exit_fee
         self.entry_fee -= entry_part
-        self.qty -= q
-        self.trades.append(dict(side=self.side, k_in=self.k_in, k_out=k, reason='tp_partial', kind='tp_partial',
-                                qty=q, ep=self.ep, px=px_raw, pnl=pnl, ret=pnl / self.E_in, bars=k - self.k_in,
-                                eff_lev=q * self.ep / self.E_in,
-                                r=(self.side * (px_raw - self.ep) / self.d) if self.d else None))
+        r = (self.side * (px - self.ep) / self.d) if self.d else None
+        self.trades.append(dict(
+            side=self.side, k_in=self.k_in, k_out=k, reason=reason, kind=kind,
+            qty=q, ep=self.ep, px=px, gross=gross, entry_fee=entry_part, exit_fee=exit_fee,
+            funding=fund_part, pnl=pnl, ret=pnl / self.E_in, bars=k - self.k_in,
+            eff_lev=q * self.ep / self.E_in, r=r,
+        ))
 
-    def close(self, px_raw, k, reason, slip, fee):
-        # limit-type exits (take-profit) fill at their level with no slippage; stops and signal exits pay slippage
+    def take_partial(self, px_raw, k, frac, fee=None):
+        """Scale out: close a fraction of the position at a limit price. The position stays open."""
+        f = self.fee if fee is None else fee
+        q = self.qty * frac
+        fund_part = self.funding_pnl * frac
+        self.funding_pnl -= fund_part
+        self._record_trade(k, px_raw, q, 'tp_partial', 'tp_partial', f * q * px_raw, self.entry_fee * frac, fund_part)
+        self.qty -= q
+
+    def close(self, px_raw, k, reason, slip=None, fee=None):
+        # Limit-type exits (take-profit) fill at level without slippage; stops and signal exits pay slippage
+        s = self.slip if slip is None else slip
+        f = self.fee if fee is None else fee
         limit = reason in ('tp', 'tp_gap')
-        px = px_raw if limit else (px_raw * (1 - slip) if self.side > 0 else px_raw * (1 + slip))
-        gross = self.side * self.qty * (px - self.ep)
-        exit_fee = fee * self.qty * px
-        pnl = gross - exit_fee - self.entry_fee
-        self.E += gross - exit_fee
+        px = px_raw if limit else (px_raw * (1 - s) if self.side > 0 else px_raw * (1 + s))
         kind = self.stop_kind if reason in ('stop', 'gap_stop') else reason
-        self.trades.append(dict(side=self.side, k_in=self.k_in, k_out=k, reason=reason, kind=kind, qty=self.qty,
-                                ep=self.ep, px=px, pnl=pnl, ret=pnl / self.E_in, bars=k - self.k_in,
-                                eff_lev=self.qty * self.ep / self.E_in,
-                                r=(self.side * (px - self.ep) / self.d) if self.d else None))  # realised R
+        fund_part = self.funding_pnl
+        self.funding_pnl = 0.0
+        self._record_trade(k, px, self.qty, reason, kind, f * self.qty * px, self.entry_fee, fund_part)
         self.side, self.qty, self.stop, self.ext, self.liq = 0, 0.0, None, None, None
-        self.d, self.tp, self.stop_kind = None, None, 'init'
-        self.entry_fee = 0.0
+        self.d, self.tp, self.stop_kind, self.entry_fee = None, None, 'init', 0.0
         if self.E <= 0:
-            # a gap through the liquidation level can lose more than the margin; an account cannot go negative
             self.E, self.ruined = 0.0, True
 
     def mtm(self, c):
         return self.E + (self.side * self.qty * (c - self.ep) if self.side else 0.0)
+
+    def charge_funding(self, fund_t: list, fund_r: list, fi: int, t_k: int, prev_c: float) -> int:
+        while fi < len(fund_t) and fund_t[fi] <= t_k:
+            if self.side:
+                payment = self.side * self.qty * prev_c * fund_r[fi]
+                self.E -= payment
+                self.funding_pnl -= payment
+                if self.E <= 0:
+                    self.E, self.ruined = 0.0, True
+                    self.side, self.qty = 0, 0.0
+            fi += 1
+        return fi
+
+    def check_open_gaps(self, O: float, k: int, risk: Risk) -> Optional[int]:
+        if not self.side:
+            return None
+        if (self.side > 0 and O <= self.liq) or (self.side < 0 and O >= self.liq):
+            side = self.side
+            self.close(O, k, 'liq')
+            return side
+        if self.stop is not None and ((self.side > 0 and O <= self.stop) or (self.side < 0 and O >= self.stop)):
+            side = self.side
+            self.close(O, k, 'gap_stop')
+            return side
+        if self.tp is not None and ((self.side > 0 and O >= self.tp) or (self.side < 0 and O <= self.tp)):
+            if risk.tp_frac < 1:
+                self.take_partial(O, k, risk.tp_frac)
+                self.tp = None
+                return None
+            side = self.side
+            self.close(O, k, 'tp_gap')
+            return side
+        return None
+
+    def check_intrabar(self, H: float, L: float, k: int, risk: Risk) -> Optional[int]:
+        if not self.side:
+            return None
+        if (self.side > 0 and L <= self.liq) or (self.side < 0 and H >= self.liq):
+            side = self.side
+            self.close(self.liq, k, 'liq')
+            return side
+        if self.stop is not None and ((self.side > 0 and L <= self.stop) or (self.side < 0 and H >= self.stop)):
+            side = self.side
+            self.close(self.stop, k, 'stop')
+            return side
+        if self.tp is not None and ((self.side > 0 and H >= self.tp) or (self.side < 0 and L <= self.tp)):
+            if risk.tp_frac < 1:
+                self.take_partial(self.tp, k, risk.tp_frac)
+                self.tp = None
+                return None
+            side = self.side
+            self.close(self.tp, k, 'tp')
+            return side
+        return None
+
+    def update_ratchets(self, H: float, L: float, risk: Risk, A: Optional[list], k: int):
+        if not self.side:
+            return
+        self.ext = max(self.ext, H) if self.side > 0 else min(self.ext, L)
+        mfe = (self.side * (self.ext - self.ep) / self.d) if self.d else None
+        if risk.be_r is not None and mfe is not None and mfe >= risk.be_r:
+            self.ratchet(self.ep, 'be')
+        active = (not risk.trail_act_r) or mfe is None or mfe >= risk.trail_act_r
+        if risk.trail_mult and active and A is not None and k < len(A) and A[k] is not None:
+            tight = risk.trail_tight_r is not None and mfe is not None and mfe >= risk.trail_tight_r
+            mult = risk.trail_tight_mult if tight else risk.trail_mult
+            self.ratchet(self.ext - self.side * mult * A[k], 'trail')
+        for trig, lock in risk.lock_steps:
+            if mfe is not None and mfe >= trig:
+                self.ratchet(self.ep + self.side * lock * self.d, 'lock')
+        if risk.giveback and active and self.side * (self.ext - self.ep) > 0:
+            self.ratchet(self.ep + (self.ext - self.ep) * (1 - risk.giveback), 'giveback')
+
+    def time_stop_due(self, k: int, risk: Risk) -> bool:
+        """True when max_bars have elapsed and the trade never reached +1R."""
+        if not (self.side and risk.max_bars and self.d) or k - self.k_in + 1 < risk.max_bars:
+            return False
+        return self.side * (self.ext - self.ep) < self.d
+
+
+def _calc_stop_geometry(desired: int, px: float, a: Optional[float], sp: Optional[float], sl_mult: Optional[float]):
+    if sp is not None:
+        wrong = (desired > 0 and sp >= px) or (desired < 0 and sp <= px)
+        return sp, abs(px - sp), wrong
+    if sl_mult and a:
+        d = sl_mult * a
+        return px - desired * d, d, False
+    return None, None, False
+
+
+def _process_signal(bk: _Book, desired: int, block: int, skipped: int, O: float, k: int,
+                    risk: Risk, a: Optional[float], sp: Optional[float]):
+    if block and desired != block:
+        block = 0
+    if desired == bk.side:
+        return block, skipped
+    if bk.side:
+        bk.close(O, k, 'signal')
+    if not desired or desired == block or bk.ruined:
+        return block, skipped
+
+    px = O * (1 + bk.slip) if desired > 0 else O * (1 - bk.slip)
+    stop, d, wrong_side = _calc_stop_geometry(desired, px, a, sp, risk.sl_mult)
+    no_size = risk.sizing == 'risk' and (d is None or d <= 0)
+    too_wide = d is not None and d / px > risk.liq_frac * risk.liq_buffer
+    if wrong_side or no_size or too_wide:
+        return desired, skipped + 1
+
+    qty = min(risk.risk_pct * bk.E / d, risk.lev * bk.E / px) if risk.sizing == 'risk' else risk.lev * bk.E / px
+    if qty > 0:
+        bk.open(desired, k, O, qty, stop, risk.liq_frac, d=d, tp_r=risk.tp_r)
+    return block, skipped
 
 
 def simulate(s: Series, sig: List[int], risk: Risk, start: int, end: int,
              A: Optional[List[Optional[float]]] = None, fund_t=None, fund_r=None,
              stop_px: Optional[List[Optional[float]]] = None,
              fee: float = FEE, slip: float = SLIP) -> Result:
-    """Run bars [start, end). sig[k-1] is the desired side at the open of bar k.
-    stop_px[k-1], if not None, is an absolute structural stop for an entry at the open of bar k.
-    Positions are flat at `start` and flattened at the close of `end-1`, so each call is a
-    self-contained period (used for walk-forward folds)."""
+    """Run bars [start, end). sig[k-1] is the desired side at the open of bar k."""
     risk.validate()
     if start < 1 or end > len(s) or start >= end:
         raise ValueError(f"bad window [{start},{end}) for {len(s)} bars")
-    if A is None and (risk.sl_mult or risk.trail_mult):
-        A = atr(s, 14)
-    if fund_t is None:
-        fund_t, fund_r = [], []
-    liq_frac = risk.liq_frac
-    fi = bisect.bisect_right(fund_t, s.t[start])
-    bk = _Book()
-    block = 0
-    skipped = 0
-    eq, pos_hist = [], []
+    A = A if A is not None or not (risk.sl_mult or risk.trail_mult) else atr(s, 14)
+    fund_t, fund_r = fund_t or [], fund_r or []
+    fi, bk = bisect.bisect_right(fund_t, s.t[start]), _Book(fee=fee, slip=slip)
+    block, skipped, eq, pos_hist = 0, 0, [], []
+
     for k in range(start, end):
         O, H, L, C = s.o[k], s.h[k], s.l[k], s.c[k]
-        # 6. funding events in (T[k-1], T[k]] are paid by the position held through them
-        while fi < len(fund_t) and fund_t[fi] <= s.t[k]:
-            if bk.side:
-                bk.E -= bk.side * bk.qty * s.c[k - 1] * fund_r[fi]
-                if bk.E <= 0:
-                    bk.E, bk.ruined = 0.0, True
-                    bk.side, bk.qty = 0, 0.0
-            fi += 1
-        # 4. gap-through liquidation or stop at the open (liquidation takes precedence)
-        if bk.side:
-            if (bk.side > 0 and O <= bk.liq) or (bk.side < 0 and O >= bk.liq):
-                block = bk.side
-                bk.close(O, k, 'liq', slip, fee)
-            elif bk.stop is not None and ((bk.side > 0 and O <= bk.stop) or (bk.side < 0 and O >= bk.stop)):
-                block = bk.side
-                bk.close(O, k, 'gap_stop', slip, fee)
-            elif bk.tp is not None and ((bk.side > 0 and O >= bk.tp) or (bk.side < 0 and O <= bk.tp)):
-                if risk.tp_frac < 1:
-                    bk.take_partial(O, k, risk.tp_frac, fee)
-                    bk.tp = None
-                else:
-                    block = bk.side
-                    bk.close(O, k, 'tp_gap', slip, fee)
-        # 1/8. signal orders at the open
-        desired = sig[k - 1]
-        if block and desired != block:
-            block = 0
-        if desired != bk.side:
-            if bk.side:
-                bk.close(O, k, 'signal', slip, fee)
-            if desired and desired != block and not bk.ruined:
-                px = O * (1 + slip) if desired > 0 else O * (1 - slip)
-                a = A[k - 1] if A is not None else None
-                sp = stop_px[k - 1] if stop_px is not None else None
-                if sp is not None:
-                    stop, d = sp, abs(px - sp)
-                    wrong_side = (desired > 0 and sp >= px) or (desired < 0 and sp <= px)
-                elif risk.sl_mult and a:
-                    d = risk.sl_mult * a
-                    stop = px - desired * d
-                    wrong_side = False
-                else:
-                    d, stop, wrong_side = None, None, False
-                no_size = risk.sizing == 'risk' and (d is None or d <= 0)
-                too_wide = d is not None and d / px > liq_frac * risk.liq_buffer
-                if wrong_side or no_size or too_wide:
-                    # one attempt per signal episode: no retry on later bars while the same direction persists
-                    skipped += 1
-                    block = desired
-                else:
-                    if risk.sizing == 'risk':
-                        qty = min(risk.risk_pct * bk.E / d, risk.lev * bk.E / px)
-                    else:
-                        qty = risk.lev * bk.E / px
-                    if qty > 0:
-                        bk.open(desired, k, O, qty, stop, liq_frac, slip, fee, d=d, tp_r=risk.tp_r)
-        # 5. intrabar liquidation, then stop, on the open position (includes a position opened on this bar)
-        if bk.side:
-            if (bk.side > 0 and L <= bk.liq) or (bk.side < 0 and H >= bk.liq):
-                block = bk.side
-                bk.close(bk.liq, k, 'liq', slip, fee)
-            elif bk.stop is not None and ((bk.side > 0 and L <= bk.stop) or (bk.side < 0 and H >= bk.stop)):
-                block = bk.side
-                bk.close(bk.stop, k, 'stop', slip, fee)
-            elif bk.tp is not None and ((bk.side > 0 and H >= bk.tp) or (bk.side < 0 and L <= bk.tp)):
-                if risk.tp_frac < 1:
-                    bk.take_partial(bk.tp, k, risk.tp_frac, fee)
-                    bk.tp = None
-                else:
-                    block = bk.side
-                    bk.close(bk.tp, k, 'tp', slip, fee)
-        # 3. stop ratchets from the close of bar k, apply to bar k+1 onward. Extreme and R-multiple are
-        #    measured on bars <= k only, so there is no lookahead.
-        if bk.side:
-            bk.ext = max(bk.ext, H) if bk.side > 0 else min(bk.ext, L)
-            mfe = (bk.side * (bk.ext - bk.ep) / bk.d) if bk.d else None   # max favourable excursion in R
-            if risk.be_r is not None and mfe is not None and mfe >= risk.be_r:
-                bk.ratchet(bk.ep, 'be')
-            if risk.trail_mult and A is not None and A[k] is not None:
-                active = (not risk.trail_act_r) or mfe is None or mfe >= risk.trail_act_r
-                if active:
-                    cand = bk.ext - bk.side * risk.trail_mult * A[k]
-                    bk.ratchet(cand, 'trail')
-        # 7. mark to market at close
+        fi = bk.charge_funding(fund_t, fund_r, fi, s.t[k], s.c[k - 1])
+        block = bk.check_open_gaps(O, k, risk) or block
+        a_prev = A[k - 1] if (A is not None and k - 1 < len(A)) else None
+        sp_prev = stop_px[k - 1] if (stop_px is not None and k - 1 < len(stop_px)) else None
+        block, skipped = _process_signal(bk, sig[k - 1], block, skipped, O, k, risk, a_prev, sp_prev)
+        block = bk.check_intrabar(H, L, k, risk) or block
+        bk.update_ratchets(H, L, risk, A, k)
+        if bk.time_stop_due(k, risk):
+            block = bk.side
+            bk.close(C, k, 'time')
         if k == end - 1 and bk.side:
-            bk.close(C, k, 'eod', slip, fee)
+            bk.close(C, k, 'eod')
         eq.append(bk.mtm(C))
         pos_hist.append(bk.side)
+
     return Result(eq=eq, pos=pos_hist, trades=bk.trades, skipped=skipped, ruined=bk.ruined)
 
 
@@ -374,10 +432,7 @@ def returns_from_levels(levels: List[float], start: float = 1.0) -> List[float]:
     return [eq[i] / eq[i - 1] - 1 if eq[i - 1] > 0 else 0.0 for i in range(1, len(eq))]
 
 
-def metrics(res: Result, tf: str) -> dict:
-    eq = [1.0] + res.eq
-    rets = returns_from_levels(res.eq)
-    bpy = BARS_PER_YEAR[tf]
+def _equity_metrics(eq: List[float], rets: List[float], bpy: int) -> dict:
     mu = st.fmean(rets)
     sd = st.pstdev(rets) or 1e-12
     peak, mdd = 1.0, 0.0
@@ -387,29 +442,39 @@ def metrics(res: Result, tf: str) -> dict:
     years = len(rets) / bpy
     total = eq[-1] - 1
     cagr = (eq[-1] ** (1 / years) - 1) if years > 0 and eq[-1] > 0 else -1.0
-    tr = res.trades
+    return dict(total=total, cagr=cagr, sharpe=mu / sd * math.sqrt(bpy), mdd=mdd,
+                calmar=(cagr / abs(mdd)) if mdd < 0 else 0.0)
+
+
+def _trade_metrics(tr: list) -> dict:
     wins = [t['pnl'] for t in tr if t['pnl'] > 0]
     losses = [t['pnl'] for t in tr if t['pnl'] <= 0]
     gp, gl = sum(wins), -sum(losses)
     longs = [t['ret'] for t in tr if t['side'] > 0]
     shorts = [t['ret'] for t in tr if t['side'] < 0]
     return dict(
-        total=total, cagr=cagr, sharpe=mu / sd * math.sqrt(bpy), mdd=mdd,
-        calmar=(cagr / abs(mdd)) if mdd < 0 else 0.0,
         n=len(tr), wr=len(wins) / len(tr) if tr else 0.0,
         pf=(gp / gl) if gl > 0 else (math.inf if gp > 0 else 0.0),
         exp=st.fmean([t['ret'] for t in tr]) if tr else 0.0,
         hold=st.fmean([t['bars'] for t in tr]) if tr else 0.0,
         eff_lev=st.fmean([t['eff_lev'] for t in tr]) if tr else 0.0,
-        exposure=sum(1 for p in res.pos if p) / len(res.pos) if res.pos else 0.0,
         nl=len(longs), el=st.fmean(longs) if longs else 0.0,
         ns=len(shorts), es=st.fmean(shorts) if shorts else 0.0,
         stops=sum(1 for t in tr if t['reason'] in ('stop', 'gap_stop')),
         liqs=sum(1 for t in tr if t['reason'] == 'liq'),
         tps=sum(1 for t in tr if t['reason'] in ('tp', 'tp_gap')),
         positions=sum(1 for t in tr if t['reason'] != 'tp_partial'),
-        skipped=res.skipped,
     )
+
+
+def metrics(res: Result, tf: str) -> dict:
+    eq = [1.0] + res.eq
+    rets = returns_from_levels(res.eq)
+    out = _equity_metrics(eq, rets, BARS_PER_YEAR[tf])
+    out.update(_trade_metrics(res.trades))
+    out['exposure'] = sum(1 for p in res.pos if p) / len(res.pos) if res.pos else 0.0
+    out['skipped'] = res.skipped
+    return out
 
 
 # ----------------------------------------------------------------------------- gates
@@ -441,13 +506,11 @@ def donchian_sig(s: Series, n: int, exit_n: Optional[int] = None, gate: Optional
     Exit: close back through the mid-line of the entry channel, or through the prior exit_n-bar
           opposite extreme if exit_n is given. Gate turning against a position also exits.
     Direct reversal when the opposite breakout fires."""
-    hi = prior_max(s.h, n)
-    lo = prior_min(s.l, n)
+    hi, lo = prior_max(s.h, n), prior_min(s.l, n)
     if exit_n:
-        xhi = prior_max(s.h, exit_n)
-        xlo = prior_min(s.l, exit_n)
+        xhi, xlo = prior_max(s.h, exit_n), prior_min(s.l, exit_n)
     else:
-        xhi = xlo = [None if hi[k] is None else (hi[k] + lo[k]) / 2 for k in range(len(s))]
+        xhi = xlo = [None if h is None else (h + l) / 2 for h, l in zip(hi, lo)]
     st_ = 0
     out = [0] * len(s)
     for k in range(len(s)):
@@ -456,46 +519,47 @@ def donchian_sig(s: Series, n: int, exit_n: Optional[int] = None, gate: Optional
         c = s.c[k]
         gl = gate is None or gate[k] == 1
         gs = gate is None or gate[k] == -1
-        if st_ == 1 and (c < xlo[k] or not gl):
+        if (st_ == 1 and (c < xlo[k] or not gl)) or (st_ == -1 and (c > xhi[k] or not gs)):
             st_ = 0
-        elif st_ == -1 and (c > xhi[k] or not gs):
-            st_ = 0
-        if st_ == 0:
-            if c > hi[k] and gl:
-                st_ = 1
-            elif c < lo[k] and gs:
-                st_ = -1
-        elif st_ == 1 and c < lo[k] and gs:
-            st_ = -1
-        elif st_ == -1 and c > hi[k] and gl:
+        if (st_ == 0 and c > hi[k] and gl) or (st_ == -1 and c > hi[k] and gl):
             st_ = 1
+        elif (st_ == 0 and c < lo[k] and gs) or (st_ == 1 and c < lo[k] and gs):
+            st_ = -1
         out[k] = st_
+    return out
+
+
+def supertrend_dyn(s: Series, A: List[Optional[float]], mult) -> List[int]:
+    """Supertrend with a scalar or per-bar multiplier."""
+    n = len(s)
+    fu = fl = None
+    d = 0
+    out = [0] * n
+    is_seq = isinstance(mult, (list, tuple))
+    for k in range(n):
+        m_k = mult[k] if is_seq else mult
+        if A[k] is None or m_k is None:
+            continue
+        hl2 = (s.h[k] + s.l[k]) / 2
+        bu, bl = hl2 + m_k * A[k], hl2 - m_k * A[k]
+        if fu is None:
+            fu, fl, d = bu, bl, 1
+            out[k] = d
+            continue
+        pc = s.c[k - 1]
+        fu = bu if (bu < fu or pc > fu) else fu
+        fl = bl if (bl > fl or pc < fl) else fl
+        if d == -1 and s.c[k] > fu:
+            d = 1
+        elif d == 1 and s.c[k] < fl:
+            d = -1
+        out[k] = d
     return out
 
 
 def supertrend_sig(s: Series, period: int = 10, mult: float = 3.0) -> List[int]:
     """Always-in-market ATR trend flip. Returns +1/-1 after warm-up, 0 before."""
-    a = atr(s, period)
-    fu = fl = None
-    d = 0
-    out = [0] * len(s)
-    for k in range(len(s)):
-        if a[k] is None:
-            continue
-        hl2 = (s.h[k] + s.l[k]) / 2
-        bu, bl = hl2 + mult * a[k], hl2 - mult * a[k]
-        if fu is None:
-            fu, fl, d = bu, bl, 1
-        else:
-            pc = s.c[k - 1]
-            fu = bu if (bu < fu or pc > fu) else fu
-            fl = bl if (bl > fl or pc < fl) else fl
-            if d == -1 and s.c[k] > fu:
-                d = 1
-            elif d == 1 and s.c[k] < fl:
-                d = -1
-        out[k] = d
-    return out
+    return supertrend_dyn(s, atr(s, period), mult)
 
 
 def tsmom_sig(s: Series, lookback: int) -> List[int]:

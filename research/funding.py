@@ -10,6 +10,7 @@
 Usage:  python3 -m research.funding
 """
 import bisect
+import itertools
 import statistics as st
 import sys
 from datetime import datetime, timezone
@@ -83,17 +84,12 @@ def mr_signal(z, thr: float, exit_thr: float):
     for k, v in enumerate(z):
         if v is None:
             continue
-        if pos == 0:
-            if v > thr:
-                pos = -1
-            elif v < -thr:
-                pos = 1
-        elif abs(v) < exit_thr:
+        if abs(v) < exit_thr:
             pos = 0
-        elif pos == -1 and v < -thr:       # flip if the opposite extreme arrives
-            pos = 1
-        elif pos == 1 and v > thr:
+        elif v > thr:
             pos = -1
+        elif v < -thr:
+            pos = 1
         sig[k] = pos
     return sig
 
@@ -101,12 +97,11 @@ def mr_signal(z, thr: float, exit_thr: float):
 def mr_cells(tf: str, ft, fr):
     s = load_klines(tf)
     out = []
-    for robust in (False, True):
-        for N in (90, 270):                 # trailing settlements: 30 days and 90 days
-            z = z_at_bars(s, ft, fr, N, robust)
-            for thr in (2.0, 2.5):
-                tag = 'robust' if robust else 'stdev'
-                out.append((f"{tag} z N{N} thr{thr:g}", mr_signal(z, thr, 0.5)))
+    for robust, N in itertools.product((False, True), (90, 270)):
+        z = z_at_bars(s, ft, fr, N, robust)
+        tag = 'robust' if robust else 'stdev'
+        for thr in (2.0, 2.5):
+            out.append((f"{tag} z N{N} thr{thr:g}", mr_signal(z, thr, 0.5)))
     return out
 
 

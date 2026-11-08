@@ -34,16 +34,30 @@ COST = 0.0008        # per side
 CONFIGS = {'1h': dict(train=2160, test=720, bpy=8760), '15m': dict(train=2880, test=1440, bpy=35040)}
 
 
+def _validate_and_extract_closes(rows: list, step_ms: int, inst: str) -> dict:
+    rows = sorted(rows, key=lambda r: r['t'])
+    ts = [int(r['t']) for r in rows]
+    for a, b in zip(ts, ts[1:]):
+        if b - a != step_ms:
+            raise ValueError(f"{inst}: non-contiguous bar delta {b - a} != {step_ms} at {a}")
+    return {r['t']: float(r['c']) for r in rows}
+
+
 def load(tf: str):
+    step = 3_600_000 if tf == '1h' else 900_000
     def closes(inst):
-        rows = json.load(open(f'data/okx/{inst}-{"1H" if tf == "1h" else "15m"}.json'))['rows']
-        return {r['t']: r['c'] for r in rows}
+        with open(f'data/okx/{inst}-{"1H" if tf == "1h" else "15m"}.json') as f:
+            rows = json.load(f)['rows']
+        return _validate_and_extract_closes(rows, step, inst)
     s = closes('SOL-USDT-SWAP')
     b = closes('BTC-USDT-SWAP')
     e = closes('ETH-USDT-SWAP')
     common = sorted(set(s) & set(b) & set(e))
     if tf == '15m':
         common = [t for t in common if t >= 1743465600000]          # from 2025-04-01
+    for t0, t1 in zip(common, common[1:]):
+        if t1 - t0 != step:
+            raise ValueError(f"aligned cross-asset gap: delta {t1 - t0} != {step} between {t0} and {t1}")
     ls = np.log([s[t] for t in common])
     lb = np.log([b[t] for t in common])
     le = np.log([e[t] for t in common])
@@ -199,7 +213,7 @@ def headline(tf: str):
                   f"{m['mdd'] * 100:>7.1f}% {m['round_trips']:>5d} {win:>7.1f}% {lo * 100:>6.1f} .. {hi * 100:>5.1f}% {m['in_mkt'] * 100:>6.1f}%")
 
 
-def robustness(tf: str, kinds=('CROSS', 'MARKET')):
+def _report_thresholds(tf: str, kinds):
     print(f"\n--- {tf}: threshold sweep (k), total net return and Sharpe")
     print(f"{'features':<8} " + "  ".join(f"k={k:<4}" for k in (0.25, 0.5, 0.75, 1.0)))
     for kind in kinds:
@@ -210,6 +224,8 @@ def robustness(tf: str, kinds=('CROSS', 'MARKET')):
             cells.append(f"{m['net_tot'] * 100:+6.1f}% {m['sharpe']:+5.2f}")
         print(f"{kind:<8} " + "  ".join(cells))
 
+
+def _report_nulls_and_costs(tf: str, kinds):
     print(f"\n--- {tf}: nulls and costs at k=0.5 (net total return / Sharpe)")
     print(f"{'features':<8} {'causal':>16} {'flip sign':>16} {'delay 1':>16} {'delay 2':>16}")
     for kind in kinds:
@@ -229,7 +245,8 @@ def robustness(tf: str, kinds=('CROSS', 'MARKET')):
             row.append(f"{c * 1e4:>2.0f} bps: {m['net_tot'] * 100:+6.1f}% {m['sharpe']:+5.2f}")
         print(f"{kind:<8} " + "   ".join(row))
 
-    kind = kinds[0]
+
+def _report_detail(tf: str, kind: str):
     wf = walk_forward(tf, kind)
     m = metrics(wf, trade(wf, k=0.5))
     (tlo, thi), (slo, shi) = block_bootstrap(trade(wf, k=0.5)['net'], wf['bpy'])
@@ -241,6 +258,12 @@ def robustness(tf: str, kinds=('CROSS', 'MARKET')):
     ranked = sorted(m['fold_rets'], reverse=True)
     ex_top3 = float(np.prod(1 + np.array(ranked[3:])) - 1)
     print(f"   best 3 folds: {' '.join(f'{r * 100:+.1f}%' for r in ranked[:3])}; total without them: {ex_top3 * 100:+.1f}%")
+
+
+def robustness(tf: str, kinds=('CROSS', 'MARKET')):
+    _report_thresholds(tf, kinds)
+    _report_nulls_and_costs(tf, kinds)
+    _report_detail(tf, kinds[0])
 
 
 def main():

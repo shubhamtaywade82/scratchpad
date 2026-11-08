@@ -3,7 +3,7 @@
 import json, math, statistics as st
 from datetime import datetime, timezone
 
-D = json.load(open('/workspace/data/SOLUSDT-futures.json'))
+D = json.load(open('data/SOLUSDT-futures.json'))
 K = D['klines']['1d']
 C=[k['close'] for k in K]; H=[k['high'] for k in K]; L=[k['low'] for k in K]
 T=[datetime.fromtimestamp(k['openTime']/1e3, tz=timezone.utc) for k in K]

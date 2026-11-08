@@ -1,4 +1,5 @@
 node_modules/
+dist/
 *.log
 analysis-output.txt
 analysis-v2-output.txt
@@ -7,3 +8,4 @@ analysis-v3b-output.txt
 __pycache__/
 data/okx/
 data/hl/
+data/binance-1m/

@@ -1,0 +1,429 @@
+v13 exit study: fixed rules, no selection, 1% risk/trade, full sample after warm-up (2021-2026). HTF = bar-level exits, 1m = minute-path exits (the honest number).
+
+==================== 1d DONENS ====================
+SOLUSDT E0 stop 2ATR only                        HTF tot   +34.9%  |  1m tot   +35.0%  MDD  -10.5%  n 114
+    positions 114  win 33%  winners in 1-10%: 20/38  >10%: 16
+    unlevered move  winners p25/50/75 +3.36/+7.80/+20.97%  losers p25/50/75 -10.05/-6.26/-3.07%  mean +4.02%
+    return on margin per trade (net of costs): 5x +19.32%  10x +38.63%
+    equity per trade (1% risk sizing): mean +0.29%  best +17.51%  worst -1.13%
+SOLUSDT E1 chandelier 3ATR after 1R              HTF tot   +34.4%  |  1m tot   +18.3%  MDD   -7.4%  n 114
+    positions 114  win 34%  winners in 1-10%: 18/39  >10%: 19
+    unlevered move  winners p25/50/75 +4.34/+9.88/+21.13%  losers p25/50/75 -9.77/-6.16/-2.95%  mean +1.95%
+    return on margin per trade (net of costs): 5x +8.95%  10x +17.91%
+    equity per trade (1% risk sizing): mean +0.15%  best +6.56%  worst -1.03%
+SOLUSDT E2 E1 + tighten to 1.5ATR past 3R        HTF tot   +16.2%  |  1m tot   +21.1%  MDD   -5.4%  n 114
+    positions 114  win 34%  winners in 1-10%: 18/39  >10%: 19
+    unlevered move  winners p25/50/75 +4.34/+9.88/+27.28%  losers p25/50/75 -9.77/-6.16/-2.95%  mean +2.17%
+    return on margin per trade (net of costs): 5x +10.06%  10x +20.13%
+    equity per trade (1% risk sizing): mean +0.18%  best +5.26%  worst -1.03%
+SOLUSDT E3 E2 + scale 50% at 2R                  HTF tot   +13.7%  |  1m tot   +16.3%  MDD   -3.9%  n 133
+    positions 114  win 34%  winners in 1-10%: 16/39  >10%: 21
+    unlevered move  winners p25/50/75 +4.34/+14.06/+20.57%  losers p25/50/75 -9.77/-6.16/-2.95%  mean +1.61%
+    return on margin per trade (net of costs): 5x +7.26%  10x +14.52%
+    equity per trade (1% risk sizing): mean +0.14%  best +3.60%  worst -1.03%
+SOLUSDT E4 agent tiers + 1.5ATR trail past 2R    HTF tot    +8.1%  |  1m tot    +9.2%  MDD   -4.1%  n 114
+    positions 114  win 32%  winners in 1-10%: 18/36  >10%: 17
+    unlevered move  winners p25/50/75 +5.92/+9.24/+20.94%  losers p25/50/75 -9.74/-6.15/-2.25%  mean +0.75%
+    return on margin per trade (net of costs): 5x +2.96%  10x +5.92%
+    equity per trade (1% risk sizing): mean +0.08%  best +4.14%  worst -1.03%
+SOLUSDT E5 giveback 40% after 1R                 HTF tot   +15.5%  |  1m tot   +16.7%  MDD   -7.4%  n 114
+    positions 114  win 38%  winners in 1-10%: 19/43  >10%: 23
+    unlevered move  winners p25/50/75 +7.31/+11.43/+15.49%  losers p25/50/75 -9.81/-6.25/-3.08%  mean +1.15%
+    return on margin per trade (net of costs): 5x +4.95%  10x +9.89%
+    equity per trade (1% risk sizing): mean +0.14%  best +11.12%  worst -1.03%
+SOLUSDT E6 fixed TP 2R                           HTF tot    +8.5%  |  1m tot    +8.5%  MDD   -4.8%  n 114
+    positions 114  win 33%  winners in 1-10%: 16/38  >10%: 20
+    unlevered move  winners p25/50/75 +4.34/+10.95/+24.96%  losers p25/50/75 -10.05/-6.26/-3.07%  mean +0.62%
+    return on margin per trade (net of costs): 5x +2.30%  10x +4.60%
+    equity per trade (1% risk sizing): mean +0.08%  best +2.02%  worst -1.13%
+ETHUSDT E0 stop 2ATR only                        HTF tot    +3.6%  |  1m tot    +3.5%  MDD   -8.0%  n 122
+    positions 122  win 30%  winners in 1-10%: 17/37  >10%: 14
+    unlevered move  winners p25/50/75 +4.26/+7.35/+16.53%  losers p25/50/75 -6.94/-4.42/-2.75%  mean +0.09%
+    return on margin per trade (net of costs): 5x -0.37%  10x -0.73%
+    equity per trade (1% risk sizing): mean +0.03%  best +5.61%  worst -1.10%
+ETHUSDT E1 chandelier 3ATR after 1R              HTF tot    +2.4%  |  1m tot    +5.5%  MDD   -7.7%  n 122
+    positions 122  win 30%  winners in 1-10%: 13/37  >10%: 18
+    unlevered move  winners p25/50/75 +4.26/+9.95/+16.92%  losers p25/50/75 -6.94/-4.29/-2.75%  mean +0.14%
+    return on margin per trade (net of costs): 5x -0.09%  10x -0.18%
+    equity per trade (1% risk sizing): mean +0.05%  best +5.21%  worst -1.10%
+ETHUSDT E2 E1 + tighten to 1.5ATR past 3R        HTF tot    +3.1%  |  1m tot    +6.1%  MDD   -6.5%  n 122
+    positions 122  win 30%  winners in 1-10%: 13/37  >10%: 18
+    unlevered move  winners p25/50/75 +4.26/+9.95/+18.02%  losers p25/50/75 -6.94/-4.29/-2.75%  mean +0.10%
+    return on margin per trade (net of costs): 5x -0.32%  10x -0.63%
+    equity per trade (1% risk sizing): mean +0.05%  best +3.95%  worst -1.10%
+ETHUSDT E3 E2 + scale 50% at 2R                  HTF tot    +3.0%  |  1m tot    +4.7%  MDD   -6.1%  n 143
+    positions 122  win 30%  winners in 1-10%: 11/37  >10%: 20
+    unlevered move  winners p25/50/75 +4.26/+14.13/+20.22%  losers p25/50/75 -6.94/-4.29/-2.75%  mean +0.08%
+    return on margin per trade (net of costs): 5x -0.40%  10x -0.80%
+    equity per trade (1% risk sizing): mean +0.04%  best +2.97%  worst -1.10%
+ETHUSDT E4 agent tiers + 1.5ATR trail past 2R    HTF tot    -0.4%  |  1m tot    +3.0%  MDD   -5.9%  n 122
+    positions 122  win 27%  winners in 1-10%: 12/33  >10%: 18
+    unlevered move  winners p25/50/75 +5.39/+11.87/+18.02%  losers p25/50/75 -6.49/-4.13/-2.00%  mean -0.16%
+    return on margin per trade (net of costs): 5x -1.58%  10x -3.16%
+    equity per trade (1% risk sizing): mean +0.03%  best +3.95%  worst -1.10%
+ETHUSDT E5 giveback 40% after 1R                 HTF tot    -0.1%  |  1m tot    -4.0%  MDD   -8.8%  n 122
+    positions 122  win 32%  winners in 1-10%: 21/39  >10%: 15
+    unlevered move  winners p25/50/75 +5.80/+7.68/+10.98%  losers p25/50/75 -7.26/-4.42/-2.97%  mean -0.54%
+    return on margin per trade (net of costs): 5x -3.48%  10x -6.97%
+    equity per trade (1% risk sizing): mean -0.03%  best +4.44%  worst -1.10%
+ETHUSDT E6 fixed TP 2R                           HTF tot    +3.4%  |  1m tot    +3.3%  MDD   -6.0%  n 122
+    positions 122  win 30%  winners in 1-10%: 11/37  >10%: 20
+    unlevered move  winners p25/50/75 +4.26/+12.52/+20.34%  losers p25/50/75 -6.94/-4.42/-2.75%  mean +0.06%
+    return on margin per trade (net of costs): 5x -0.50%  10x -1.00%
+    equity per trade (1% risk sizing): mean +0.03%  best +2.02%  worst -1.10%
+XRPUSDT E0 stop 2ATR only                        HTF tot   +25.5%  |  1m tot   +25.5%  MDD  -14.5%  n 122
+    positions 122  win 26%  winners in 1-10%: 16/32  >10%: 12
+    unlevered move  winners p25/50/75 +2.02/+6.25/+15.51%  losers p25/50/75 -7.03/-3.85/-2.73%  mean +1.44%
+    return on margin per trade (net of costs): 5x +6.38%  10x +12.76%
+    equity per trade (1% risk sizing): mean +0.24%  best +38.96%  worst -1.10%
+XRPUSDT E1 chandelier 3ATR after 1R              HTF tot    +2.1%  |  1m tot    -7.2%  MDD  -13.8%  n 122
+    positions 122  win 27%  winners in 1-10%: 14/33  >10%: 15
+    unlevered move  winners p25/50/75 +2.13/+6.20/+17.43%  losers p25/50/75 -6.62/-3.91/-2.73%  mean -0.87%
+    return on margin per trade (net of costs): 5x -5.15%  10x -10.30%
+    equity per trade (1% risk sizing): mean -0.06%  best +4.14%  worst -1.03%
+XRPUSDT E2 E1 + tighten to 1.5ATR past 3R        HTF tot    -4.8%  |  1m tot    -2.1%  MDD  -10.3%  n 122
+    positions 122  win 27%  winners in 1-10%: 14/33  >10%: 15
+    unlevered move  winners p25/50/75 +2.13/+6.20/+22.07%  losers p25/50/75 -6.62/-3.91/-2.73%  mean -0.48%
+    return on margin per trade (net of costs): 5x -3.19%  10x -6.38%
+    equity per trade (1% risk sizing): mean -0.01%  best +3.72%  worst -1.03%
+XRPUSDT E3 E2 + scale 50% at 2R                  HTF tot    -3.6%  |  1m tot    -2.1%  MDD   -8.0%  n 139
+    positions 122  win 27%  winners in 1-10%: 13/33  >10%: 16
+    unlevered move  winners p25/50/75 +2.13/+9.40/+20.39%  losers p25/50/75 -6.62/-3.91/-2.73%  mean -0.41%
+    return on margin per trade (net of costs): 5x -2.83%  10x -5.66%
+    equity per trade (1% risk sizing): mean -0.01%  best +2.85%  worst -1.03%
+XRPUSDT E4 agent tiers + 1.5ATR trail past 2R    HTF tot    -6.2%  |  1m tot    -2.7%  MDD  -10.5%  n 122
+    positions 122  win 24%  winners in 1-10%: 11/29  >10%: 14
+    unlevered move  winners p25/50/75 +3.35/+9.41/+22.07%  losers p25/50/75 -6.48/-3.58/-1.41%  mean -0.46%
+    return on margin per trade (net of costs): 5x -3.08%  10x -6.17%
+    equity per trade (1% risk sizing): mean -0.02%  best +3.44%  worst -1.03%
+XRPUSDT E5 giveback 40% after 1R                 HTF tot    -3.7%  |  1m tot    -3.5%  MDD   -7.5%  n 122
+    positions 122  win 33%  winners in 1-10%: 23/40  >10%: 14
+    unlevered move  winners p25/50/75 +5.99/+7.60/+11.28%  losers p25/50/75 -6.90/-4.05/-2.91%  mean -0.41%
+    return on margin per trade (net of costs): 5x -2.86%  10x -5.72%
+    equity per trade (1% risk sizing): mean -0.03%  best +2.81%  worst -1.03%
+XRPUSDT E6 fixed TP 2R                           HTF tot    -4.6%  |  1m tot    -4.7%  MDD   -8.5%  n 122
+    positions 122  win 26%  winners in 1-10%: 11/32  >10%: 17
+    unlevered move  winners p25/50/75 +2.02/+14.77/+20.59%  losers p25/50/75 -7.03/-3.85/-2.73%  mean -0.61%
+    return on margin per trade (net of costs): 5x -3.84%  10x -7.68%
+    equity per trade (1% risk sizing): mean -0.04%  best +2.03%  worst -1.10%
+
+==================== 4h DONENS ====================
+SOLUSDT E0 stop 2ATR only                        HTF tot  +152.3%  |  1m tot  +156.5%  MDD  -15.6%  n 140
+    positions 140  win 34%  winners in 1-10%: 24/47  >10%: 23
+    unlevered move  winners p25/50/75 +3.44/+9.90/+30.51%  losers p25/50/75 -5.94/-5.05/-3.67%  mean +5.09%
+    return on margin per trade (net of costs): 5x +24.67%  10x +49.33%
+    equity per trade (1% risk sizing): mean +0.77%  best +42.31%  worst -1.23%
+SOLUSDT E1 chandelier 3ATR after 1R              HTF tot   +31.0%  |  1m tot   +14.4%  MDD  -16.1%  n 140
+    positions 140  win 46%  winners in 1-10%: 37/65  >10%: 17
+    unlevered move  winners p25/50/75 +2.24/+4.46/+10.05%  losers p25/50/75 -5.94/-4.74/-3.36%  mean +0.68%
+    return on margin per trade (net of costs): 5x +2.59%  10x +5.17%
+    equity per trade (1% risk sizing): mean +0.11%  best +5.61%  worst -1.18%
+SOLUSDT E2 E1 + tighten to 1.5ATR past 3R        HTF tot   +14.2%  |  1m tot   +20.7%  MDD  -15.3%  n 140
+    positions 140  win 46%  winners in 1-10%: 34/65  >10%: 20
+    unlevered move  winners p25/50/75 +2.24/+4.57/+10.57%  losers p25/50/75 -5.94/-4.74/-3.36%  mean +1.05%
+    return on margin per trade (net of costs): 5x +4.46%  10x +8.93%
+    equity per trade (1% risk sizing): mean +0.14%  best +5.52%  worst -1.18%
+SOLUSDT E3 E2 + scale 50% at 2R                  HTF tot   +19.8%  |  1m tot   +24.7%  MDD  -13.6%  n 182
+    positions 140  win 46%  winners in 1-10%: 34/65  >10%: 21
+    unlevered move  winners p25/50/75 +3.01/+7.36/+10.44%  losers p25/50/75 -5.94/-4.74/-3.36%  mean +1.20%
+    return on margin per trade (net of costs): 5x +5.22%  10x +10.43%
+    equity per trade (1% risk sizing): mean +0.17%  best +3.75%  worst -1.18%
+SOLUSDT E4 agent tiers + 1.5ATR trail past 2R    HTF tot    +9.7%  |  1m tot   +14.8%  MDD  -12.6%  n 140
+    positions 140  win 39%  winners in 1-10%: 40/54  >10%: 14
+    unlevered move  winners p25/50/75 +4.11/+6.84/+9.92%  losers p25/50/75 -5.82/-4.09/-0.03%  mean +0.96%
+    return on margin per trade (net of costs): 5x +4.02%  10x +8.05%
+    equity per trade (1% risk sizing): mean +0.11%  best +2.89%  worst -1.18%
+SOLUSDT E5 giveback 40% after 1R                 HTF tot   +17.2%  |  1m tot   +24.1%  MDD  -10.6%  n 140
+    positions 140  win 57%  winners in 1-10%: 73/80  >10%: 7
+    unlevered move  winners p25/50/75 +3.64/+5.06/+6.78%  losers p25/50/75 -6.33/-5.19/-3.79%  mean +0.97%
+    return on margin per trade (net of costs): 5x +4.06%  10x +8.13%
+    equity per trade (1% risk sizing): mean +0.16%  best +10.90%  worst -1.18%
+SOLUSDT E6 fixed TP 2R                           HTF tot   +42.2%  |  1m tot   +42.1%  MDD  -10.2%  n 140
+    positions 140  win 44%  winners in 1-10%: 31/62  >10%: 31
+    unlevered move  winners p25/50/75 +7.10/+9.97/+14.09%  losers p25/50/75 -5.94/-5.07/-3.76%  mean +2.00%
+    return on margin per trade (net of costs): 5x +9.20%  10x +18.41%
+    equity per trade (1% risk sizing): mean +0.26%  best +2.00%  worst -1.18%
+ETHUSDT E0 stop 2ATR only                        HTF tot   +56.9%  |  1m tot   +56.9%  MDD  -12.7%  n 152
+    positions 152  win 32%  winners in 1-10%: 24/49  >10%: 18
+    unlevered move  winners p25/50/75 +1.86/+7.51/+14.10%  losers p25/50/75 -4.79/-3.34/-2.18%  mean +1.04%
+    return on margin per trade (net of costs): 5x +4.40%  10x +8.80%
+    equity per trade (1% risk sizing): mean +0.33%  best +16.89%  worst -1.32%
+ETHUSDT E1 chandelier 3ATR after 1R              HTF tot   +32.5%  |  1m tot   +43.6%  MDD   -9.9%  n 152
+    positions 152  win 42%  winners in 1-10%: 42/64  >10%: 12
+    unlevered move  winners p25/50/75 +1.64/+3.04/+8.02%  losers p25/50/75 -4.51/-3.13/-1.95%  mean +0.88%
+    return on margin per trade (net of costs): 5x +3.58%  10x +7.16%
+    equity per trade (1% risk sizing): mean +0.26%  best +12.78%  worst -1.13%
+ETHUSDT E2 E1 + tighten to 1.5ATR past 3R        HTF tot   +11.2%  |  1m tot   +17.9%  MDD   -9.9%  n 152
+    positions 152  win 42%  winners in 1-10%: 38/64  >10%: 16
+    unlevered move  winners p25/50/75 +1.64/+3.04/+9.84%  losers p25/50/75 -4.51/-3.13/-1.95%  mean +0.44%
+    return on margin per trade (net of costs): 5x +1.41%  10x +2.83%
+    equity per trade (1% risk sizing): mean +0.12%  best +7.15%  worst -1.13%
+ETHUSDT E3 E2 + scale 50% at 2R                  HTF tot   +15.4%  |  1m tot   +19.9%  MDD   -8.4%  n 197
+    positions 152  win 42%  winners in 1-10%: 44/64  >10%: 10
+    unlevered move  winners p25/50/75 +1.81/+4.58/+8.16%  losers p25/50/75 -4.51/-3.13/-1.95%  mean +0.54%
+    return on margin per trade (net of costs): 5x +1.90%  10x +3.80%
+    equity per trade (1% risk sizing): mean +0.13%  best +4.56%  worst -1.13%
+ETHUSDT E4 agent tiers + 1.5ATR trail past 2R    HTF tot   +23.3%  |  1m tot   +24.8%  MDD   -9.0%  n 152
+    positions 152  win 38%  winners in 1-10%: 46/58  >10%: 12
+    unlevered move  winners p25/50/75 +3.29/+5.07/+8.45%  losers p25/50/75 -4.19/-3.03/-0.03%  mean +0.81%
+    return on margin per trade (net of costs): 5x +3.24%  10x +6.48%
+    equity per trade (1% risk sizing): mean +0.15%  best +7.15%  worst -1.13%
+ETHUSDT E5 giveback 40% after 1R                 HTF tot   +24.1%  |  1m tot   +27.5%  MDD   -9.2%  n 152
+    positions 152  win 55%  winners in 1-10%: 79/83  >10%: 4
+    unlevered move  winners p25/50/75 +2.63/+3.56/+4.79%  losers p25/50/75 -4.71/-3.52/-2.67%  mean +0.85%
+    return on margin per trade (net of costs): 5x +3.47%  10x +6.94%
+    equity per trade (1% risk sizing): mean +0.17%  best +11.37%  worst -1.13%
+ETHUSDT E6 fixed TP 2R                           HTF tot   +25.5%  |  1m tot   +25.5%  MDD   -7.6%  n 152
+    positions 152  win 39%  winners in 1-10%: 41/60  >10%: 14
+    unlevered move  winners p25/50/75 +5.45/+6.79/+9.54%  losers p25/50/75 -4.91/-3.41/-2.28%  mean +0.81%
+    return on margin per trade (net of costs): 5x +3.25%  10x +6.50%
+    equity per trade (1% risk sizing): mean +0.16%  best +2.01%  worst -1.13%
+XRPUSDT E0 stop 2ATR only                        HTF tot   +12.8%  |  1m tot   +12.7%  MDD  -33.2%  n 160
+    positions 160  win 24%  winners in 1-10%: 21/39  >10%: 12
+    unlevered move  winners p25/50/75 +1.32/+4.64/+12.51%  losers p25/50/75 -5.23/-3.77/-3.06%  mean +0.72%
+    return on margin per trade (net of costs): 5x +2.81%  10x +5.61%
+    equity per trade (1% risk sizing): mean +0.20%  best +70.54%  worst -1.13%
+XRPUSDT E1 chandelier 3ATR after 1R              HTF tot   -36.4%  |  1m tot   -30.3%  MDD  -35.0%  n 160
+    positions 160  win 33%  winners in 1-10%: 38/53  >10%: 6
+    unlevered move  winners p25/50/75 +1.42/+3.25/+5.79%  losers p25/50/75 -5.23/-3.68/-2.59%  mean -1.07%
+    return on margin per trade (net of costs): 5x -6.13%  10x -12.27%
+    equity per trade (1% risk sizing): mean -0.22%  best +11.10%  worst -1.08%
+XRPUSDT E2 E1 + tighten to 1.5ATR past 3R        HTF tot   -32.8%  |  1m tot   -31.1%  MDD  -32.4%  n 160
+    positions 160  win 33%  winners in 1-10%: 35/53  >10%: 9
+    unlevered move  winners p25/50/75 +1.42/+3.25/+6.51%  losers p25/50/75 -5.23/-3.68/-2.59%  mean -1.08%
+    return on margin per trade (net of costs): 5x -6.22%  10x -12.44%
+    equity per trade (1% risk sizing): mean -0.23%  best +3.93%  worst -1.08%
+XRPUSDT E3 E2 + scale 50% at 2R                  HTF tot   -24.5%  |  1m tot   -24.3%  MDD  -27.3%  n 195
+    positions 160  win 33%  winners in 1-10%: 37/53  >10%: 7
+    unlevered move  winners p25/50/75 +2.24/+5.71/+7.75%  losers p25/50/75 -5.23/-3.68/-2.59%  mean -0.83%
+    return on margin per trade (net of costs): 5x -4.97%  10x -9.94%
+    equity per trade (1% risk sizing): mean -0.17%  best +2.95%  worst -1.08%
+XRPUSDT E4 agent tiers + 1.5ATR trail past 2R    HTF tot   -22.7%  |  1m tot   -19.6%  MDD  -24.1%  n 160
+    positions 160  win 30%  winners in 1-10%: 41/48  >10%: 6
+    unlevered move  winners p25/50/75 +2.86/+6.10/+7.55%  losers p25/50/75 -5.23/-3.59/-2.50%  mean -0.64%
+    return on margin per trade (net of costs): 5x -3.99%  10x -7.98%
+    equity per trade (1% risk sizing): mean -0.13%  best +3.93%  worst -1.08%
+XRPUSDT E5 giveback 40% after 1R                 HTF tot   -17.8%  |  1m tot   -22.1%  MDD  -23.8%  n 160
+    positions 160  win 44%  winners in 1-10%: 69/70  >10%: 0
+    unlevered move  winners p25/50/75 +2.60/+3.56/+4.98%  losers p25/50/75 -5.51/-4.02/-3.14%  mean -0.83%
+    return on margin per trade (net of costs): 5x -4.93%  10x -9.86%
+    equity per trade (1% risk sizing): mean -0.15%  best +2.00%  worst -1.08%
+XRPUSDT E6 fixed TP 2R                           HTF tot    -7.8%  |  1m tot    -7.8%  MDD  -18.9%  n 160
+    positions 160  win 34%  winners in 1-10%: 35/54  >10%: 14
+    unlevered move  winners p25/50/75 +6.24/+7.84/+9.52%  losers p25/50/75 -5.44/-3.79/-3.08%  mean -0.26%
+    return on margin per trade (net of costs): 5x -2.08%  10x -4.16%
+    equity per trade (1% risk sizing): mean -0.04%  best +2.04%  worst -1.11%
+
+==================== 1d TSMOM L10d ====================
+SOLUSDT E0 stop 2ATR only                        HTF tot   +46.4%  |  1m tot   +46.5%  MDD  -10.4%  n 263
+    positions 263  win 36%  winners in 1-10%: 49/95  >10%: 32
+    unlevered move  winners p25/50/75 +1.76/+5.19/+14.74%  losers p25/50/75 -7.50/-4.60/-2.27%  mean +2.49%
+    return on margin per trade (net of costs): 5x +11.66%  10x +23.33%
+    equity per trade (1% risk sizing): mean +0.16%  best +19.60%  worst -1.13%
+SOLUSDT E1 chandelier 3ATR after 1R              HTF tot   +44.1%  |  1m tot   +25.9%  MDD   -7.8%  n 263
+    positions 263  win 37%  winners in 1-10%: 50/97  >10%: 34
+    unlevered move  winners p25/50/75 +1.82/+6.35/+15.46%  losers p25/50/75 -7.09/-4.42/-2.23%  mean +1.24%
+    return on margin per trade (net of costs): 5x +5.38%  10x +10.76%
+    equity per trade (1% risk sizing): mean +0.09%  best +6.56%  worst -1.03%
+SOLUSDT E2 E1 + tighten to 1.5ATR past 3R        HTF tot   +24.9%  |  1m tot   +29.3%  MDD   -7.1%  n 263
+    positions 263  win 37%  winners in 1-10%: 50/97  >10%: 34
+    unlevered move  winners p25/50/75 +1.82/+6.35/+15.54%  losers p25/50/75 -7.09/-4.42/-2.23%  mean +1.39%
+    return on margin per trade (net of costs): 5x +6.14%  10x +12.29%
+    equity per trade (1% risk sizing): mean +0.10%  best +5.70%  worst -1.03%
+SOLUSDT E3 E2 + scale 50% at 2R                  HTF tot   +21.0%  |  1m tot   +23.7%  MDD   -7.5%  n 291
+    positions 263  win 37%  winners in 1-10%: 49/97  >10%: 35
+    unlevered move  winners p25/50/75 +1.82/+6.49/+19.82%  losers p25/50/75 -7.09/-4.42/-2.23%  mean +1.07%
+    return on margin per trade (net of costs): 5x +4.53%  10x +9.06%
+    equity per trade (1% risk sizing): mean +0.08%  best +3.84%  worst -1.03%
+SOLUSDT E4 agent tiers + 1.5ATR trail past 2R    HTF tot   +25.8%  |  1m tot   +28.2%  MDD   -6.0%  n 263
+    positions 263  win 36%  winners in 1-10%: 49/94  >10%: 32
+    unlevered move  winners p25/50/75 +1.82/+6.49/+15.74%  losers p25/50/75 -7.02/-4.10/-1.78%  mean +1.31%
+    return on margin per trade (net of costs): 5x +5.76%  10x +11.53%
+    equity per trade (1% risk sizing): mean +0.10%  best +5.70%  worst -1.03%
+SOLUSDT E5 giveback 40% after 1R                 HTF tot   +23.5%  |  1m tot   +25.7%  MDD   -5.0%  n 263
+    positions 263  win 40%  winners in 1-10%: 52/106  >10%: 41
+    unlevered move  winners p25/50/75 +2.12/+8.38/+12.88%  losers p25/50/75 -7.10/-4.47/-2.23%  mean +0.90%
+    return on margin per trade (net of costs): 5x +3.71%  10x +7.42%
+    equity per trade (1% risk sizing): mean +0.09%  best +13.14%  worst -1.03%
+SOLUSDT E6 fixed TP 2R                           HTF tot   +13.2%  |  1m tot   +13.2%  MDD  -11.0%  n 263
+    positions 263  win 36%  winners in 1-10%: 47/95  >10%: 35
+    unlevered move  winners p25/50/75 +1.77/+6.35/+18.54%  losers p25/50/75 -7.50/-4.60/-2.27%  mean +0.51%
+    return on margin per trade (net of costs): 5x +1.77%  10x +3.55%
+    equity per trade (1% risk sizing): mean +0.05%  best +2.11%  worst -1.13%
+ETHUSDT E0 stop 2ATR only                        HTF tot   +12.4%  |  1m tot   +12.4%  MDD  -11.5%  n 285
+    positions 285  win 33%  winners in 1-10%: 50/95  >10%: 27
+    unlevered move  winners p25/50/75 +1.36/+4.17/+12.84%  losers p25/50/75 -5.99/-3.02/-1.32%  mean +0.46%
+    return on margin per trade (net of costs): 5x +1.48%  10x +2.96%
+    equity per trade (1% risk sizing): mean +0.05%  best +5.79%  worst -1.13%
+ETHUSDT E1 chandelier 3ATR after 1R              HTF tot   +13.6%  |  1m tot   +17.2%  MDD   -8.5%  n 285
+    positions 285  win 35%  winners in 1-10%: 48/100  >10%: 29
+    unlevered move  winners p25/50/75 +1.15/+4.05/+12.44%  losers p25/50/75 -5.97/-3.10/-1.32%  mean +0.57%
+    return on margin per trade (net of costs): 5x +2.03%  10x +4.06%
+    equity per trade (1% risk sizing): mean +0.06%  best +5.73%  worst -1.13%
+ETHUSDT E2 E1 + tighten to 1.5ATR past 3R        HTF tot   +12.4%  |  1m tot   +16.4%  MDD   -8.0%  n 285
+    positions 285  win 35%  winners in 1-10%: 48/100  >10%: 29
+    unlevered move  winners p25/50/75 +1.15/+4.05/+14.14%  losers p25/50/75 -5.97/-3.10/-1.32%  mean +0.54%
+    return on margin per trade (net of costs): 5x +1.92%  10x +3.83%
+    equity per trade (1% risk sizing): mean +0.06%  best +4.27%  worst -1.13%
+ETHUSDT E3 E2 + scale 50% at 2R                  HTF tot    +9.1%  |  1m tot   +11.4%  MDD   -9.0%  n 314
+    positions 285  win 35%  winners in 1-10%: 44/100  >10%: 33
+    unlevered move  winners p25/50/75 +1.15/+4.05/+13.98%  losers p25/50/75 -5.97/-3.10/-1.32%  mean +0.44%
+    return on margin per trade (net of costs): 5x +1.38%  10x +2.76%
+    equity per trade (1% risk sizing): mean +0.04%  best +3.12%  worst -1.13%
+ETHUSDT E4 agent tiers + 1.5ATR trail past 2R    HTF tot    +5.9%  |  1m tot    +3.2%  MDD  -11.3%  n 285
+    positions 285  win 31%  winners in 1-10%: 46/88  >10%: 28
+    unlevered move  winners p25/50/75 +1.55/+5.11/+13.79%  losers p25/50/75 -5.62/-2.65/-1.00%  mean +0.12%
+    return on margin per trade (net of costs): 5x -0.18%  10x -0.35%
+    equity per trade (1% risk sizing): mean +0.01%  best +4.27%  worst -1.13%
+ETHUSDT E5 giveback 40% after 1R                 HTF tot   +20.9%  |  1m tot   +17.0%  MDD  -11.0%  n 285
+    positions 285  win 37%  winners in 1-10%: 62/106  >10%: 30
+    unlevered move  winners p25/50/75 +1.81/+6.14/+10.46%  losers p25/50/75 -6.22/-3.10/-1.32%  mean +0.52%
+    return on margin per trade (net of costs): 5x +1.80%  10x +3.61%
+    equity per trade (1% risk sizing): mean +0.06%  best +5.73%  worst -1.13%
+ETHUSDT E6 fixed TP 2R                           HTF tot    +4.1%  |  1m tot    +4.1%  MDD  -11.3%  n 285
+    positions 285  win 33%  winners in 1-10%: 46/95  >10%: 31
+    unlevered move  winners p25/50/75 +1.36/+5.26/+15.33%  losers p25/50/75 -5.99/-3.02/-1.32%  mean +0.25%
+    return on margin per trade (net of costs): 5x +0.44%  10x +0.88%
+    equity per trade (1% risk sizing): mean +0.02%  best +2.03%  worst -1.13%
+XRPUSDT E0 stop 2ATR only                        HTF tot   +32.4%  |  1m tot   +39.5%  MDD  -15.6%  n 299
+    positions 299  win 31%  winners in 1-10%: 57/94  >10%: 26
+    unlevered move  winners p25/50/75 +1.48/+3.49/+10.92%  losers p25/50/75 -5.53/-3.33/-1.75%  mean +0.93%
+    return on margin per trade (net of costs): 5x +3.86%  10x +7.72%
+    equity per trade (1% risk sizing): mean +0.14%  best +48.25%  worst -1.07%
+XRPUSDT E1 chandelier 3ATR after 1R              HTF tot    -0.3%  |  1m tot   -11.3%  MDD  -19.9%  n 299
+    positions 299  win 32%  winners in 1-10%: 58/95  >10%: 23
+    unlevered move  winners p25/50/75 +1.41/+3.53/+8.95%  losers p25/50/75 -5.53/-3.37/-1.71%  mean -0.53%
+    return on margin per trade (net of costs): 5x -3.45%  10x -6.90%
+    equity per trade (1% risk sizing): mean -0.04%  best +4.69%  worst -1.07%
+XRPUSDT E2 E1 + tighten to 1.5ATR past 3R        HTF tot   -12.7%  |  1m tot    -8.0%  MDD  -21.0%  n 299
+    positions 299  win 32%  winners in 1-10%: 58/95  >10%: 23
+    unlevered move  winners p25/50/75 +1.41/+3.53/+8.95%  losers p25/50/75 -5.53/-3.37/-1.71%  mean -0.39%
+    return on margin per trade (net of costs): 5x -2.73%  10x -5.45%
+    equity per trade (1% risk sizing): mean -0.03%  best +5.44%  worst -1.07%
+XRPUSDT E3 E2 + scale 50% at 2R                  HTF tot   -10.0%  |  1m tot    -7.0%  MDD  -18.5%  n 323
+    positions 299  win 32%  winners in 1-10%: 53/95  >10%: 28
+    unlevered move  winners p25/50/75 +1.41/+3.53/+12.59%  losers p25/50/75 -5.53/-3.37/-1.71%  mean -0.35%
+    return on margin per trade (net of costs): 5x -2.53%  10x -5.07%
+    equity per trade (1% risk sizing): mean -0.02%  best +3.71%  worst -1.07%
+XRPUSDT E4 agent tiers + 1.5ATR trail past 2R    HTF tot   -18.1%  |  1m tot    -5.0%  MDD  -18.4%  n 299
+    positions 299  win 30%  winners in 1-10%: 52/89  >10%: 26
+    unlevered move  winners p25/50/75 +1.54/+4.08/+12.69%  losers p25/50/75 -5.42/-3.10/-1.40%  mean -0.30%
+    return on margin per trade (net of costs): 5x -2.32%  10x -4.64%
+    equity per trade (1% risk sizing): mean -0.01%  best +5.44%  worst -1.07%
+XRPUSDT E5 giveback 40% after 1R                 HTF tot    -9.5%  |  1m tot    -2.5%  MDD  -17.1%  n 299
+    positions 299  win 35%  winners in 1-10%: 71/106  >10%: 24
+    unlevered move  winners p25/50/75 +2.03/+6.50/+9.06%  losers p25/50/75 -5.72/-3.45/-1.84%  mean -0.26%
+    return on margin per trade (net of costs): 5x -2.11%  10x -4.22%
+    equity per trade (1% risk sizing): mean -0.01%  best +4.10%  worst -1.07%
+XRPUSDT E6 fixed TP 2R                           HTF tot    -6.7%  |  1m tot    -1.8%  MDD  -12.6%  n 299
+    positions 299  win 32%  winners in 1-10%: 55/96  >10%: 30
+    unlevered move  winners p25/50/75 +1.48/+3.72/+14.83%  losers p25/50/75 -5.53/-3.31/-1.75%  mean -0.16%
+    return on margin per trade (net of costs): 5x -1.61%  10x -3.21%
+    equity per trade (1% risk sizing): mean -0.00%  best +2.04%  worst -1.07%
+
+==================== 4h TSMOM L10d ====================
+SOLUSDT E0 stop 2ATR only                        HTF tot   +92.5%  |  1m tot   +92.6%  MDD  -18.5%  n 663
+    positions 663  win 34%  winners in 1-10%: 119/226  >10%: 39
+    unlevered move  winners p25/50/75 +0.85/+1.96/+6.15%  losers p25/50/75 -4.12/-2.10/-1.00%  mean +0.69%
+    return on margin per trade (net of costs): 5x +2.64%  10x +5.29%
+    equity per trade (1% risk sizing): mean +0.12%  best +30.61%  worst -1.23%
+SOLUSDT E1 chandelier 3ATR after 1R              HTF tot   +22.9%  |  1m tot   +15.4%  MDD  -15.1%  n 663
+    positions 663  win 38%  winners in 1-10%: 132/251  >10%: 36
+    unlevered move  winners p25/50/75 +0.76/+1.89/+5.12%  losers p25/50/75 -3.35/-1.76/-0.90%  mean +0.15%
+    return on margin per trade (net of costs): 5x -0.06%  10x -0.12%
+    equity per trade (1% risk sizing): mean +0.03%  best +6.81%  worst -1.07%
+SOLUSDT E2 E1 + tighten to 1.5ATR past 3R        HTF tot    +6.5%  |  1m tot   +11.5%  MDD  -13.6%  n 663
+    positions 663  win 38%  winners in 1-10%: 126/251  >10%: 42
+    unlevered move  winners p25/50/75 +0.76/+1.89/+5.13%  losers p25/50/75 -3.35/-1.76/-0.90%  mean +0.14%
+    return on margin per trade (net of costs): 5x -0.08%  10x -0.17%
+    equity per trade (1% risk sizing): mean +0.02%  best +6.63%  worst -1.07%
+SOLUSDT E3 E2 + scale 50% at 2R                  HTF tot    +9.6%  |  1m tot   +12.2%  MDD  -13.3%  n 745
+    positions 663  win 38%  winners in 1-10%: 125/251  >10%: 43
+    unlevered move  winners p25/50/75 +0.76/+1.92/+7.69%  losers p25/50/75 -3.35/-1.76/-0.90%  mean +0.17%
+    return on margin per trade (net of costs): 5x +0.06%  10x +0.13%
+    equity per trade (1% risk sizing): mean +0.02%  best +4.31%  worst -1.07%
+SOLUSDT E4 agent tiers + 1.5ATR trail past 2R    HTF tot    -2.3%  |  1m tot    +1.2%  MDD  -16.6%  n 663
+    positions 663  win 34%  winners in 1-10%: 137/228  >10%: 34
+    unlevered move  winners p25/50/75 +0.99/+2.35/+7.06%  losers p25/50/75 -3.20/-1.51/-0.50%  mean +0.08%
+    return on margin per trade (net of costs): 5x -0.40%  10x -0.80%
+    equity per trade (1% risk sizing): mean +0.01%  best +4.27%  worst -1.07%
+SOLUSDT E5 giveback 40% after 1R                 HTF tot    +7.9%  |  1m tot   +13.4%  MDD  -11.0%  n 663
+    positions 663  win 44%  winners in 1-10%: 217/289  >10%: 16
+    unlevered move  winners p25/50/75 +1.28/+3.11/+5.14%  losers p25/50/75 -3.74/-1.89/-0.93%  mean +0.21%
+    return on margin per trade (net of costs): 5x +0.25%  10x +0.51%
+    equity per trade (1% risk sizing): mean +0.02%  best +5.59%  worst -1.07%
+SOLUSDT E6 fixed TP 2R                           HTF tot   +23.6%  |  1m tot   +23.6%  MDD  -14.9%  n 663
+    positions 663  win 36%  winners in 1-10%: 118/241  >10%: 56
+    unlevered move  winners p25/50/75 +0.90/+2.98/+9.52%  losers p25/50/75 -3.98/-2.02/-1.00%  mean +0.26%
+    return on margin per trade (net of costs): 5x +0.48%  10x +0.97%
+    equity per trade (1% risk sizing): mean +0.04%  best +2.14%  worst -1.09%
+ETHUSDT E0 stop 2ATR only                        HTF tot    +8.6%  |  1m tot    +8.6%  MDD  -22.8%  n 740
+    positions 740  win 30%  winners in 1-10%: 93/220  >10%: 33
+    unlevered move  winners p25/50/75 +0.33/+1.35/+4.31%  losers p25/50/75 -3.00/-1.33/-0.54%  mean +0.16%
+    return on margin per trade (net of costs): 5x +0.01%  10x +0.02%
+    equity per trade (1% risk sizing): mean +0.02%  best +19.22%  worst -1.30%
+ETHUSDT E1 chandelier 3ATR after 1R              HTF tot    +9.2%  |  1m tot    +3.0%  MDD  -25.3%  n 740
+    positions 740  win 34%  winners in 1-10%: 130/251  >10%: 21
+    unlevered move  winners p25/50/75 +0.37/+1.40/+4.15%  losers p25/50/75 -2.53/-1.14/-0.45%  mean +0.11%
+    return on margin per trade (net of costs): 5x -0.27%  10x -0.53%
+    equity per trade (1% risk sizing): mean +0.01%  best +13.57%  worst -1.20%
+ETHUSDT E2 E1 + tighten to 1.5ATR past 3R        HTF tot    -5.5%  |  1m tot    -7.8%  MDD  -22.6%  n 740
+    positions 740  win 34%  winners in 1-10%: 126/251  >10%: 25
+    unlevered move  winners p25/50/75 +0.37/+1.40/+4.92%  losers p25/50/75 -2.53/-1.14/-0.45%  mean +0.08%
+    return on margin per trade (net of costs): 5x -0.39%  10x -0.79%
+    equity per trade (1% risk sizing): mean -0.01%  best +9.91%  worst -1.20%
+ETHUSDT E3 E2 + scale 50% at 2R                  HTF tot   -11.5%  |  1m tot   -14.0%  MDD  -23.4%  n 828
+    positions 740  win 34%  winners in 1-10%: 131/251  >10%: 21
+    unlevered move  winners p25/50/75 +0.37/+1.48/+5.70%  losers p25/50/75 -2.53/-1.14/-0.45%  mean +0.06%
+    return on margin per trade (net of costs): 5x -0.52%  10x -1.04%
+    equity per trade (1% risk sizing): mean -0.02%  best +5.94%  worst -1.20%
+ETHUSDT E4 agent tiers + 1.5ATR trail past 2R    HTF tot    -9.0%  |  1m tot    -4.7%  MDD  -19.0%  n 740
+    positions 740  win 33%  winners in 1-10%: 137/241  >10%: 21
+    unlevered move  winners p25/50/75 +0.41/+1.76/+5.66%  losers p25/50/75 -2.51/-1.05/-0.31%  mean +0.10%
+    return on margin per trade (net of costs): 5x -0.32%  10x -0.64%
+    equity per trade (1% risk sizing): mean -0.00%  best +9.91%  worst -1.20%
+ETHUSDT E5 giveback 40% after 1R                 HTF tot    +4.7%  |  1m tot    +3.9%  MDD  -21.4%  n 740
+    positions 740  win 39%  winners in 1-10%: 198/292  >10%: 12
+    unlevered move  winners p25/50/75 +0.77/+2.35/+3.43%  losers p25/50/75 -2.79/-1.22/-0.48%  mean +0.10%
+    return on margin per trade (net of costs): 5x -0.28%  10x -0.57%
+    equity per trade (1% risk sizing): mean +0.01%  best +17.61%  worst -1.20%
+ETHUSDT E6 fixed TP 2R                           HTF tot   -25.8%  |  1m tot   -25.8%  MDD  -35.7%  n 740
+    positions 740  win 32%  winners in 1-10%: 130/239  >10%: 21
+    unlevered move  winners p25/50/75 +0.38/+1.97/+6.36%  losers p25/50/75 -2.97/-1.28/-0.51%  mean -0.00%
+    return on margin per trade (net of costs): 5x -0.81%  10x -1.62%
+    equity per trade (1% risk sizing): mean -0.04%  best +2.02%  worst -1.20%
+XRPUSDT E0 stop 2ATR only                        HTF tot   +50.3%  |  1m tot   +77.4%  MDD  -42.4%  n 769
+    positions 769  win 29%  winners in 1-10%: 89/226  >10%: 31
+    unlevered move  winners p25/50/75 +0.39/+1.23/+3.72%  losers p25/50/75 -3.04/-1.47/-0.56%  mean +0.53%
+    return on margin per trade (net of costs): 5x +1.86%  10x +3.71%
+    equity per trade (1% risk sizing): mean +0.14%  best +118.56%  worst -1.42%
+XRPUSDT E1 chandelier 3ATR after 1R              HTF tot   -15.9%  |  1m tot   +14.8%  MDD  -18.4%  n 769
+    positions 769  win 36%  winners in 1-10%: 137/274  >10%: 23
+    unlevered move  winners p25/50/75 +0.43/+1.48/+4.43%  losers p25/50/75 -2.76/-1.25/-0.52%  mean +0.04%
+    return on margin per trade (net of costs): 5x -0.61%  10x -1.22%
+    equity per trade (1% risk sizing): mean +0.02%  best +14.94%  worst -1.08%
+XRPUSDT E2 E1 + tighten to 1.5ATR past 3R        HTF tot   -15.2%  |  1m tot    +9.5%  MDD  -20.3%  n 769
+    positions 769  win 36%  winners in 1-10%: 130/274  >10%: 30
+    unlevered move  winners p25/50/75 +0.43/+1.48/+4.92%  losers p25/50/75 -2.76/-1.25/-0.52%  mean -0.00%
+    return on margin per trade (net of costs): 5x -0.81%  10x -1.62%
+    equity per trade (1% risk sizing): mean +0.02%  best +8.39%  worst -1.08%
+XRPUSDT E3 E2 + scale 50% at 2R                  HTF tot   -10.8%  |  1m tot   +10.0%  MDD  -19.5%  n 863
+    positions 769  win 36%  winners in 1-10%: 135/274  >10%: 25
+    unlevered move  winners p25/50/75 +0.43/+1.50/+5.95%  losers p25/50/75 -2.76/-1.25/-0.52%  mean +0.04%
+    return on margin per trade (net of costs): 5x -0.59%  10x -1.18%
+    equity per trade (1% risk sizing): mean +0.02%  best +5.19%  worst -1.08%
+XRPUSDT E4 agent tiers + 1.5ATR trail past 2R    HTF tot   -28.3%  |  1m tot    -4.2%  MDD  -20.1%  n 769
+    positions 769  win 34%  winners in 1-10%: 144/258  >10%: 21
+    unlevered move  winners p25/50/75 +0.53/+1.70/+5.33%  losers p25/50/75 -2.67/-1.15/-0.39%  mean -0.01%
+    return on margin per trade (net of costs): 5x -0.84%  10x -1.68%
+    equity per trade (1% risk sizing): mean -0.00%  best +3.93%  worst -1.08%
+XRPUSDT E5 giveback 40% after 1R                 HTF tot   -10.5%  |  1m tot   -10.5%  MDD  -21.3%  n 769
+    positions 769  win 39%  winners in 1-10%: 201/301  >10%: 7
+    unlevered move  winners p25/50/75 +0.64/+2.33/+3.95%  losers p25/50/75 -2.86/-1.36/-0.53%  mean -0.07%
+    return on margin per trade (net of costs): 5x -1.14%  10x -2.28%
+    equity per trade (1% risk sizing): mean -0.01%  best +10.83%  worst -1.08%
+XRPUSDT E6 fixed TP 2R                           HTF tot    -8.4%  |  1m tot   +11.4%  MDD  -19.3%  n 769
+    positions 769  win 34%  winners in 1-10%: 128/259  >10%: 30
+    unlevered move  winners p25/50/75 +0.49/+2.26/+7.23%  losers p25/50/75 -3.01/-1.41/-0.54%  mean +0.14%
+    return on margin per trade (net of costs): 5x -0.10%  10x -0.19%
+    equity per trade (1% risk sizing): mean +0.02%  best +2.09%  worst -1.21%

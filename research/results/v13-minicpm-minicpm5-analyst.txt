@@ -1,0 +1,16 @@
+v13 MiniCPM fleet replay: model minicpm5-analyst, 900 decision points, 1m path, 10x isolated, 48h max hold
+
+--- SOLUSDT: 300 prompts, HOLD 0, rejected by fleet validation 49, entries 251 (stop beyond 10x liquidation buffer, not traded: 71)
+  FLEET  n  180  win  7.2%  mean margin ret  -2.82%  (t -4.57)  median  -1.30%  winners in 1-10% move: 7/13  mean move -0.181%  exits {'be': 133, 'init': 34, 'tp': 13}
+  TIERS  n  180  win 36.7%  mean margin ret  -5.89%  (t -3.55)  median  -8.72%  winners in 1-10% move: 38/66  mean move -0.484%  exits {'init': 93, 'tp': 47, 'lock': 22, 'eod': 14, 'trail': 4}
+  FLIP   n  180  win 11.7%  mean margin ret  -0.26%  (t -0.32)  median  -1.30%  winners in 1-10% move: 16/21  mean move +0.072%  exits {'be': 137, 'tp': 21, 'init': 22}
+
+--- ETHUSDT: 300 prompts, HOLD 0, rejected by fleet validation 81, entries 219 (stop beyond 10x liquidation buffer, not traded: 30)
+  FLEET  n  189  win  7.9%  mean margin ret  -3.01%  (t -5.16)  median  -1.30%  winners in 1-10% move: 8/15  mean move -0.199%  exits {'be': 121, 'init': 52, 'tp': 15, 'eod': 1}
+  TIERS  n  189  win 33.9%  mean margin ret  -2.63%  (t -2.20)  median  -4.34%  winners in 1-10% move: 34/64  mean move -0.155%  exits {'lock': 40, 'init': 97, 'tp': 34, 'trail': 12, 'eod': 6}
+  FLIP   n  189  win 10.1%  mean margin ret  -1.35%  (t -2.06)  median  -1.30%  winners in 1-10% move: 11/19  mean move -0.038%  exits {'be': 127, 'init': 42, 'tp': 19, 'eod': 1}
+
+--- XRPUSDT: 300 prompts, HOLD 0, rejected by fleet validation 191, entries 109 (stop beyond 10x liquidation buffer, not traded: 38)
+  FLEET  n   71  win  9.9%  mean margin ret  +1.73%  (t +0.55)  median  -1.30%  winners in 1-10% move: 5/7  mean move +0.280%  exits {'be': 49, 'init': 15, 'tp': 7}
+  TIERS  n   71  win 36.6%  mean margin ret  -2.08%  (t -0.77)  median  -5.58%  winners in 1-10% move: 16/26  mean move -0.095%  exits {'init': 32, 'lock': 11, 'trail': 10, 'eod': 9, 'tp': 9}
+  FLIP   n   71  win  8.5%  mean margin ret  -1.97%  (t -1.10)  median  -1.30%  winners in 1-10% move: 6/6  mean move -0.100%  exits {'be': 48, 'init': 16, 'tp': 5, 'eod': 2}

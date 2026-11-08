@@ -12,6 +12,7 @@ Protocol (no parameter ever sees the bars it is scored on):
 
 Usage:  python3 -m research.search 4h 1d 1h 15m
 """
+import itertools
 import math
 import random
 import statistics as st
@@ -19,11 +20,12 @@ import sys
 from dataclasses import dataclass
 from typing import Callable, List, Optional
 
-from research.engine import (FEE, SLIP, Result, Risk, atr, donchian_sig, ema_gate, htf_gate, returns_from_levels,
-                             load_funding, load_klines, metrics, simulate, supertrend_sig,
-                             tsmom_sig)
+from research.engine import (BARS_PER_YEAR, FEE, SLIP, Result, Risk, atr, donchian_sig, ema_gate, htf_gate,
+                             returns_from_levels, load_funding, load_klines, metrics, simulate,
+                             supertrend_sig, tsmom_sig)
 
 MIN_TRADES = 3
+MIN_TRADES_BY_TF = {'15m': 15, '1h': 10, '4h': 6, '1d': 4}
 CUT = 0.6                                  # v4 split, used only for the comparison table
 WINDOWS = {                                # (train bars, test bars) per timeframe
     '15m': (1440, 720),                    # 15 d / 7.5 d
@@ -36,6 +38,14 @@ TSMOM_L = {'15m': [96, 288, 672], '1h': [24, 72, 168], '4h': [30, 60, 120, 240],
 HTF_FOR = {'15m': '1h', '1h': '4h'}        # intraday trend gate source
 
 
+def _score_config(m: dict) -> float:
+    """Robust selection score: penalizes low-sample variance spikes and requires positive return."""
+    if m['total'] <= 0 or m['pf'] < 1.0:
+        return -math.inf
+    trade_weight = math.sqrt(min(m['n'], 20) / 20.0)
+    return m['sharpe'] * trade_weight
+
+
 @dataclass
 class Cfg:
     name: str
@@ -44,32 +54,44 @@ class Cfg:
     family: str
 
 
+def _build_don_configs(base, tf: str, gates: dict) -> List[Cfg]:
+    cfgs = []
+    for n, exit_kind, (gname, g) in itertools.product(DON_N[tf], ('mid', 'half'), gates.items()):
+        exit_n = None if exit_kind == 'mid' else max(2, n // 2)
+        sig = donchian_sig(base, n, exit_n=exit_n, gate=g)
+        for sl, tr in itertools.product((None, 2.0, 3.0), (None, 3.0)):
+            nm = f"DON{n}/{exit_kind}/{gname}/sl{sl}/tr{tr}"
+            cfgs.append(Cfg(nm, sig, Risk(sl_mult=sl, trail_mult=tr), 'DON'))
+    return cfgs
+
+
+def _build_st_configs(base) -> List[Cfg]:
+    cfgs = []
+    for (p, m), sl in itertools.product(itertools.product((10, 20), (2.0, 3.0, 4.0)), (None, 3.0)):
+        sig = supertrend_sig(base, p, m)
+        cfgs.append(Cfg(f"ST{p}x{m}/sl{sl}", sig, Risk(sl_mult=sl), 'ST'))
+    return cfgs
+
+
+def _build_tsmom_configs(base, tf: str) -> List[Cfg]:
+    cfgs = []
+    for L, sl in itertools.product(TSMOM_L[tf], (None, 3.0)):
+        sig = tsmom_sig(base, L)
+        cfgs.append(Cfg(f"TSMOM{L}/sl{sl}", sig, Risk(sl_mult=sl), 'TSMOM'))
+    return cfgs
+
+
 def build_configs(tf: str, base, load: Callable[[str], object]) -> List[Cfg]:
     gates = {'none': None}
     for L in (100, 200):
         gates[f'ema{L}'] = ema_gate(base, L)
     if tf in HTF_FOR:
         gates[f'mtf-{HTF_FOR[tf]}-ema200'] = htf_gate(base, load(HTF_FOR[tf]), 200)
-    cfgs: List[Cfg] = []
-    for n in DON_N[tf]:
-        for exit_kind in ('mid', 'half'):
-            exit_n = None if exit_kind == 'mid' else max(2, n // 2)
-            for gname, g in gates.items():
-                sig = donchian_sig(base, n, exit_n=exit_n, gate=g)
-                for sl in (None, 2.0, 3.0):
-                    for tr in (None, 3.0):
-                        nm = f"DON{n}/{exit_kind}/{gname}/sl{sl}/tr{tr}"
-                        cfgs.append(Cfg(nm, sig, Risk(sl_mult=sl, trail_mult=tr), 'DON'))
-    for p in (10, 20):
-        for m in (2.0, 3.0, 4.0):
-            sig = supertrend_sig(base, p, m)
-            for sl in (None, 3.0):
-                cfgs.append(Cfg(f"ST{p}x{m}/sl{sl}", sig, Risk(sl_mult=sl), 'ST'))
-    for L in TSMOM_L[tf]:
-        sig = tsmom_sig(base, L)
-        for sl in (None, 3.0):
-            cfgs.append(Cfg(f"TSMOM{L}/sl{sl}", sig, Risk(sl_mult=sl), 'TSMOM'))
-    return cfgs
+    return (
+        _build_don_configs(base, tf, gates) +
+        _build_st_configs(base) +
+        _build_tsmom_configs(base, tf)
+    )
 
 
 def block_bootstrap_sharpe(rets: List[float], bpy: int, B: int = 1000, L: int = 20, seed: int = 7):
@@ -88,6 +110,50 @@ def block_bootstrap_sharpe(rets: List[float], bpy: int, B: int = 1000, L: int = 
     return out[int(.05 * B)], out[int(.5 * B)], out[int(.95 * B)]
 
 
+_EULER_GAMMA = 0.57721566490153286
+
+
+def expected_max_sr(n_trials: int, sr_std: float) -> float:
+    """Expected maximum Sharpe ratio under the null hypothesis (Bailey & Lopez de Prado, 2014)."""
+    if n_trials <= 1 or sr_std <= 0:
+        return 0.0
+    nd = st.NormalDist()
+    z1 = nd.inv_cdf(1.0 - 1.0 / n_trials)
+    z2 = nd.inv_cdf(1.0 - 1.0 / (n_trials * math.e))
+    return sr_std * ((1.0 - _EULER_GAMMA) * z1 + _EULER_GAMMA * z2)
+
+
+def deflated_sharpe_ratio(rets: List[float], bpy: int, n_trials: int = 1, sr_std: float = 0.5) -> dict:
+    """Probabilistic and Deflated Sharpe Ratios accounting for non-normality and selection bias."""
+    T = len(rets)
+    if T < 3:
+        return dict(psr=0.5, dsr=0.5, sr_ann=0.0, sr_star=0.0)
+    mu, sigma = st.fmean(rets), st.stdev(rets) or 1e-12
+    sr = mu / sigma
+    m3 = sum((x - mu) ** 3 for x in rets) / T
+    m4 = sum((x - mu) ** 4 for x in rets) / T
+    skew, kurt = m3 / (sigma ** 3), m4 / (sigma ** 4)
+    se_sr = math.sqrt(max(1e-12, (1.0 - skew * sr + (kurt - 1.0) / 4.0 * (sr ** 2)) / T))
+    nd = st.NormalDist()
+    psr = nd.cdf(sr / se_sr)
+    sr_star_ann = expected_max_sr(n_trials, sr_std)
+    dsr = nd.cdf((sr - sr_star_ann / math.sqrt(bpy)) / se_sr)
+    return dict(sr_ann=sr * math.sqrt(bpy), psr=psr, dsr=dsr, sr_star=sr_star_ann, skew=skew, kurt=kurt)
+
+
+def _select_train_config(cfgs: List[Cfg], base, train: int, start: int, A, fund_t, fund_r, tf: str):
+    min_n = MIN_TRADES_BY_TF.get(tf, 6)
+    best, best_score = None, -math.inf
+    for c in cfgs:
+        r = simulate(base, c.sig, c.risk, max(1, start - train), start, A=A, fund_t=fund_t, fund_r=fund_r)
+        m = metrics(r, tf)
+        if m['n'] >= min_n:
+            score = _score_config(m)
+            if score > best_score:
+                best, best_score = (c, m), score
+    return best
+
+
 def walk_forward(tf: str, base, cfgs: List[Cfg], fund_t, fund_r, train: int, test: int):
     n = len(base)
     A = atr(base, 14)
@@ -98,14 +164,7 @@ def walk_forward(tf: str, base, cfgs: List[Cfg], fund_t, fund_r, train: int, tes
     folds = []
     start = train
     while start + test <= n:
-        best = None
-        for c in cfgs:
-            r = simulate(base, c.sig, c.risk, max(1, start - train), start, A=A, fund_t=fund_t, fund_r=fund_r)
-            m = metrics(r, tf)
-            if m['n'] < MIN_TRADES:
-                continue
-            if best is None or m['sharpe'] > best[1]['sharpe']:
-                best = (c, m)
+        best = _select_train_config(cfgs, base, train, start, A, fund_t, fund_r, tf)
         if best is None:
             r = simulate(base, [0] * n, Risk(), start, start + test, A=A)
             chosen = 'FLAT (no config met MIN_TRADES in train)'
@@ -124,14 +183,15 @@ def walk_forward(tf: str, base, cfgs: List[Cfg], fund_t, fund_r, train: int, tes
     return Result(eq=eq_all, pos=pos_all, trades=trades_all), folds
 
 
-def stitched_report(tf: str, res: Result):
+def stitched_report(tf: str, res: Result, n_trials: int = 1, sr_std: float = 0.5):
     m = metrics(res, tf)
     rets = returns_from_levels(res.eq)
     lo, md, hi = block_bootstrap_sharpe(rets, BPY[tf], L=10 if tf == '1d' else 20)
-    return m, (lo, md, hi)
+    dsr_stat = deflated_sharpe_ratio(rets, BPY[tf], n_trials=n_trials, sr_std=sr_std)
+    return m, (lo, md, hi), dsr_stat
 
 
-BPY = {'15m': 35040, '1h': 8760, '4h': 2190, '1d': 365}
+BPY = BARS_PER_YEAR
 
 
 def fmt(m):
@@ -141,34 +201,24 @@ def fmt(m):
             f"L {m['nl']}({m['el'] * 100:+.2f}%) S {m['ns']}({m['es'] * 100:+.2f}%)")
 
 
-def run(tf: str, fund_t, fund_r):
-    base = load_klines(tf)
-    load = lambda t: load_klines(t)
-    cfgs = build_configs(tf, base, load)
-    train, test = WINDOWS[tf]
-    n = len(base)
-    print(f"\n==================== {tf}: {n} bars ({n / BPY[tf] * 365:.0f} d), {len(cfgs)} configs ====================")
-
-    # 1. walk-forward
-    res, folds = walk_forward(tf, base, cfgs, fund_t, fund_r, train, test)
-    m, (lo, md, hi) = stitched_report(tf, res)
-    print(f"[WF OOS] {len(folds)} folds x {test} bars  {fmt(m)}")
-    print(f"         block-bootstrap OOS Sharpe 5/50/95: {lo:+.2f} / {md:+.2f} / {hi:+.2f}")
-    for f in folds:
-        print(f"         fold {f['start']:>5}-{f['end']:<5} train_Sh {f['train_sharpe']:+5.2f}  "
-              f"oos {f['oos_total'] * 100:+6.1f}% Sh {f['oos_sharpe']:+5.2f} n {f['oos_n']:2d}  {f['chosen']}")
-
-    # 2. in-sample best over the full sample (optimistic, shows selection bias)
-    best_full = None
+def _find_is_best(base, cfgs: List[Cfg], n: int, tf: str, fund_t, fund_r):
+    min_n = MIN_TRADES_BY_TF.get(tf, 6)
+    best_full, best_score = None, -math.inf
     for c in cfgs:
         r = simulate(base, c.sig, c.risk, 1, n, A=atr(base, 14), fund_t=fund_t, fund_r=fund_r)
         mm = metrics(r, tf)
-        if mm['n'] >= MIN_TRADES and (best_full is None or mm['sharpe'] > best_full[1]['sharpe']):
-            best_full = (c, mm)
+        if mm['n'] >= min_n:
+            score = _score_config(mm)
+            if score > best_score:
+                best_full, best_score = (c, mm), score
     if best_full:
         print(f"[IS best, full sample, OPTIMISTIC] {best_full[0].name}: {fmt(best_full[1])}")
+        g = metrics(simulate(base, best_full[0].sig, best_full[0].risk, 1, n, A=atr(base, 14), fee=0.0, slip=0.0), tf)
+        print(f"[gross, zero cost, IS best] n {g['n']}  exp/tr {g['exp'] * 100:+.3f}%  total {g['total'] * 100:+.1f}%  Sh {g['sharpe']:+.2f}")
+    return best_full
 
-    # 3. v4 baseline, a priori (not searched): 4h/1d Donchian40 with EMA200 gate, no stop
+
+def _report_v4_baseline(base, n: int, tf: str, fund_t, fund_r):
     if tf in ('4h', '1d'):
         c = Cfg('v4 DON40+EMA200 nostop', donchian_sig(base, 40, gate=ema_gate(base, 200)), Risk(), 'DON')
         cut = int(n * CUT)
@@ -177,11 +227,23 @@ def run(tf: str, fund_t, fund_r):
         print(f"[v4 baseline full] {fmt(full)}")
         print(f"[v4 baseline OOS ] {fmt(oos)}")
 
-    # 4. gross (no fee/slip/funding) on the in-sample best: is there any pre-cost edge?
-    if best_full:
-        c = best_full[0]
-        g = metrics(simulate(base, c.sig, c.risk, 1, n, A=atr(base, 14), fee=0.0, slip=0.0), tf)
-        print(f"[gross, zero cost, IS best] n {g['n']}  exp/tr {g['exp'] * 100:+.3f}%  total {g['total'] * 100:+.1f}%  Sh {g['sharpe']:+.2f}")
+
+def run(tf: str, fund_t, fund_r):
+    base = load_klines(tf)
+    cfgs = build_configs(tf, base, load_klines)
+    train, test = WINDOWS[tf]
+    n = len(base)
+    print(f"\n==================== {tf}: {n} bars ({n / BPY[tf] * 365:.0f} d), {len(cfgs)} configs ====================")
+    res, folds = walk_forward(tf, base, cfgs, fund_t, fund_r, train, test)
+    m, (lo, md, hi), dsr_stat = stitched_report(tf, res, n_trials=len(cfgs))
+    print(f"[WF OOS] {len(folds)} folds x {test} bars  {fmt(m)}")
+    print(f"         block-bootstrap OOS Sharpe 5/50/95: {lo:+.2f} / {md:+.2f} / {hi:+.2f}")
+    print(f"         PSR (vs 0): {dsr_stat['psr'] * 100:5.1f}%  |  DSR (vs {len(cfgs)} trials): {dsr_stat['dsr'] * 100:5.1f}%")
+    for f in folds:
+        print(f"         fold {f['start']:>5}-{f['end']:<5} train_Sh {f['train_sharpe']:+5.2f}  "
+              f"oos {f['oos_total'] * 100:+6.1f}% Sh {f['oos_sharpe']:+5.2f} n {f['oos_n']:2d}  {f['chosen']}")
+    _find_is_best(base, cfgs, n, tf, fund_t, fund_r)
+    _report_v4_baseline(base, n, tf, fund_t, fund_r)
     return res, folds, m
 
 

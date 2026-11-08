@@ -22,7 +22,7 @@ from datetime import datetime, timezone
 
 np.random.seed(7)
 
-D = json.load(open('/workspace/data/SOLUSDT-futures.json'))
+D = json.load(open('data/SOLUSDT-futures.json'))
 K = D['klines']['1d']
 O = np.array([k['open'] for k in K]); H = np.array([k['high'] for k in K])
 L = np.array([k['low'] for k in K]);  C = np.array([k['close'] for k in K])

@@ -19,9 +19,9 @@ import sys
 from typing import List
 
 from research.adaptive_st import vol_adaptive_st_sig
-from research.engine import (Risk, Series, atr, ema, load_funding, load_klines, supertrend_sig, tsmom_sig)
+from research.engine import (BARS_PER_YEAR, Risk, Series, atr, ema, load_funding, load_klines,
+                             metrics, supertrend_sig, tsmom_sig)
 from research.ideas import walk
-from research.engine import metrics, BARS_PER_YEAR
 from research.search import WINDOWS
 
 STOP_ATR = 3.0
@@ -29,23 +29,25 @@ RISK_PCT = 0.01
 LEV_BY_TF = {'1h': 5.0, '4h': 5.0, '1d': 1.0}    # 1d: a 3-ATR stop exceeds the 5x buffer (see leverage.txt)
 
 
-def adx(s: Series, n: int = 14) -> List[float]:
-    """Wilder ADX. Undefined (0.0) until 2n bars are available."""
-    N = len(s)
-    out = [0.0] * N
+def _dm_and_tr(s: Series):
     tr_list, pdm, mdm = [], [], []
-    for k in range(1, N):
+    for k in range(1, len(s)):
         up = s.h[k] - s.h[k - 1]
         dn = s.l[k - 1] - s.l[k]
         pdm.append(up if (up > dn and up > 0) else 0.0)
         mdm.append(dn if (dn > up and dn > 0) else 0.0)
         tr_list.append(max(s.h[k] - s.l[k], abs(s.h[k] - s.c[k - 1]), abs(s.l[k] - s.c[k - 1])))
+    return tr_list, pdm, mdm
+
+
+def adx(s: Series, n: int = 14) -> List[float]:
+    """Wilder ADX. Undefined (0.0) until 2n bars are available."""
+    tr_list, pdm, mdm = _dm_and_tr(s)
     if len(tr_list) < 2 * n:
-        return out
-    tr_s = sum(tr_list[:n])
-    p_s = sum(pdm[:n])
-    m_s = sum(mdm[:n])
+        return [0.0] * len(s)
+    tr_s, p_s, m_s = sum(tr_list[:n]), sum(pdm[:n]), sum(mdm[:n])
     dx = []
+    out = [0.0] * len(s)
     for i in range(n, len(tr_list)):
         if i > n:
             tr_s = tr_s - tr_s / n + tr_list[i]
@@ -65,8 +67,7 @@ def adx(s: Series, n: int = 14) -> List[float]:
     return out
 
 
-def supertrend_dirs(s: Series, period: int, mult: float) -> List[int]:
-    return supertrend_sig(s, period, mult)
+supertrend_dirs = supertrend_sig
 
 
 def adx_gated(dirs: List[int], adx_v: List[float], thr: float) -> List[int]:
@@ -83,34 +84,32 @@ def adx_gated(dirs: List[int], adx_v: List[float], thr: float) -> List[int]:
     return out
 
 
-def squeeze_sig(s: Series, n: int = 20, m_bb: float = 2.0, m_kc: float = 1.5) -> List[int]:
+def _detect_squeeze(s: Series, n: int, m_bb: float, m_kc: float):
     N = len(s)
     A = atr(s, n)
     ema_mid = ema(s.c, n)
-    sma = [None] * N
-    sd = [None] * N
-    for k in range(n - 1, N):
-        w = s.c[k - n + 1:k + 1]
-        sma[k] = st.fmean(w)
-        sd[k] = st.pstdev(w)
+    sma = [st.fmean(s.c[k - n + 1:k + 1]) if k >= n - 1 else None for k in range(N)]
+    sd = [st.pstdev(s.c[k - n + 1:k + 1]) if k >= n - 1 else None for k in range(N)]
     sq = [False] * N
     for k in range(N):
-        if sma[k] is None or A[k] is None:
-            continue
-        bb_u, bb_l = sma[k] + m_bb * sd[k], sma[k] - m_bb * sd[k]
-        kc_u, kc_l = ema_mid[k] + m_kc * A[k], ema_mid[k] - m_kc * A[k]
-        sq[k] = bb_u < kc_u and bb_l > kc_l
-    out = [0] * N
+        if sma[k] is not None and A[k] is not None:
+            bb_u, bb_l = sma[k] + m_bb * sd[k], sma[k] - m_bb * sd[k]
+            kc_u, kc_l = ema_mid[k] + m_kc * A[k], ema_mid[k] - m_kc * A[k]
+            sq[k] = bb_u < kc_u and bb_l > kc_l
+    return sq, sma
+
+
+def squeeze_sig(s: Series, n: int = 20, m_bb: float = 2.0, m_kc: float = 1.5) -> List[int]:
+    sq, sma = _detect_squeeze(s, n, m_bb, m_kc)
+    out = [0] * len(s)
     pos = 0
-    for k in range(1, N):
+    for k in range(1, len(s)):
         if sma[k] is None:
             continue
         released = sq[k - 1] and not sq[k]
         if pos == 0 and released:
             pos = 1 if s.c[k] > sma[k] else (-1 if s.c[k] < sma[k] else 0)
-        elif pos == 1 and s.c[k] < sma[k]:
-            pos = 0
-        elif pos == -1 and s.c[k] > sma[k]:
+        elif (pos == 1 and s.c[k] < sma[k]) or (pos == -1 and s.c[k] > sma[k]):
             pos = 0
         out[k] = pos
     return out

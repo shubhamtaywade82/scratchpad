@@ -13,6 +13,7 @@ mmr is an ASSUMPTION (0.5%). Confirm the tier for SOLUSDT notional from the exch
 
 Usage: python3 -m research.leverage
 """
+import itertools
 import random
 import statistics as st
 
@@ -62,25 +63,26 @@ def mdd_distribution(levels, tf, B=1000, L=20, seed=5):
     return mdds[B // 2], mdds[int(0.05 * B)], sum(1 for x in mdds if x < -0.30) / B
 
 
+def _eval_cell(s, tf: str, sig, ft, fr, sl: float, lev: int, mode: str, rp: float):
+    risk = Risk(sizing='fixed' if mode == 'fixed' else 'risk', risk_pct=rp or 0.01, lev=lev, sl_mult=sl)
+    res, _ = walk(tf, s, sig, risk, None, ft, fr)
+    m = metrics(res, tf)
+    p50, _, p30 = mdd_distribution(res.eq, tf)
+    tag = 'fixed' if mode == 'fixed' else f"risk{int(rp * 100)}%"
+    ruin = 'RUIN' if (res.ruined or res.eq[-1] <= 0) else '-'
+    print(f"{sl:>4.0f}A {lev:>4} {tag:<7} {m['total'] * 100:>+7.1f}% {m['sharpe']:>+6.2f} {m['mdd'] * 100:>6.1f}% "
+          f"{p50 * 100:>7.1f}% {p30 * 100:>11.1f}% {m['n']:>4} {m['eff_lev']:>7.2f} {m['liqs']:>4} "
+          f"{m['skipped']:>5} {m['stops']:>5} {ruin:>5}")
+
+
 def study(label, tf, sig, ft, fr):
     s = load_klines(tf)
     print(f"\n==================== {label} | {tf} ====================")
     print(f"{'stop':>5} {'lev':>4} {'mode':<7} {'WF tot':>8} {'Sh':>6} {'MDD':>7} {'MDD p50':>8} {'P(MDD<-30%)':>12} "
           f"{'n':>4} {'effLev':>7} {'liq':>4} {'skip':>5} {'stops':>5} {'ruin':>5}")
-    for sl in STOPS:
-        for lev in LEVS:
-            for mode, rp in MODES:
-                if lev == 1 and mode != 'fixed':
-                    continue
-                risk = Risk(sizing='fixed' if mode == 'fixed' else 'risk', risk_pct=rp or 0.01, lev=lev, sl_mult=sl)
-                res, _ = walk(tf, s, sig, risk, None, ft, fr)
-                m = metrics(res, tf)
-                p50, _, p30 = mdd_distribution(res.eq, tf)
-                tag = 'fixed' if mode == 'fixed' else f"risk{int(rp * 100)}%"
-                ruin = 'RUIN' if (res.ruined or res.eq[-1] <= 0) else '-'
-                print(f"{sl:>4.0f}A {lev:>4} {tag:<7} {m['total'] * 100:>+7.1f}% {m['sharpe']:>+6.2f} {m['mdd'] * 100:>6.1f}% "
-                      f"{p50 * 100:>7.1f}% {p30 * 100:>11.1f}% {m['n']:>4} {m['eff_lev']:>7.2f} {m['liqs']:>4} "
-                      f"{m['skipped']:>5} {m['stops']:>5} {ruin:>5}")
+    for sl, lev, (mode, rp) in itertools.product(STOPS, LEVS, MODES):
+        if lev != 1 or mode == 'fixed':
+            _eval_cell(s, tf, sig, ft, fr, sl, lev, mode, rp)
 
 
 if __name__ == '__main__':

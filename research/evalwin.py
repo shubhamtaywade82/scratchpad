@@ -3,10 +3,8 @@
 Same conventions as research/ideas.walk: fixed signal, fresh capital each fold, flat at each fold boundary, ruin carried
 forward. Bootstrap is a block bootstrap on the stitched per-bar returns.
 """
-import random
-import statistics as st
-
 from research.engine import BARS_PER_YEAR, Result, Risk, metrics, returns_from_levels, simulate, atr
+from research.search import block_bootstrap_sharpe
 
 
 def walk_w(s, sig, risk: Risk, fund_t, fund_r, train: int, test: int, tf: str, stop_px=None):
@@ -39,20 +37,7 @@ def walk_w(s, sig, risk: Risk, fund_t, fund_r, train: int, test: int, tf: str, s
 
 def boot_sharpe(res: Result, tf: str, B: int = 1000, L: int = 20, seed: int = 7):
     rets = returns_from_levels(res.eq)
-    rnd = random.Random(seed)
-    m = len(rets)
-    bpy = BARS_PER_YEAR[tf]
-    out = []
-    for _ in range(B):
-        s = []
-        while len(s) < m:
-            i0 = rnd.randrange(m)
-            s.extend(rets[i0:i0 + L])
-        s = s[:m]
-        sd = st.pstdev(s) or 1e-12
-        out.append(st.fmean(s) / sd * (bpy ** 0.5))
-    out.sort()
-    return out[int(.05 * B)], out[int(.5 * B)], out[int(.95 * B)]
+    return block_bootstrap_sharpe(rets, BARS_PER_YEAR[tf], B=B, L=L, seed=seed)
 
 
 def summarize_w(s, sig, risk, fund_t, fund_r, train, test, tf, stop_px=None):
