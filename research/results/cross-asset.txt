@@ -30,4 +30,35 @@ MARKET    0 bps:  +29.9% +0.76    4 bps:  +26.1% +0.68    8 bps:  +22.3% +0.60  
    round trips 72, winners 42, folds positive 15 of 55
    block bootstrap (1-day blocks, 2000 draws): total -3.8% .. +106.3%,  Sharpe -0.04 .. +1.66
    best 3 folds: +11.7% +8.4% +5.4%; total without them: +8.7%
-15m: data missing (data/okx/SOL-USDT-SWAP-15m.json); skipped
+
+15m: 53780 aligned bars
+
+==================== cross-asset return prediction, SOL, 15m ====================
+features    k    OOS R2       net  Sh net      MDD    RT   RT win    RT win 95% CI  in mkt
+OWN       0.0   -0.218%   -100.0%  -28.10  -100.0% 18227    31.3%   30.6 ..  32.0%  100.0%
+OWN       0.5   -0.218%    -10.0%   -0.55   -12.9%    55    36.4%   24.9 ..  49.6%    0.1%
+CROSS     0.0   -0.554%   -100.0%  -34.47  -100.0% 22081    31.0%   30.4 ..  31.6%  100.0%
+CROSS     0.5   -0.554%    -14.8%   -1.19   -15.0%    47    40.4%   27.6 ..  54.7%    0.1%
+MARKET    0.0   -0.221%   -100.0%  -28.20  -100.0% 17395    31.9%   31.2 ..  32.6%  100.0%
+MARKET    0.5   -0.221%     -8.8%   -0.53   -13.2%    12    25.0%    8.9 ..  53.2%    0.0%
+ALL       0.0   -0.757%   -100.0%  -37.30  -100.0% 23626    31.1%   30.5 ..  31.6%  100.0%
+ALL       0.5   -0.757%    -24.7%   -1.39   -25.0%   131    32.1%   24.7 ..  40.5%    0.3%
+
+--- 15m: threshold sweep (k), total net return and Sharpe
+features k=0.25  k=0.5   k=0.75  k=1.0 
+CROSS     -66.8% -4.36   -14.8% -1.19   -10.0% -0.84    +0.2% +0.05
+MARKET    -23.2% -1.14    -8.8% -0.53    +0.2% +0.06    +8.4% +0.83
+
+--- 15m: nulls and costs at k=0.5 (net total return / Sharpe)
+features           causal        flip sign          delay 1          delay 2
+CROSS         -14.8% -1.19      -0.1% +0.03      +2.2% +0.22      -7.0% -1.21
+MARKET         -8.8% -0.53      +3.7% +0.29      +5.7% +0.41      +2.5% +0.27
+
+--- 15m: cost sensitivity at k=0.5, causal (net total return / Sharpe)
+CROSS     0 bps:   -8.2% -0.62    4 bps:  -11.6% -0.90    8 bps:  -14.8% -1.19   12 bps:  -18.0% -1.47
+MARKET    0 bps:   -7.0% -0.41    4 bps:   -7.9% -0.47    8 bps:   -8.8% -0.53   12 bps:   -9.7% -0.59
+
+--- 15m: CROSS k=0.5 causal, detail
+   round trips 47, winners 19, folds positive 3 of 35
+   block bootstrap (1-day blocks, 2000 draws): total -33.0% .. +2.9%,  Sharpe -2.61 .. +0.29
+   best 3 folds: +3.9% +1.9% +0.0%; total without them: -19.6%

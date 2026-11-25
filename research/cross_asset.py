@@ -55,9 +55,9 @@ def load(tf: str):
     common = sorted(set(s) & set(b) & set(e))
     if tf == '15m':
         common = [t for t in common if t >= 1743465600000]          # from 2025-04-01
-    for a, b in zip(common, common[1:]):
-        if b - a != step:
-            raise ValueError(f"aligned cross-asset gap: delta {b - a} != {step} between {a} and {b}")
+    for t0, t1 in zip(common, common[1:]):
+        if t1 - t0 != step:
+            raise ValueError(f"aligned cross-asset gap: delta {t1 - t0} != {step} between {t0} and {t1}")
     ls = np.log([s[t] for t in common])
     lb = np.log([b[t] for t in common])
     le = np.log([e[t] for t in common])

@@ -7,4 +7,3 @@
    IID bootstrap 95% CI   -0.325% .. +1.365%  (includes 0)
    Block bootstrap 95% CI -0.332% .. +0.683%  (includes 0)
    win-rate CI excludes 50% (below): any edge comes from payoff size, not hit rate
-
